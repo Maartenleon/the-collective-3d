@@ -77,12 +77,12 @@
     { id: "t4", ch: 0, seq: "twist", bar: 4, hold: 1.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4 },
     { id: "t5", ch: 0, seq: "twist", bar: 5, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
-    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: 1.0, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },
-    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: 0.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
-    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: 0.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
-    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: 0.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
-    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 0.9, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
-    { id: "f5", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
+    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: 0.5, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },
+    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: 0.25, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
+    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: 0.25, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
+    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: 0.25, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
+    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 0.4, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
+    { id: "f5", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
     // Frame 4: Plan
     { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan" },
     // Frame 5: Blueprint
