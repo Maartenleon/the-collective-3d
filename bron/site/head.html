@@ -55,25 +55,25 @@
 
   <div class="panels">
     <aside class="panel glass" data-panel="plan" aria-label="Plan">
-      <p class="panel__kicker">Plan</p>
+      <p class="panel__kicker">Plan<svg class="panel__fw" data-panel-fw="p" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
       <p class="panel__title">The piece</p>
       <p class="panel__body">What we choose to play for our audience, and what we leave out.</p>
       <p class="panel__org"><span>In your organisation</span>Your strategy, turned into this year&rsquo;s budget and a change portfolio for the years ahead.</p>
     </aside>
     <aside class="panel glass" data-panel="blueprint" aria-label="Blueprint">
-      <p class="panel__kicker">Blueprint</p>
+      <p class="panel__kicker">Blueprint<svg class="panel__fw" data-panel-fw="b" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
       <p class="panel__title">The score</p>
       <p class="panel__body">Turning the piece into parts every section can play.</p>
       <p class="panel__org"><span>In your organisation</span>How value flows through your business, data and technology, and what it must grow into.</p>
     </aside>
     <aside class="panel glass" data-panel="means" aria-label="Means">
-      <p class="panel__kicker">Means</p>
+      <p class="panel__kicker">Means<svg class="panel__fw" data-panel-fw="m" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
       <p class="panel__title">The orchestra</p>
       <p class="panel__body">The musicians, their instruments, and the budget that keeps them playing.</p>
       <p class="panel__org"><span>In your organisation</span>People, skills, tools and funding: who and what you have to run today and change for tomorrow.</p>
     </aside>
     <aside class="panel glass" data-panel="orchestration" aria-label="Orchestration">
-      <p class="panel__kicker">Orchestration</p>
+      <p class="panel__kicker">Orchestration<svg class="panel__fw" data-panel-fw="o" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
       <p class="panel__title">The conductor</p>
       <p class="panel__body">Keeping every part in time, and the whole in tune.</p>
       <p class="panel__org"><span>In your organisation</span>Leadership that keeps it in step: by function for Run, by value stream for Change.</p>
@@ -87,15 +87,11 @@
   </div>
 
   <div class="caption" id="caption" aria-live="polite"><span class="caption__kind" id="captionKind"></span><span class="caption__text" id="captionText"></span></div>
-  <div class="seq" id="seq">
-    <button class="seq__btn" id="seqBtn" type="button" aria-label="Pause"><svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1" y="0" width="3" height="10"/><rect x="6" y="0" width="3" height="10"/></svg></button>
-    <span class="seq__bars" id="seqBars"></span>
-    <button class="seq__skip" id="seqSkip" type="button">Skip</button>
-  </div>
-
   <section class="problems" id="problems" aria-label="Problems companies recognise">
     <p class="problems__intro">Pick the note that sounds off, or take it from the top.</p>
+    <p class="problems__head problems__head--fw">Our solution that solves these</p>
     <div class="problems__col">
+      <p class="problems__head">Problems we see</p>
       <div class="prob glass"><span class="prob__ph">Problem 1 · placeholder</span><span class="prob__line">Every report says green, but the numbers don&rsquo;t move.</span></div>
       <div class="prob glass"><span class="prob__ph">Problem 2 · placeholder</span><span class="prob__line">We start a lot. We almost never stop anything.</span></div>
       <div class="prob glass"><span class="prob__ph">Problem 3 · placeholder</span><span class="prob__line">We can&rsquo;t tell whether our projects pay off.</span></div>
@@ -138,23 +134,20 @@
       </footer>
     </div>
   </section>
-  <div class="brand">The Collective</div>
-  <button class="meet" id="meet" type="button">Meet The Collective</button>
-  <div class="timeline" aria-hidden="true">
-    <span id="tlNum">01</span>
-    <span class="timeline__bar"><span class="timeline__fill" id="tlFill"></span></span>
-    <span class="timeline__label" id="tlLabel">The concert</span>
-  </div>
+  <button class="brand" type="button" data-brand aria-label="The Collective, back to the start">The Collective</button>
+  <button class="meet" id="meet" type="button">About us</button>
+  <nav class="timeline" data-timeline aria-label="Story">
+    <span class="timeline__num" data-timeline-num>01</span>
+    <span class="timeline__bar" data-timeline-bar></span>
+    <span class="timeline__label" data-timeline-label>The concert</span>
+    <span class="timeline__sep" aria-hidden="true"></span>
+    <button class="timeline__play" type="button" data-timeline-play aria-label="Play story"></button>
+    <button class="timeline__skip" type="button" data-timeline-skip>Skip</button>
+  </nav>
   <div class="scroll-hint" id="hint" aria-hidden="true">Scroll</div>
-  <nav class="scenes" id="scenes" aria-label="Scenes"></nav>
   <div class="loading" id="loading" aria-hidden="true">Musicians arriving…</div>
   <div class="loader" id="loader" role="status" aria-live="polite">
-    <div class="loader__open"><b>When an organisation plays as one,</b><i>it sounds effortless.</i></div>
-    <div class="loader__inner">
-      <div class="loader__brand">The Collective</div>
-      <div class="loader__line"><i id="loaderFill"></i></div>
-      <div class="loader__text"><span>Setting the stage</span><span id="loaderPct">0%</span></div>
-    </div>
+    <div class="loader__open"><b>When an organisation plays as one,</b><i>it sounds effortless.</i><span class="loader__pct" id="loaderPct">0%</span></div>
   </div>
 </main>
 
