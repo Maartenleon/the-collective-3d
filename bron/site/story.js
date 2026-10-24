@@ -207,6 +207,7 @@
     hint.style.opacity = at === 0 ? 1 : 0;
     const n = segOf(at);
     segBtns.forEach((b, k) => { b.setAttribute("aria-current", k === n ? "step" : "false"); b.tabIndex = k === n ? 0 : -1; segFills[k].style.transform = `scaleX(${k < n ? 1 : 0})`; });
+    if (tlBar.contains(document.activeElement) && document.activeElement !== segBtns[n]) segBtns[n].focus({ preventScroll: true });   // focus follows only if it is already in the bar
     segFills[n].parentNode.appendChild(tlDot);
     if (preview < 0) showSeg(n, nameAt(at));
     tlSkip.classList.toggle("is-on", !!S.seq);
