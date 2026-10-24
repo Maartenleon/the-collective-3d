@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Collective · 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="is-loading">
+<main class="stage" id="stage" aria-label="The Collective: when an organisation plays as one">
+  <canvas id="c" role="img" aria-label="An orchestra and its conductor playing in a white plaster pit, in a bowl of red earth with a grain field in front"></canvas>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="floor" aria-hidden="true"></div>
+  <div class="top-shade" id="topShade" aria-hidden="true"></div>
+  <div class="shade" id="shade" aria-hidden="true"></div>
+
+  <div class="labels" id="labels" aria-hidden="true">
+    <span class="label" data-label="strings">Strings</span>
+    <span class="label" data-label="woodwinds">Woodwinds</span>
+    <span class="label" data-label="brass">Brass</span>
+    <span class="label" data-label="percussion">Percussion</span>
+  </div>
+
+  <div class="beats">
+    <div class="beat" data-beat="opening" data-anchor="conductor">
+      <p class="beat__title">When an organisation plays as one,</p>
+      <p class="beat__lead">it sounds effortless.</p>
+    </div>
+    <div class="beat" data-beat="twist" data-anchor="conductor">
+      <p class="beat__title">It isn&rsquo;t.</p>
+      <ul class="beat__lines">
+        <li data-line="1">Different roles.</li>
+        <li data-line="2">Different capabilities.</li>
+        <li data-line="3">Different perspectives.</li>
+        <li data-line="4">One performance.</li>
+      </ul>
+    </div>
+    <div class="beat" data-beat="off" data-anchor="conductor">
+      <p class="beat__title">When one part is off,</p>
+      <ul class="beat__lines"><li data-line="1" data-late>everyone hears it.</li></ul>
+    </div>
+    <div class="beat beat--top" data-beat="fw">
+      <p class="beat__title">What holds it together</p>
+      <p class="beat__lead">A plan, a score, the people and their instruments, and someone who keeps them in&nbsp;step.</p>
+    </div>
+    <div class="beat beat--centred" data-beat="question">
+      <p class="beat__title">So, how does your organisation sound?</p>
+    </div>
+  </div>
+
+  <svg class="fw" id="fw" viewBox="0 0 640 560" role="img" aria-label="The framework: Plan, Blueprint and Means as three bands; Run and Change as two columns through them; Orchestration as a circle around everything"></svg>
+
+  <div class="panels">
+    <aside class="panel glass" data-panel="plan" aria-label="Plan">
+      <p class="panel__kicker">Plan</p>
+      <p class="panel__title">The piece</p>
+      <p class="panel__body">What we choose to play for our audience, and what we leave out.</p>
+      <p class="panel__org"><span>In your organisation</span>Your strategy, turned into this year&rsquo;s budget and a change portfolio for the years ahead.</p>
+    </aside>
+    <aside class="panel glass" data-panel="blueprint" aria-label="Blueprint">
+      <p class="panel__kicker">Blueprint</p>
+      <p class="panel__title">The score</p>
+      <p class="panel__body">Turning the piece into parts every section can play.</p>
+      <p class="panel__org"><span>In your organisation</span>How value flows through your business, data and technology, and what it must grow into.</p>
+    </aside>
+    <aside class="panel glass" data-panel="means" aria-label="Means">
+      <p class="panel__kicker">Means</p>
+      <p class="panel__title">The orchestra</p>
+      <p class="panel__body">The musicians, their instruments, and the budget that keeps them playing.</p>
+      <p class="panel__org"><span>In your organisation</span>People, skills, tools and funding: who and what you have to run today and change for tomorrow.</p>
+    </aside>
+    <aside class="panel glass" data-panel="orchestration" aria-label="Orchestration">
+      <p class="panel__kicker">Orchestration</p>
+      <p class="panel__title">The conductor</p>
+      <p class="panel__body">Keeping every part in time, and the whole in tune.</p>
+      <p class="panel__org"><span>In your organisation</span>Leadership that keeps it in step: by function for Run, by value stream for Change.</p>
+    </aside>
+    <aside class="panel glass" data-panel="dims" aria-label="Run and Change">
+      <p class="panel__kicker">Run and Change</p>
+      <p class="panel__title">Tonight’s concert has to be perfect. But if that is all we play, next season the hall stays silent.</p>
+      <p class="panel__extra" id="dimsLate">So while tonight&rsquo;s concert plays, next season&rsquo;s symphony is already in rehearsal.</p>
+      <p class="panel__org"><span>In your organisation</span><b class="org-run">Run: keep today&rsquo;s value flowing, with stable value streams steered by function.</b><b class="org-chg" id="dimsOrgC">Change: build what comes next, with multidisciplinary teams around a value stream and the means to deliver it end to end.</b></p>
+    </aside>
+  </div>
+
+  <div class="caption" id="caption" aria-live="polite"><span class="caption__kind" id="captionKind"></span><span class="caption__text" id="captionText"></span></div>
+  <div class="seq" id="seq">
+    <button class="seq__btn" id="seqBtn" type="button" aria-label="Pause"><svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1" y="0" width="3" height="10"/><rect x="6" y="0" width="3" height="10"/></svg></button>
+    <span class="seq__bars" id="seqBars"></span>
+    <button class="seq__skip" id="seqSkip" type="button">Skip</button>
+  </div>
+
+  <section class="problems" id="problems" aria-label="Problems companies recognise">
+    <p class="problems__intro">Pick the note that sounds off, or take it from the top.</p>
+    <div class="problems__col">
+      <div class="prob glass"><span class="prob__ph">Problem 1 · placeholder</span><span class="prob__line">Every report says green, but the numbers don&rsquo;t move.</span></div>
+      <div class="prob glass"><span class="prob__ph">Problem 2 · placeholder</span><span class="prob__line">We start a lot. We almost never stop anything.</span></div>
+      <div class="prob glass"><span class="prob__ph">Problem 3 · placeholder</span><span class="prob__line">We can&rsquo;t tell whether our projects pay off.</span></div>
+      <div class="prob glass"><span class="prob__ph">Problem 4 · placeholder</span><span class="prob__line">Our big programme is late and still growing.</span></div>
+      <div class="prob glass"><span class="prob__ph">Problem 5 · placeholder</span><span class="prob__line">Our costs keep creeping up, and nobody knows why.</span></div>
+      <div class="prob glass"><span class="prob__ph">Problem 6 · placeholder</span><span class="prob__line">Keeping things running eats the budget for anything new.</span></div>
+      <div class="prob glass"><span class="prob__ph">Problem 7 · placeholder</span><span class="prob__line">We merged, and still run two of everything.</span></div>
+      <div class="prob glass"><span class="prob__ph">Problem 8 · placeholder</span><span class="prob__line">The system went live, the benefits never showed up.</span></div>
+    </div>
+    <p class="problems__fw">The framework</p>
+  </section>
+
+
+  <section class="coll" id="coll" aria-label="The Collective">
+    <div class="coll__page glass">
+      <header class="coll__head">
+        <p class="coll__kicker">The Collective</p>
+        <h2 class="coll__title">More value. Less noise.</h2>
+        <p class="coll__intro">We are The Collective. Your organisation is full of talent, and somehow it still doesn&rsquo;t sound like it. We fix the music, not the musicians: we connect direction, design and means, so tonight&rsquo;s concert lands and next season isn&rsquo;t an afterthought.</p>
+      </header>
+      <div class="coll__cols">
+        <div class="coll__col">
+          <h3>We listen to the whole orchestra.</h3>
+          <p>Not just the loudest section. We find where value is made, where it gets stuck, and who is quietly playing a different song.</p>
+        </div>
+        <div class="coll__col coll__col--score">
+          <h3>We bring our score.</h3>
+          <p>Proven theory and hard-won experience in one framework. Not another 200-slide deck.</p>
+          <svg class="coll__fw" id="collFw" viewBox="0 0 640 560" role="img" aria-label="The framework; select a part to go to it"></svg>
+        </div>
+        <div class="coll__col">
+          <h3>We stay for the performance.</h3>
+          <p>Advice that never reaches the stage is just noise. We turn insight into choices and action, in Run and in Change. Same organisation, often the same people, one rhythm.</p>
+        </div>
+      </div>
+      <footer class="coll__cta">
+        <p class="coll__ask">Sounds familiar?</p>
+        <button class="coll__btn" type="button">Let&rsquo;s talk</button>
+        <p class="coll__baton">We won&rsquo;t steal the baton. <span class="coll__mail">soundcheck@thecollective.nu</span></p>
+      </footer>
+    </div>
+  </section>
+  <div class="brand">The Collective</div>
+  <button class="meet" id="meet" type="button">Meet The Collective</button>
+  <div class="timeline" aria-hidden="true">
+    <span id="tlNum">01</span>
+    <span class="timeline__bar"><span class="timeline__fill" id="tlFill"></span></span>
+    <span class="timeline__label" id="tlLabel">The concert</span>
+  </div>
+  <div class="scroll-hint" id="hint" aria-hidden="true">Scroll</div>
+  <nav class="scenes" id="scenes" aria-label="Scenes"></nav>
+  <div class="loading" id="loading" aria-hidden="true">Musicians arriving…</div>
+  <div class="loader" id="loader" role="status" aria-live="polite">
+    <div class="loader__open"><b>When an organisation plays as one,</b><i>it sounds effortless.</i></div>
+    <div class="loader__inner">
+      <div class="loader__brand">The Collective</div>
+      <div class="loader__line"><i id="loaderFill"></i></div>
+      <div class="loader__text"><span>Setting the stage</span><span id="loaderPct">0%</span></div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/BufferGeometryUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/libs/fflate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/curves/NURBSUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/curves/NURBSCurve.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/FBXLoader.js"></script>
+<script>
+(() => {
+  "use strict";

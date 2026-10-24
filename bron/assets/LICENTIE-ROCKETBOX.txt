@@ -1,0 +1,3 @@
+De avatars in rocketbox/ zijn afgeleid van Microsoft Rocketbox (https://github.com/microsoft/Microsoft-Rocketbox),
+uitgegeven onder de MIT-licentie, Copyright (c) Microsoft Corporation.
+Ze zijn voorbewerkt (kleiner gemaakt, pakken herkleurd, texturen aangepast) met de scripts in pipeline/.

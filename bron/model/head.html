@@ -1,0 +1,131 @@
+<title>Orkest RUN</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Figtree:wght@700;800&display=swap">
+<style>
+/* Layout: full-bleed 3D canvas with a scene-tree panel on the left (bottom sheet on phones). One light look, tokens from Art direction v3. */
+:root {
+  --bg: #FAF8F6; --ink: rgb(30 8 4 / .88); --muted: rgb(30 8 4 / .52); --line: rgb(30 8 4 / .12);
+  --panel: rgba(250, 248, 246, 0.9); --brand: #5C0F07; --accent: #F1400B; --warm: #FCE8D8;
+  --serif: "EB Garamond", Garamond, Georgia, serif; --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 13px; overflow: hidden; }
+#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.panel {
+  position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: 320px; max-width: calc(100% - 24px);
+  background: var(--panel); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 6px;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.head { padding: 14px 16px 10px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.kicker { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 1.6rem; color: var(--brand); line-height: 1.05; }
+.head p { margin: 0; color: var(--muted); line-height: 1.45; }
+.cams { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+button { font: 500 12px var(--sans); color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+button:hover { border-color: var(--ink); }
+button[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #FAF8F6; }
+button:focus-visible, .node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sel { padding: 8px 16px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--muted); min-height: 2.6em; }
+.sel b { color: var(--accent); font-weight: 500; }
+.tree { overflow: auto; padding: 8px 8px 16px; flex: 1; min-height: 0; font-size: 12.5px; }
+.tree details { margin-left: 12px; }
+.tree > details { margin-left: 0; }
+.tree summary { list-style: none; display: flex; align-items: center; gap: 4px; cursor: default; }
+.tree summary::-webkit-details-marker { display: none; }
+.tw { width: 14px; flex: none; color: var(--muted); font-size: 10px; text-align: center; cursor: pointer; }
+details[open] > summary .tw { transform: rotate(90deg); }
+.leaf { margin-left: 12px; display: flex; gap: 4px; }
+.leaf .tw { visibility: hidden; }
+.node { all: unset; cursor: pointer; padding: 2px 6px; border-radius: 4px; display: inline-flex; gap: 6px; align-items: baseline; }
+.node:hover { background: rgb(30 8 4 / .06); }
+.node.on { background: var(--brand); color: #FAF8F6; }
+.node .n { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.node.on .n { color: rgb(250 248 246 / .7); }
+.head .loading { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+.loading[hidden] { display: none; }
+.hint { padding: 8px 16px 12px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .04em; }
+@media (min-width: 641px) { #c { left: 344px; width: calc(100% - 344px); } }
+@media (max-width: 640px) {
+  #c { height: 56%; }
+  .panel { top: auto; height: 42%; width: auto; right: max(12px, env(safe-area-inset-right, 0px)); }
+}
+</style>
+
+<canvas id="c" aria-label="3D-scène van het orkest op het podium in de heuvels"></canvas>
+<aside class="panel">
+  <div class="head">
+    <div class="kicker">Proef v14 · RUN + CHANGE</div>
+    <h1>Tonight's Symphony</h1>
+    <p>Lager, helder wit podium met zachte textuur, lichte heuvels ver weg, een lange schaduw over de voorkant van de kom en laag gras vóór het publiek. Klik een naam of klik in de scène om te isoleren.</p>
+    <p class="loading" id="loading" role="status">Muzikanten laden…</p>
+  </div>
+  <div class="cams" id="cams">
+    <button id="cam1" data-cam="1" aria-pressed="true">Camera 1 · opening</button>
+    <button id="cam2" data-cam="2" aria-pressed="false">Camera 2 · uitzoomen</button>
+    <button id="allbtn" data-all="1">Toon alles</button>
+  </div>
+  <div class="sel" id="sel">Niets geïsoleerd</div>
+  <nav class="tree" id="tree" aria-label="Hiërarchie van de scène"></nav>
+  <div class="hint">Slepen om te draaien · scrollen of knijpen om te zoomen</div>
+</aside>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/BufferGeometryUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/libs/fflate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/curves/NURBSUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/curves/NURBSCurve.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/FBXLoader.js"></script>
+<script>
+(() => {
+  "use strict";
+  /* =====================================================================
+     CONFIG: every number that shapes the scene. Meters. Blueprint coords:
+     x right, y toward the back wall. In three.js: z = -y (back is -z).
+     ===================================================================== */
+  const STAGE = { a: 11, b: 9, floor: 0.24, band: 0.05, rx: 12.6, zf: 6.8, zb: 10.8,   // the pit: one oval floor, a thin light band around it
+    tier1: { r: [3.7, 6.6], deg: [-22, 17], h: 0.15 },     // woodwinds, one step up
+    tier2: { r: [6.6, 8.6], deg: [-38, 64], h: 0.3 },      // brass and percussion, two steps up
+    wall: { low: 0.5, high: 1.1, t: 0.3 } };   // back: one smooth low band, rising gently to the sides
+  const CONDUCTOR = [0, 1.0];
+  const SECTIONS = [ // [group path, part, rows: [radius, deg0, deg1, n]]
+    [["Strijkers", "Eerste violen"], "viool",      [[2.7, -88, -42, 4], [3.9, -88, -42, 4]]],
+    [["Strijkers", "Tweede violen"], "viool",      [[5.2, -84, -50, 4], [6.4, -80, -56, 3]]],
+    [["Strijkers", "Altviolen"],     "altviool",   [[3.6, 18, 42, 3], [4.8, 22, 40, 2]]],
+    [["Strijkers", "Cello's"],       "cello",      [[2.8, 52, 88, 3], [4.0, 58, 86, 2]]],
+    [["Strijkers", "Contrabassen"],  "contrabas",  [[6.2, 62, 82, 3]]],
+    [["Houtblazers", "Fluiten"],     "fluit",      [[4.9, -16, -6.7, 2]]],
+    [["Houtblazers", "Hobo's"],      "hobo",       [[4.9, 2.7, 12, 2]]],
+    [["Houtblazers", "Klarinetten"], "klarinet",   [[6.0, -14, -6, 2]]],
+    [["Houtblazers", "Fagotten"],    "fagot",      [[6.0, 2, 10, 2]]],
+    [["Koper", "Hoorns"],            "hoorn",      [[7.3, -30, -20, 2]]],
+    [["Koper", "Trompetten"],        "trompet",    [[7.3, -10, 0, 2]]],
+    [["Koper", "Trombones"],         "trombone",   [[7.3, 10, 20, 2]]],
+    [["Koper", "Tuba"],              "tuba",       [[7.3, 30, 30, 1]]],
+    [["Slagwerk", "Pauken"],         "pauken",     [[7.6, 36, 36, 1]]],
+    [["Slagwerk", "Grote trom"],     "grote trom", [[7.6, 43.3, 43.3, 1]]],
+    [["Slagwerk", "Bekkens"],        "bekkens",    [[7.6, 50.7, 50.7, 1]]],
+    [["Slagwerk", "Xylofoon"],       "xylofoon",   [[7.6, 58, 58, 1]]],
+    [["Harp"],                       "harp",       [[6.3, -100, -100, 1]]],
+    [["Piano"],                      "piano",      [[7.2, -75, -75, 1]]],
+  ];
+  const STAND_SHARE = 4;   // one shared music stand per four musicians
+  const AUDIENCE = { rows: 4, perRow: 12, firstZ: 38, rowGap: 1.15, seatGap: 0.9 };
+  const BOARD = { x: 9.4, y: 0.6, rotY: -0.3, title: "TONIGHT'S SYMPHONY", lines: ["The Show", "Must Go On"], foot: "· THE ORCHESTRA ·" };   // programme board on the stage, right of the orchestra
+  // CHANGE · tomorrow: a flat terrace on the left rim of the bowl, out of the opening shot: next season's board and a small rehearsal
+  const NEXT = { x: -37, z: 1, r: 6.5, rehearsal: [-36.4, 0.4], ring: 2.0,
+    board: { at: [-39.8, -1.4], rotY: 0.96, title: "NEXT SEASON'S SYMPHONY", lines: ["The Next", "Episode"], foot: "· IN REHEARSAL ·" },
+    players: ["viool", "fluit", "hoorn", "cello", "piano"] };
+  const CAMS = {
+    1: { pos: [0, 2.0, 36], target: [0, 4.4, -10], fov: 34 },  // opening: low and frontal, the stage in the lower third, pale hills above the red rim
+    2: { pos: [0, 1.6, 44], target: [0, 1.8, -3], fov: 45 },  // zoom out: behind the audience, heads in view
+  };
+  // Art direction v3 image palette
+  const AD = { shadow: 0x1A0E0A, earth: 0x5C2414, conductor: 0xD9452B, grain: 0xA9824F, sky: 0x8A9CB0, stage: 0xF6F2EC, garnet: 0x5C0F07 };
+  const SUN = { color: 0xffc896, intensity: 2.8, pos: [70, 21, 26], target: [0, 0, -6] };   // very low, raking from the right   // low golden light from front-left, long shadows   // low golden side light, long shadows
+  const GHOST = 0.07;
