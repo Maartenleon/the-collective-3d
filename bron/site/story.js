@@ -284,6 +284,8 @@
   // the miniature to fly to when one stop shows the big diagram and the other a panel that has one
   const flipTarget = (a, b) => { const big = a.fw === "big" ? a : b.fw === "big" ? b : null, other = big === a ? b : a;
     return big && other.fw !== "big" && other.panel ? panelFw[other.panel] || null : null; };
+  $("[data-brand]").addEventListener("click", () => {   // the logo: back to the opening
+    if (document.body.classList.contains("is-loading")) return; story = false; paused = false; meetFrom = null; goTo(0); });
   let meetFrom = null;   // the stop the Meet button was pressed on; a click outside the page goes back there
   meetBtn.addEventListener("click", () => { if (document.body.classList.contains("is-loading")) return; if (!STOPS[at].coll) meetFrom = at; goTo(idx("c0")); });
   document.addEventListener("click", e => {

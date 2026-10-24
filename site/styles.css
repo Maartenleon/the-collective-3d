@@ -143,7 +143,8 @@ p, ul, h1, h2 { margin: 0; }
   font: italic 400 var(--text-lede)/1.25 var(--font-serif); color: var(--color-text-muted); text-shadow: var(--shadow-text); }
 
 /* ---- chrome ---- */
-.brand { position: fixed; z-index: 4; top: calc(var(--nav-top) + var(--brand-nudge)); left: var(--gutter); font: 500 .6875rem/1 var(--font-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--color-text); pointer-events: none; }
+.brand { all: unset; cursor: pointer; position: fixed; z-index: 4; top: calc(var(--nav-top) + var(--brand-nudge)); left: var(--gutter); font: 500 .6875rem/1 var(--font-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--color-text); }
+.brand:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 3px; }
 /* ---- timeline: the story navigator. One segment per scroll step; the active one fills as its steps play ---- */
 .timeline {
   --timeline-bar-width: calc(var(--panel-width) - 2ch - var(--space-s)); --timeline-seg-min: 24px; --timeline-hit: 32px; --timeline-line: 1px; --timeline-line-hover: 3px;
