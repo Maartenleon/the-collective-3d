@@ -87,12 +87,6 @@
   </div>
 
   <div class="caption" id="caption" aria-live="polite"><span class="caption__kind" id="captionKind"></span><span class="caption__text" id="captionText"></span></div>
-  <div class="seq" id="seq">
-    <button class="seq__btn" id="seqBtn" type="button" aria-label="Pause"><svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1" y="0" width="3" height="10"/><rect x="6" y="0" width="3" height="10"/></svg></button>
-    <span class="seq__bars" id="seqBars"></span>
-    <button class="seq__skip" id="seqSkip" type="button">Skip</button>
-  </div>
-
   <section class="problems" id="problems" aria-label="Problems companies recognise">
     <p class="problems__intro">Pick the note that sounds off, or take it from the top.</p>
     <div class="problems__col">
@@ -140,13 +134,14 @@
   </section>
   <div class="brand">The Collective</div>
   <button class="meet" id="meet" type="button">Meet The Collective</button>
-  <div class="timeline" aria-hidden="true">
-    <span id="tlNum">01</span>
-    <span class="timeline__bar"><span class="timeline__fill" id="tlFill"></span></span>
-    <span class="timeline__label" id="tlLabel">The concert</span>
-  </div>
+  <nav class="timeline" data-timeline aria-label="Story">
+    <button class="timeline__play" type="button" data-timeline-play aria-label="Play story"></button>
+    <span class="timeline__num" data-timeline-num>01</span>
+    <span class="timeline__bar" data-timeline-bar></span>
+    <span class="timeline__label" data-timeline-label>The concert</span>
+    <button class="timeline__skip" type="button" data-timeline-skip>Skip</button>
+  </nav>
   <div class="scroll-hint" id="hint" aria-hidden="true">Scroll</div>
-  <nav class="scenes" id="scenes" aria-label="Scenes"></nav>
   <div class="loading" id="loading" aria-hidden="true">Musicians arriving…</div>
   <div class="loader" id="loader" role="status" aria-live="polite">
     <div class="loader__open"><b>When an organisation plays as one,</b><i>it sounds effortless.</i></div>

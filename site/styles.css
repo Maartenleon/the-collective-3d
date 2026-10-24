@@ -11,13 +11,13 @@
   --font-serif: "EB Garamond", Garamond, Georgia, serif; --font-sans: "Restart Soft", "Figtree", ui-sans-serif, system-ui, sans-serif;
   --text-ui: .75rem; --text-lede: clamp(1.05rem, 1.45vw, 1.4rem); --text-beat: clamp(1.5rem, 2.3vw, 2.25rem); --text-h3: 1.45rem; --text-h3-sm: 1.25rem;
   --space-3xs: .25rem; --space-2xs: .4rem; --space-xs: .6rem; --space-s: .85rem; --space-m: 1.25rem; --space-l: 1.75rem;
-  --gutter: clamp(20px, 7vw, 120px); --nav-top: calc(20px + env(safe-area-inset-top, 0px)); --brand-nudge: 9.5px; --beat-width: 46rem; --panel-width: 20rem; --panel-offset: 72px; --timeline-offset: 30px;
+  --gutter: clamp(20px, 7vw, 120px); --nav-top: calc(20px + env(safe-area-inset-top, 0px)); --brand-nudge: 9.5px; --beat-width: 46rem; --panel-width: 20rem; --panel-offset: 72px; --timeline-offset: 30px; --space-segment: 4px;
   --radius-glass: 18px; --radius-pill: 999px; --blur-glass: blur(18px) saturate(1.15);
   --shadow-glass: 0 20px 50px -30px rgb(0 0 0 / .6); --shadow-text: 0 1px 30px rgb(var(--rgb-shadow) / .45);
   --ease-out: cubic-bezier(.16, .84, .24, 1); --ease-in-out: cubic-bezier(.4, 0, .6, 1);
   --dur-fast: .3s; --dur-base: .6s; --dur-slow: .9s; --stagger: .08s;
 }
-@media (max-width: 720px) { :root { --panel-offset: calc(76px + env(safe-area-inset-bottom, 0px)); --timeline-offset: calc(36px + env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 720px) { :root { --panel-offset: calc(92px + env(safe-area-inset-bottom, 0px)); --timeline-offset: calc(36px + env(safe-area-inset-bottom, 0px)); } }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--color-bg); color: var(--color-text); overflow: hidden; overscroll-behavior: none; }
 body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
@@ -94,23 +94,12 @@ p, ul, h1, h2 { margin: 0; }
 .tag--run { border-color: rgb(250 248 246 / .3); color: var(--color-text); }
 .tag--change { border-color: rgb(241 64 11 / .55); color: var(--color-highlight); }
 
-/* ---- a running sequence (Blueprint, Means): what is on screen, its progress, and a pause button ---- */
+/* ---- caption: what is on screen during a sequence ---- */
 .caption { position: absolute; left: 50%; top: max(84px, 11vh); transform: translate(-50%, 6px); opacity: 0; pointer-events: none; text-align: center;
   transition: opacity .4s ease, transform .5s var(--ease-out); text-shadow: var(--shadow-text); }
 .caption.is-on { opacity: 1; transform: translate(-50%, 0); }
 .caption__kind { display: block; font: 500 var(--text-ui)/1 var(--font-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--color-highlight); }
 .caption__text { display: block; margin-top: .45rem; font: italic 400 clamp(1.2rem, 2vw, 1.7rem)/1.15 var(--font-serif); }
-.seq { position: absolute; left: 50%; bottom: var(--timeline-offset); transform: translateX(-50%); display: flex; align-items: center; gap: 12px;
-  opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility 0s linear .4s; }
-.seq.is-on { opacity: 1; visibility: visible; transition: opacity .6s ease, visibility 0s; }
-.seq__bars { display: flex; gap: 6px; }
-.seq__bar { position: relative; width: 38px; height: 2px; background: var(--color-line-soft); overflow: hidden; border-radius: 1px; }
-.seq__bar i { position: absolute; inset: 0; background: var(--color-text); transform-origin: 0 0; transform: scaleX(0); }
-.seq__btn { all: unset; cursor: pointer; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--color-line-soft); color: var(--color-text); }
-.seq__btn:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 2px; }
-.seq__btn svg { width: 10px; height: 10px; fill: currentColor; }
-.seq__skip { all: unset; cursor: pointer; font: 400 var(--text-ui)/1 var(--font-sans); color: var(--color-text-muted); }
-.seq__skip:hover { color: var(--color-text); }
 
 /* ---- labels anchored to the world ---- */
 .labels { position: absolute; inset: 0; pointer-events: none; }
@@ -148,19 +137,30 @@ p, ul, h1, h2 { margin: 0; }
 
 /* ---- chrome ---- */
 .brand { position: fixed; z-index: 4; top: calc(var(--nav-top) + var(--brand-nudge)); left: var(--gutter); font: 500 .6875rem/1 var(--font-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--color-text); pointer-events: none; }
-.timeline { position: absolute; left: var(--gutter); bottom: var(--timeline-offset); display: flex; align-items: center; gap: var(--space-s);
-  font: 400 var(--text-ui)/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--color-text-muted); pointer-events: none; }
-.timeline__bar { position: relative; width: 120px; height: 1px; background: var(--color-line); }
-.timeline__fill { position: absolute; inset: 0; background: var(--color-text); transform-origin: 0 0; transform: scaleX(0); transition: transform .9s var(--ease-out); }
+/* ---- timeline: the story navigator. One segment per scroll step; the active one fills as its steps play ---- */
+.timeline {
+  --timeline-bar-width: 260px; --timeline-seg-min: 24px; --timeline-hit: 32px; --timeline-line: 1px; --timeline-line-hover: 3px;
+  --timeline-dot-size: 5px; --timeline-icon: 12px;
+  position: absolute; z-index: 4; left: var(--gutter); right: var(--gutter); bottom: calc(var(--timeline-offset) - (var(--timeline-hit) - var(--text-ui)) / 2);
+  display: flex; align-items: center; gap: var(--space-s); pointer-events: none;
+  font: 400 var(--text-ui)/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
+.timeline__play { all: unset; pointer-events: auto; cursor: pointer; display: grid; place-items: center; height: var(--timeline-hit); margin-right: calc(var(--space-2xs) - var(--space-s)); color: inherit; }
+.timeline__play svg { width: var(--timeline-icon); height: var(--timeline-icon); fill: currentColor; }
+.timeline__bar { pointer-events: auto; display: flex; gap: var(--space-segment); width: var(--timeline-bar-width); }
+.timeline__seg { all: unset; cursor: pointer; flex: 1 1 0; min-width: var(--timeline-seg-min); height: var(--timeline-hit); display: flex; align-items: center; }
+.timeline__line { position: relative; width: 100%; height: var(--timeline-line); background: var(--color-line); transition: height var(--dur-fast) ease; }
+.timeline__seg:hover .timeline__line, .timeline__seg:focus-visible .timeline__line { height: var(--timeline-line-hover); }
+.timeline__fill { position: absolute; inset: 0; background: var(--color-text); transform-origin: 0 0; transform: scaleX(0); }
+.timeline__dot { position: absolute; top: 50%; width: var(--timeline-dot-size); height: var(--timeline-dot-size); margin: calc(var(--timeline-dot-size) / -2) 0 0 calc(var(--timeline-dot-size) / -2);
+  border-radius: 50%; background: var(--color-highlight); }
 .timeline__label { color: var(--color-text); }
+.timeline__skip { all: unset; pointer-events: auto; cursor: pointer; margin-left: auto; font: 500 var(--text-ui)/1 var(--font-sans); color: var(--color-text); opacity: 0; visibility: hidden;
+  transition: opacity var(--dur-fast) ease, visibility 0s linear var(--dur-fast); }
+.timeline__skip.is-on { opacity: .82; visibility: visible; transition: opacity var(--dur-fast) ease, visibility 0s; }
+.timeline__skip.is-on:hover { opacity: 1; }
+.timeline__play:focus-visible, .timeline__seg:focus-visible, .timeline__skip:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 3px; border-radius: 4px; }
 .scroll-hint { position: absolute; left: 50%; bottom: var(--timeline-offset); transform: translateX(-50%); font: 400 var(--text-ui)/1 var(--font-sans);
   color: var(--color-text-muted); pointer-events: none; transition: opacity .5s ease; }
-.scenes { position: absolute; right: max(12px, calc(var(--gutter) * .35)); top: 50%; transform: translateY(-50%); display: grid; gap: 4px; }
-.scenes .dot { all: unset; cursor: pointer; width: 22px; height: 18px; display: grid; place-items: center; }
-.scenes .dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--color-line); transition: transform .2s, background .2s; }
-.scenes .dot:hover::before { background: var(--color-text); }
-.scenes .dot[aria-current="step"]::before { background: var(--color-accent); transform: scale(1.5); }
-.scenes .dot:focus-visible { outline: 1px solid var(--color-text); outline-offset: 1px; border-radius: 4px; }
 .loading { position: absolute; right: var(--gutter); bottom: var(--timeline-offset); pointer-events: none; font: 400 var(--text-ui)/1 var(--font-sans); color: var(--color-text-muted); }
 .loading, .loading[hidden] { display: none; }
 /* loader: a calm full-screen line until the whole scene, people included, is ready */
@@ -184,19 +184,18 @@ p, ul, h1, h2 { margin: 0; }
 
 @media (max-width: 720px) {
   .beat:not(.beat--centred) { top: 13vh; }
-  .timeline { right: var(--gutter); }
-  .timeline__bar { flex: 1; width: auto; }
+  .timeline { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "num label skip" "play bar bar"; column-gap: var(--space-2xs); row-gap: var(--space-3xs); }
+  .timeline__play { grid-area: play; margin: 0; } .timeline__num { grid-area: num; } .timeline__label { grid-area: label; } .timeline__skip { grid-area: skip; }
+  .timeline__bar { grid-area: bar; width: auto; }
   .scroll-hint { display: none; }
   .panel { left: 14px; right: 14px; width: auto; padding: var(--space-s) var(--space-m); }
   .panel__title { font-size: var(--text-h3-sm); }
   .panel__body { font-size: .72rem; }
   .panel__org { font-size: .72rem; margin-top: var(--space-2xs, .5rem); padding-top: var(--space-2xs, .5rem); }
-  .seq { bottom: auto; top: 64px; }
   .beat[data-beat="melody"] { top: 25vh; }
   .panel--wide { padding: var(--space-s); }
   .caption { top: 104px; }
-  .scenes { right: 2px; }
-  .problems { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; align-content: start; align-items: start; gap: 8px; padding: 96px 14px 80px; overflow: auto; }
+  .problems { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; align-content: start; align-items: start; gap: 8px; padding: 96px 14px calc(var(--timeline-offset) + 64px); overflow: auto; }
   .framework-btn { grid-column: 1 / -1; grid-row: 1; margin-bottom: 8px; padding: 14px 24px; }
   .problems__col { display: contents; }
   .prob { padding: 10px 12px; }

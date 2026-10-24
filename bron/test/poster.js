@@ -8,7 +8,7 @@ await p.route(/fonts\./,r=>r.abort());
 await p.setContent('<!doctype html><html><head><meta charset=utf-8></head><body>'+fs.readFileSync(process.argv[2],'utf8').replace(/^<!doctype html>/i,'')+'</body></html>');
 for(let i=0;i<300;i++){ const ok=await p.evaluate(()=>!!window.__people); if(ok)break; await p.waitForTimeout(500);}
 await p.waitForTimeout(3000);
-await p.evaluate(()=>{__story.go(0);__story.pause(true); const st=document.createElement('style'); st.textContent='.beats,.brand,.timeline,.scenes,.scroll-hint,.meet,.fw,.loader,.loading,.labels,.caption,.seq{display:none!important}'; document.head.appendChild(st);});
+await p.evaluate(()=>{__story.go(0);__story.pause(true); const st=document.createElement('style'); st.textContent='.beats,.brand,.timeline,.scroll-hint,.meet,.fw,.loader,.loading,.labels,.caption{display:none!important}'; document.head.appendChild(st);});
 await p.waitForTimeout(4000);
 await p.screenshot({path:process.argv[3],type:'jpeg',quality:mobile?55:62,timeout:120000});
 await b.close();})();
