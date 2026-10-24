@@ -34,6 +34,7 @@ Wide horizon, small ensemble, only the conductor bright orange-red (long red coa
 ```
 site/3d.html              built website (open in a browser; ~14 MB, everything inlined)
 site/orkest-model.html    built model only, free orbit camera + isolation panel (for checking the scene)
+site/icons/               favicon (same as the 2D site: dark square, vermilion dot), linked from both pages and index.html
 bron/build.py             builds both files from the sources below
 bron/model/               the 3D scene (shared by both builds)
   head.html               page shell + scene config (STAGE, BOARD, colours, camera presets)
