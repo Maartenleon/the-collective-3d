@@ -74,7 +74,7 @@ PFX=out/a STOPS='["open","t5","c0"]' WAIT=4000 node story10.js ../../site/3d.htm
 
 - `STOPS` array: one entry per stop. Fields: `id`, `name` (timeline name; on the first stop of each segment, and on `d1` where the label changes mid-segment), `ch` (part index, informational), `cam` (`K(pos,target,fov)` or `frame(box,dir,fov,k,lift)`), `seq`/`bar`/`hold`/`dur` (stops with the same `seq` auto-play as one frame; `bar` groups steps for the fill timing), `beats` (centred texts), `panel` (left panel id), `fw` ("big"/"side"/"coll") + `show` (framework figure), `focus(tags,t)` + `fallen` (what stays lit), `glow`, `chaos`, `off` (tension), `booth`, `late`, `coll` (part 4), `shade`, `top`, `caption`, `labels`, `line`, `problems`.
 - Scrolling during a sequence jumps past the whole sequence; Skip does the same.
-- Body text in panels and on the About page uses the tokens `--text-body`, `--leading-body` and `--color-body` (one place to change size and colour; smaller on phones). Problems view: headings "Problems we see" and "Our solution that solves these" share one line at `--problems-top`; the framework (`--problems-fw-size`) sits level with the first problem.
+- Body text in panels and on the About page uses the tokens `--text-body`, `--leading-body` and `--color-body` (one place to change size and colour; smaller on phones). Problems view: headings "Problems we see" and "Our framework that helps solve these" share one line at `--problems-top`; the framework (`--problems-fw-size`) sits level with the first problem.
 - Problems stop: a card opens a panel from the left (recognise, where it goes wrong, how the framework solves it with links to the parts, concept pills); a part in the figure (or a link) opens a panel from the right. Both are built from `PROBLEMS`, `PARTS` and `LABELS` in content.js; the figure lights the parts the open panel is about. Esc, the close button, a click elsewhere or leaving the stop closes them; on phones one at a time.
 - Framework miniature: the Plan, Blueprint, Means and Orchestration panels carry a 64px copy of the framework figure top right, its top level with the kicker (52px on phones; same geometry as `#fw`, shapes only, the panel's part in `--color-text`, the rest and Run/Change in `--color-line`). Nothing in the top-right corner of the film. Between a stop with the big diagram and one of these panels, the big diagram shrinks into the miniature (FLIP), driven by the camera move's progress; `FW_FLIP` sets which part of the move. Reduced motion: crossfade.
 - Timeline (bottom left, `<nav data-timeline>`) is the only progress UI: no dots, nothing in the bottom middle. One segment per scroll step (a stop on its own or a whole sequence, built from `STOPS` into `SEGS`), passed segments full, the active one fills with the progress through its steps, cream playhead, never vermilion. Segments are buttons (32px hit area, 1px line, 3px on hover/focus); hover or focus previews "05 Blueprint" in the number and label; roving tabindex (one tab stop, arrows move, Enter/Space jumps). Order: number, bar, label, a thin divider, play/pause, Skip. The bar ends where the panels end (`--timeline-bar-width` follows `--panel-width`). Play story also carries on to the next segments (`STORY.hold` seconds on a stop without its own `hold`); scrolling, swiping, a key or a segment click stops it. Skip is a quiet link after play, visible only in a sequence. Phone (<=720px): two rows, number, label, divider, play and Skip above, the bar full width below; panels use the same gutters as the bar. Below 1100px the Scroll hint is hidden (the timeline reaches the middle). Labels and timings live in `STORY` next to `STOPS`; knobs (`--timeline-bar-width` etc.) at the top of the `.timeline` rule; JS finds these elements via `data-timeline-*`.
@@ -82,6 +82,18 @@ PFX=out/a STOPS='["open","t5","c0"]' WAIT=4000 node story10.js ../../site/3d.htm
 - Tension (stop `t5`): brass players rotate away (`rotation.y`), conductor arms lowered via `poseArms`, see `tension()`.
 - Mesh tags (`tagsOf`): section, player, stand, conductor, audience, env, booth, grass; litOf decides opacity per stop.
 - Gotcha: a `//` comment in the middle of a line swallows the rest of the line once built; keep comments at line end.
+
+## Deployment (GitHub Pages)
+
+Public repo github.com/Maartenleon/the-collective-3d, served by GitHub Pages from branch `main`, folder `/ (root)`, no GitHub Actions and no build on GitHub (the token has no Workflows rights; ask before adding Actions).
+
+- Website: https://maartenleon.github.io/the-collective-3d/ (root `index.html` redirects to `site/3d.html`)
+- Model builder: https://maartenleon.github.io/the-collective-3d/site/orkest-model.html
+- Built files are committed: run `python3 bron/build.py` (and `model`) before committing; `site/styles.css` is copied by the build.
+- All paths relative (no leading `/`, no localhost): the site lives under the subpath `/the-collective-3d/`. Pages is case-sensitive, macOS is not: keep file names and references lowercase and identical.
+- `.nojekyll` in the root stays (no Jekyll processing). Do not move or rename folders without asking.
+- Test before pushing: serve the parent folder (`cd ~/Downloads && python3 -m http.server 8099`) and open http://127.0.0.1:8099/the-collective-3d/; there must be no 404s.
+- The repo is public: no tokens, keys, client names or internal documents. `docs/` holds internal notes and inputs (see the check of 24 Oct 2026 in the chat); decide with Kai what stays public.
 
 ## Licences and publishing
 

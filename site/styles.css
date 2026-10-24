@@ -270,7 +270,6 @@ p, ul, h1, h2 { margin: 0; }
 @media (max-height: 800px) and (min-width: 721px) {   /* low laptop screens: tighter cards, so the list ends above the timeline */
   .prob { padding: 7px 12px; } .prob__ph { margin-bottom: 4px; } .prob__line { font-size: .95rem; }
 }
-.problems__fw { position: absolute; left: 72%; top: calc(var(--problems-top) + 2.3rem + var(--problems-fw-size) * .875 + 18px); transform: translateX(-50%); font: 400 var(--text-ui)/1 var(--font-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--color-text-muted); }
 .panel__extra { opacity: 0; transition: opacity .8s ease; }
 .panel.is-on .panel__extra.is-late { opacity: 1; }
 @media (max-width: 720px) {
@@ -282,7 +281,6 @@ p, ul, h1, h2 { margin: 0; }
   .problems { bottom: calc(var(--timeline-offset) + 52px); padding-bottom: var(--space-m);   /* the list scrolls above the timeline, not behind it */
     -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); }
   .problems__col { display: grid; }
-  .problems__fw { display: none; }
 }
 
 /* ---- part 4: The Collective, one closing view ---- */
