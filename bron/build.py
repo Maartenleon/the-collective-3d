@@ -37,7 +37,7 @@ else:
                  ('"Publiek laden… " + (done - MUS.length) + " van " + AUD.length', '"Audience arriving… " + (done - MUS.length) + " / " + AUD.length'),
                  ("De muzikanten konden niet laden in deze browser.", "The musicians could not load in this browser.")]:
         assert a in people, a; people = people.replace(a, b)
-    s = r(S, "head.html") + cfg + body + r(M, "_dress_src.js") + data + people + r(S, "story.js")
+    s = r(S, "head.html") + cfg + body + r(M, "_dress_src.js") + data + people + r(S, "content.js") + r(S, "story.js")
     out = os.path.join(out_dir, "3d.html")
     open(os.path.join(out_dir, "styles.css"), "w", encoding="utf-8").write(r(S, "styles.css"))   # 3d.html linkt naar styles.css
 open(out, "w", encoding="utf-8").write(s); print(out, round(len(s) / 1e6, 2), "MB")

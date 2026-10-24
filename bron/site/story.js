@@ -196,7 +196,7 @@
     for (const k in panels) panels[k].classList.toggle("is-on", S.panel === k);
     caption.classList.toggle("is-on", !!S.caption);
     if (S.caption) { capKind.textContent = S.caption[0]; capText.textContent = S.caption[1]; }
-    problems.classList.toggle("is-on", !!S.problems);
+    problems.classList.toggle("is-on", !!S.problems); if (!S.problems) closeDrawers();
     lineEls.forEach(li => li.classList.toggle("is-shown", +li.dataset.line <= (S.lines ?? 4)));
     dimsLate.classList.toggle("is-late", !!S.late); $("#dimsOrgC").classList.toggle("is-late", !!S.late);
     fwEl.classList.toggle("is-on", !!S.fw); fwEl.classList.toggle("is-side", S.fw === "side"); fwEl.classList.toggle("is-coll", S.fw === "coll");
@@ -234,6 +234,7 @@
   /* ---------- input: wheel, keys, swipe, timeline ---------- */
   const WHEEL_REST = 0.45; let wheelQuiet = 0, wheelAcc = 0;
   addEventListener("wheel", e => {
+    if (e.target.closest && e.target.closest("[data-drawer]")) return;   // an open side panel scrolls itself
     e.preventDefault(); story = false;
     const now = clock.getElapsedTime(), quiet = now - wheelQuiet; wheelQuiet = now;
     if ((anim && anim.k < 0.85) || quiet < WHEEL_REST && wheelAcc === 0) return;
@@ -242,6 +243,8 @@
   }, { passive: false });
   addEventListener("keydown", e => {
     if (!(e.target.closest && e.target.closest("[data-timeline]"))) story = false;
+    if (e.key === "Escape" && (openProblem >= 0 || openPart)) { closeDrawers(true); return; }
+    if (e.target.closest && e.target.closest("[data-drawer]")) return;   // arrows and space scroll the open side panel
     if (e.target.closest && e.target.closest("button") && (e.key === " " || e.key === "Enter")) return;
     if (["ArrowDown", "ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); step(1); }
     if (["ArrowUp", "ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); step(-1); }
@@ -250,8 +253,8 @@
   });
   let touchY = null;
   stage.addEventListener("touchstart", e => { touchY = e.touches[0].clientY; }, { passive: true });
-  stage.addEventListener("touchmove", e => { if (!e.target.closest(".problems, .coll__page")) e.preventDefault(); }, { passive: false });
-  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest(".coll__page") && $(".coll__page").scrollHeight > $(".coll__page").clientHeight + 4) { touchY = null; return; } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });
+  stage.addEventListener("touchmove", e => { if (!e.target.closest(".problems, .coll__page, [data-drawer]")) e.preventDefault(); }, { passive: false });
+  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } if (e.target.closest(".coll__page") && $(".coll__page").scrollHeight > $(".coll__page").clientHeight + 4) { touchY = null; return; } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });
   const segBtns = SEGS.map((g, n) => { const b = document.createElement("button");
     b.type = "button"; b.className = "timeline__seg"; b.dataset.timelineSeg = n; b.tabIndex = -1;
     b.setAttribute("aria-label", `${STORY.goTo} ${pad(n)} ${STOPS[g.first].name}`);
@@ -272,7 +275,6 @@
   if (matchMedia("(pointer: coarse)").matches) hint.textContent = "Swipe";
   // the framework figure is a table of contents: a part of it jumps to its frame
   const FW_TO = { p: "plan", b: "b1", m: "m1", o: "orch", r: "d1", c: "d2" };
-  fwEl.addEventListener("click", e => { const g = e.target.closest(".k"); if (!g || !fwEl.classList.contains("is-on")) return; if (!fwEl.classList.contains("is-side")) return; goTo(idx(FW_TO[g.dataset.k])); });
   { const cf = $("#collFw"); cf.innerHTML = fwEl.innerHTML.replace(/id="fwArrow"/, 'id="collArrow"').replace(/url\(#fwArrow\)/g, "url(#collArrow)");
     cf.addEventListener("click", e => { const g = e.target.closest(".k"); if (g) goTo(idx(FW_TO[g.dataset.k])); }); }
   const panelFw = {};   // panel name -> its miniature: a copy of the big diagram with the panel's part lit
@@ -286,6 +288,60 @@
     return big && other.fw !== "big" && other.panel ? panelFw[other.panel] || null : null; };
   $("[data-brand]").addEventListener("click", () => {   // the logo: back to the opening
     if (document.body.classList.contains("is-loading")) return; story = false; paused = false; meetFrom = null; goTo(0); });
+  /* ---------- side panels: a problem slides in from the left, a framework part from the right; words in content.js ---------- */
+  const drawers = { problem: $("[data-drawer='problem']"), part: $("[data-drawer='part']") };
+  let openProblem = -1, openPart = null, drawerFrom = null;
+  const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const pills = list => `<ul class="pills" aria-label="${esc(LABELS.concepts)}">${list.map(c => `<li class="pill">${esc(c)}</li>`).join("")}</ul>`;
+  const section = (label, html) => `<h3 class="drawer__h">${esc(label)}</h3>${html}`;
+  function problemHTML(n) { const P = PROBLEMS[n];
+    return `<p class="drawer__kicker">${pad(n)} · ${esc(P.theme)}</p><h2 class="drawer__title">${esc(P.line)}</h2>`
+      + section(LABELS.recognise, `<p class="drawer__text">${esc(P.recognise)}</p>`) + section(LABELS.wrong, `<p class="drawer__text">${esc(P.wrong)}</p>`)
+      + section(LABELS.solve, `<p class="drawer__text">${esc(P.solve)}</p><p class="drawer__links">${P.parts.map(k => `<button class="drawer__link" type="button" data-open-part="${k}">${esc(PARTS[k].name)}</button>`).join("")}</p>`)
+      + section(LABELS.concepts, pills(P.concepts)); }
+  function partHTML(k) { const T = PARTS[k], related = PROBLEMS.map((P, n) => [P, n]).filter(([P]) => P.parts.includes(k));
+    return `<p class="drawer__kicker">${esc(T.name)} · ${esc(T.sub)}</p><h2 class="drawer__title">${esc(T.title)}</h2><p class="drawer__question">${esc(T.question)}</p><p class="drawer__text">${esc(T.text)}</p>`
+      + section(LABELS.org, `<p class="drawer__text">${esc(T.org)}</p>`)
+      + (related.length ? section(LABELS.problems, `<div class="drawer__problems">${related.map(([P, n]) => `<button class="drawer__problem" type="button" data-open-problem="${n}"><span>${pad(n)} · ${esc(P.theme)}</span>${esc(P.short)}</button>`).join("")}</div>`) : "")
+      + section(LABELS.concepts, pills(T.concepts)); }
+  function showDrawer(kind, html) {
+    const d = drawers[kind], other = drawers[kind === "problem" ? "part" : "problem"];
+    if (!drawerFrom || !drawerFrom.isConnected) drawerFrom = document.activeElement;
+    if (innerWidth <= 720 && other.classList.contains("is-on")) { other.classList.remove("is-on"); other.inert = true; if (kind === "problem") openPart = null; else openProblem = -1; }   // one at a time on a phone
+    d.querySelector("[data-drawer-body]").innerHTML = html; d.scrollTop = 0; d.inert = false; d.classList.add("is-on"); d.focus({ preventScroll: true });
+    markDrawers();
+  }
+  function closeDrawers(back) {
+    if (openProblem < 0 && !openPart) return;
+    for (const k in drawers) { drawers[k].classList.remove("is-on"); drawers[k].inert = true; }
+    openProblem = -1; openPart = null; markDrawers();
+    if (back && drawerFrom && drawerFrom.isConnected) drawerFrom.focus({ preventScroll: true }); drawerFrom = null;
+  }
+  function closeDrawer(kind) {   // close one panel; if it was the only one open, close all and give focus back
+    if (!(kind === "problem" ? openPart : openProblem >= 0)) return closeDrawers(true);
+    drawers[kind].classList.remove("is-on"); drawers[kind].inert = true;
+    if (kind === "problem") openProblem = -1; else openPart = null;
+    markDrawers();
+  }
+  const openProblemFn = n => { openProblem = n; showDrawer("problem", problemHTML(n)); }, openPartFn = k => { openPart = k; showDrawer("part", partHTML(k)); };
+  function markDrawers() {   // the open problem's card; in the figure, the parts that problem (or the open part) is about
+    cards.forEach((c, n) => { c.classList.toggle("is-active", n === openProblem); c.setAttribute("aria-expanded", n === openProblem); });
+    const lit = openPart ? [openPart] : openProblem >= 0 ? PROBLEMS[openProblem].parts : [];
+    fwEl.classList.toggle("has-focus", lit.length > 0); fwEl.querySelectorAll(".k").forEach(g => g.classList.toggle("is-lit", lit.includes(g.dataset.k)));
+  }
+  const cards = PROBLEMS.map((P, n) => { const b = document.createElement("button");
+    b.type = "button"; b.className = "prob glass"; b.dataset.problem = n; b.style.setProperty("--i", n); b.setAttribute("aria-controls", "drawerProblem"); b.setAttribute("aria-expanded", "false");
+    b.innerHTML = `<span class="prob__ph">${pad(n)} · ${esc(P.theme)}</span><span class="prob__line">${esc(P.short)}</span>`; $("[data-problems-list]").appendChild(b); return b; });
+  document.addEventListener("click", e => {
+    if (!STOPS[at].problems || !e.target.closest) return;
+    const card = e.target.closest("[data-problem]"), part = e.target.closest("[data-open-part]") || (fwEl.classList.contains("is-side") && e.target.closest("#fw .k"));
+    const prob = e.target.closest("[data-open-problem]"), close = e.target.closest("[data-drawer-close]");
+    if (card) { story = false; const n = +card.dataset.problem; n === openProblem ? closeDrawer("problem") : openProblemFn(n); return; }
+    if (part) { story = false; const k = part.dataset.openPart || part.dataset.k; k === openPart ? closeDrawer("part") : openPartFn(k); return; }
+    if (prob) { openProblemFn(+prob.dataset.openProblem); return; }
+    if (close) { closeDrawer(close.closest("[data-drawer]").dataset.drawer); return; }
+    if (!e.target.closest("[data-drawer], [data-timeline], .meet, .brand")) closeDrawers(false);   // a click anywhere else closes them
+  });
   let meetFrom = null;   // the stop the Meet button was pressed on; a click outside the page goes back there
   meetBtn.addEventListener("click", () => { if (document.body.classList.contains("is-loading")) return; if (!STOPS[at].coll) meetFrom = at; goTo(idx("c0")); });
   document.addEventListener("click", e => {

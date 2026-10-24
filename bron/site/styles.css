@@ -122,12 +122,11 @@ p, ul, h1, h2 { margin: 0; }
 .problems__col { display: grid; gap: 12px; max-width: 22rem; }
 .problems__col--left { justify-self: start; }
 .problems__col--right { justify-self: end; }
-.prob { all: unset; box-sizing: border-box; cursor: pointer; display: block; padding: 10px 14px; border-radius: var(--radius-glass); text-align: left; opacity: 0; transform: translateY(10px);
+.prob { all: unset; box-sizing: border-box; cursor: pointer; display: block; padding: 10px 14px; border: 1px solid transparent; border-radius: var(--radius-glass); text-align: left; opacity: 0; transform: translateY(10px);
   transition: opacity .3s ease, transform .3s ease, border-color .2s ease, background .2s ease; }
-.problems.is-on .prob { opacity: 1; transform: none; transition: opacity .7s ease, transform .8s var(--ease-out), border-color .2s ease, background .2s ease; }
-.problems.is-on .prob:nth-of-type(1) { transition-delay: .3s; } .problems.is-on .prob:nth-of-type(2) { transition-delay: .4s; }
-.problems.is-on .prob:nth-of-type(3) { transition-delay: .5s; } .problems.is-on .prob:nth-of-type(4) { transition-delay: .6s; }
-.prob:hover, .prob:focus-visible { border-color: var(--color-line); background: var(--color-glass-strong); }
+.problems.is-on .prob { opacity: 1; transform: none;   /* the cards come in one after another (--i set per card); hover reacts at once */
+  transition: opacity .7s ease calc(.25s + var(--i, 0) * .06s), transform .8s var(--ease-out) calc(.25s + var(--i, 0) * .06s), border-color .15s ease, background-color .15s ease; }
+.prob:hover, .prob:focus-visible, .prob.is-active { border-color: var(--color-line); background-color: var(--color-glass-strong); }
 .prob:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 2px; }
 .prob__ph { display: block; margin-bottom: 6px; font: 500 10px/1 var(--font-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--color-highlight); opacity: .8; }
 .prob__line { display: block; font: 400 1.05rem/1.3 var(--font-serif); color: var(--color-text); }
@@ -184,7 +183,7 @@ p, ul, h1, h2 { margin: 0; }
 .loader__open { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(46rem, calc(100% - 40px)); text-align: center; text-shadow: var(--shadow-text); }
 .loader__open b { display: block; font: 400 var(--text-beat)/1.15 var(--font-serif); color: var(--color-text); }
 .loader__open i { display: block; margin-top: .3em; font: italic 400 var(--text-lede)/1.25 var(--font-serif); color: var(--color-text-muted); }
-.loader__pct { display: block; margin-top: var(--space-m); font: 400 var(--text-beat)/1.15 var(--font-serif); font-variant-numeric: tabular-nums; color: var(--color-text); }   /* as large as the title above it */
+.loader__pct { display: block; margin-top: var(--space-m); font: 400 var(--text-beat)/1.15 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--color-text); }   /* as large as the title above it */
 .is-loading .beat { visibility: hidden; }
 
 @media (max-width: 720px) {
@@ -209,7 +208,7 @@ p, ul, h1, h2 { margin: 0; }
   .loading { right: auto; left: var(--gutter); bottom: calc(var(--timeline-offset) + 20px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .beat, .beat.is-on, .panel, .panel.is-on, .caption, .problems, .prob { transition-duration: .01s !important; transition-delay: 0s !important; }
+  .beat, .beat.is-on, .panel, .panel.is-on, .caption, .problems, .prob, .drawer, .drawer.is-on { transition-duration: .01s !important; transition-delay: 0s !important; }
 }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* ---- the framework figure (B2): big over the concert, then small in the corner as a table of contents ---- */
@@ -227,12 +226,48 @@ p, ul, h1, h2 { margin: 0; }
 .problems { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; padding-top: var(--problems-top); }
 .problems__col { display: grid; gap: 8px; max-width: 24rem; justify-self: start; }
 .problems__head { margin-bottom: var(--space-xs); font: 400 var(--text-h3)/1.15 var(--font-serif); color: var(--color-text); text-shadow: var(--shadow-text); }
+/* side panels: a problem from the left, a framework part from the right (content.js) */
+.drawer { --drawer-width: min(30rem, calc(100vw - 2 * var(--gutter)));
+  position: absolute; z-index: 5; top: calc(var(--nav-top) + 52px); bottom: calc(var(--timeline-offset) + 40px); width: var(--drawer-width); box-sizing: border-box;
+  overflow: auto; overscroll-behavior: contain; padding: var(--space-l); opacity: 0; visibility: hidden; outline: none;
+  transition: transform .5s var(--ease-out), opacity .35s ease, visibility 0s linear .5s; }
+.drawer.glass { background: var(--color-glass-strong); }
+.drawer--left { left: var(--gutter); transform: translateX(calc(-100% - var(--gutter))); }
+.drawer--right { right: var(--gutter); transform: translateX(calc(100% + var(--gutter))); }
+.drawer.is-on { opacity: 1; visibility: visible; transform: none; transition: transform .5s var(--ease-out), opacity .35s ease, visibility 0s; }
+.drawer__close { all: unset; cursor: pointer; position: sticky; top: 0; float: right; display: grid; place-items: center; width: 32px; height: 32px; margin: -8px -8px 0 var(--space-s);
+  border-radius: 50%; color: var(--color-text-muted); transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease; }
+.drawer__close svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.5; }
+.drawer__close:hover { color: var(--color-text); background-color: rgb(var(--rgb-paper) / .08); }
+.drawer__kicker { margin-bottom: var(--space-s); font: 500 var(--text-ui)/1 var(--font-sans); color: var(--color-highlight); }
+.drawer__title { margin: 0; font: 400 var(--text-h3)/1.2 var(--font-serif); color: var(--color-text); text-wrap: balance; }
+.drawer__question { margin-top: var(--space-xs); font: italic 400 1.05rem/1.35 var(--font-serif); color: var(--color-highlight); }
+.drawer__h { margin: var(--space-l) 0 var(--space-2xs); font: 500 .62rem/1 var(--font-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--color-highlight); }
+.drawer__text { font: 400 var(--text-body)/var(--leading-body) var(--font-sans); color: var(--color-body); }
+.drawer__text + .drawer__text { margin-top: var(--space-s); }
+.drawer__question + .drawer__text { margin-top: var(--space-s); }
+.drawer__links { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin-top: var(--space-s); }
+.drawer__link { all: unset; cursor: pointer; padding: .4rem .7rem; border: 1px solid var(--color-line); border-radius: var(--radius-pill); font: 500 var(--text-ui)/1 var(--font-sans); color: var(--color-text);
+  transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+.drawer__link::after { content: " \2192"; }
+.drawer__link:hover { color: var(--color-highlight); border-color: var(--color-highlight); }
+.drawer__problems { display: grid; gap: var(--space-2xs); }
+.drawer__problem { all: unset; cursor: pointer; display: block; padding: var(--space-xs) var(--space-s); border: 1px solid var(--color-line-faint); border-radius: var(--radius-glass);
+  font: 400 .95rem/1.3 var(--font-serif); color: var(--color-text); transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease; }
+.drawer__problem span { display: block; margin-bottom: 4px; font: 500 10px/1 var(--font-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--color-highlight); }
+.drawer__problem:hover { border-color: var(--color-line); background-color: rgb(var(--rgb-paper) / .05); }
+.drawer__close:focus-visible, .drawer__link:focus-visible, .drawer__problem:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 2px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }   /* related concepts: quiet labels, not links */
+.pill { padding: 5px 10px; border: 1px solid var(--color-line-soft); border-radius: var(--radius-pill); font: 400 .7rem/1 var(--font-sans); color: var(--color-text-muted); }
+.fw.has-focus .k:not(.is-lit):not(:hover) { opacity: .2 !important; }   /* the parts the open panel is about stay lit */
+@media (max-width: 720px) {
+  .drawer { --drawer-width: auto; left: var(--gutter); right: var(--gutter); top: 64px; padding: var(--space-m); }
+}
 .problems__head--fw { position: absolute; left: 72%; top: var(--problems-top); transform: translateX(-50%); white-space: nowrap; }
 @media (max-height: 800px) and (min-width: 721px) {   /* low laptop screens: tighter cards, so the list ends above the timeline */
   .prob { padding: 7px 12px; } .prob__ph { margin-bottom: 4px; } .prob__line { font-size: .95rem; }
 }
 .problems__fw { position: absolute; left: 72%; top: calc(var(--problems-top) + 2.3rem + var(--problems-fw-size) * .875 + 18px); transform: translateX(-50%); font: 400 var(--text-ui)/1 var(--font-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--color-text-muted); }
-.prob { cursor: default; }
 .panel__extra { opacity: 0; transition: opacity .8s ease; }
 .panel.is-on .panel__extra.is-late { opacity: 1; }
 @media (max-width: 720px) {

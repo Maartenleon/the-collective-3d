@@ -90,19 +90,20 @@
   <section class="problems" id="problems" aria-label="Problems companies recognise">
     <p class="problems__intro">Pick the note that sounds off, or take it from the top.</p>
     <p class="problems__head problems__head--fw">Our solution that solves these</p>
-    <div class="problems__col">
+    <div class="problems__col" data-problems-list>
       <p class="problems__head">Problems we see</p>
-      <div class="prob glass"><span class="prob__ph">Problem 1 · placeholder</span><span class="prob__line">Every report says green, but the numbers don&rsquo;t move.</span></div>
-      <div class="prob glass"><span class="prob__ph">Problem 2 · placeholder</span><span class="prob__line">We start a lot. We almost never stop anything.</span></div>
-      <div class="prob glass"><span class="prob__ph">Problem 3 · placeholder</span><span class="prob__line">We can&rsquo;t tell whether our projects pay off.</span></div>
-      <div class="prob glass"><span class="prob__ph">Problem 4 · placeholder</span><span class="prob__line">Our big programme is late and still growing.</span></div>
-      <div class="prob glass"><span class="prob__ph">Problem 5 · placeholder</span><span class="prob__line">Our costs keep creeping up, and nobody knows why.</span></div>
-      <div class="prob glass"><span class="prob__ph">Problem 6 · placeholder</span><span class="prob__line">Keeping things running eats the budget for anything new.</span></div>
-      <div class="prob glass"><span class="prob__ph">Problem 7 · placeholder</span><span class="prob__line">We merged, and still run two of everything.</span></div>
-      <div class="prob glass"><span class="prob__ph">Problem 8 · placeholder</span><span class="prob__line">The system went live, the benefits never showed up.</span></div>
     </div>
     <p class="problems__fw">The framework</p>
   </section>
+  <!-- side panels: a problem (from the left) and a framework part (from the right); filled from content.js -->
+  <aside class="drawer drawer--left glass" id="drawerProblem" data-drawer="problem" aria-label="Problem" tabindex="-1" inert>
+    <button class="drawer__close" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1L11 11M11 1L1 11"/></svg></button>
+    <div data-drawer-body></div>
+  </aside>
+  <aside class="drawer drawer--right glass" id="drawerPart" data-drawer="part" aria-label="Framework part" tabindex="-1" inert>
+    <button class="drawer__close" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1L11 11M11 1L1 11"/></svg></button>
+    <div data-drawer-body></div>
+  </aside>
 
 
   <section class="coll" id="coll" aria-label="The Collective">
