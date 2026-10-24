@@ -51,6 +51,7 @@
     </div>
   </div>
 
+  <div class="fw-glass" data-fw-glass aria-hidden="true"></div>
   <svg class="fw" id="fw" viewBox="0 0 640 560" role="img" aria-label="The framework: Plan, Blueprint and Means as three bands; Run and Change as two columns through them; Orchestration as a circle around everything"></svg>
 
   <div class="panels">
@@ -1943,6 +1944,7 @@
   const shade = $("#shade"), topShade = $("#topShade"), problems = $("#problems"), hint = $("#hint");
   const tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
   const collEl = $("#coll"), meetBtn = $("#meet");
+  const fwGlass = $("[data-fw-glass]");
   const lineEls = [...document.querySelectorAll("[data-line]")], dimsLate = $("#dimsLate"), fwEl = $("#fw");
   { // the framework figure, B2: floating rounded bands inside a circle, two columns, the Orchestration ring with its arrow
     const CX = 320, CY = 262, R = 192, W = "rgba(250,248,246,.14)", WS = "rgba(250,248,246,.8)", O = "rgba(241,64,11,.2)", VER = "#F1400B";
@@ -2249,6 +2251,12 @@
         if (!grow) { fwEl.style.opacity = (1 - hand).toFixed(3); mini.style.opacity = hand.toFixed(3); }
         else mini.style.opacity = "";
       } else if (flip) { fwEl.classList.remove("is-flip"); fwEl.style.transform = fwEl.style.opacity = ""; fwEl.style.removeProperty("--fw-text"); flip.mini.style.opacity = ""; flip = null; }
+    }
+    { // the glass disc behind the diagram follows its circle: place, size and fade
+      const o = +getComputedStyle(fwEl).opacity;
+      if (o > 0.005) { const c = fwEl.querySelector(":scope > circle").getBoundingClientRect(), p = fwGlass.offsetParent.getBoundingClientRect();
+        fwGlass.style.transform = `translate(${(c.left - p.left).toFixed(1)}px, ${(c.top - p.top).toFixed(1)}px)`; fwGlass.style.width = c.width.toFixed(1) + "px"; fwGlass.style.height = c.height.toFixed(1) + "px"; }
+      fwGlass.style.opacity = o.toFixed(3);
     }
     { // the active segment fills with the progress through its steps
       let f = anim ? anim.k : 1;

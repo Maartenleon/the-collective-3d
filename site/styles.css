@@ -217,6 +217,9 @@ p, ul, h1, h2 { margin: 0; }
   transition: opacity .7s ease, left 1s var(--ease-in-out), top 1s var(--ease-in-out), width 1s var(--ease-in-out), transform 1s var(--ease-in-out), visibility 0s linear .7s; }
 .fw.is-on { opacity: 1; visibility: visible; transition: opacity .7s ease, left 1s var(--ease-in-out), top 1s var(--ease-in-out), width 1s var(--ease-in-out), transform 1s var(--ease-in-out), visibility 0s; }
 .fw.is-side { left: 72%; top: calc(var(--problems-top) + 2.3rem + var(--problems-fw-size) * .4375); width: var(--problems-fw-size); }   /* top level with the first problem */
+.fw-glass { position: absolute; z-index: 3; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;   /* the diagram's circle as glass, like the panels; story.js keeps it on the circle */
+  background: var(--color-glass); -webkit-backdrop-filter: var(--blur-glass); backdrop-filter: var(--blur-glass); }
+.fw > circle { fill: none; }   /* the glass behind it is the fill */
 .fw .k { transition: opacity .25s ease; }
 .fw text { font-family: var(--font-serif); fill: var(--color-text); }
 .fw .lab { font-family: var(--font-sans); font-size: 13px; letter-spacing: .14em; }
