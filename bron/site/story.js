@@ -77,11 +77,11 @@
     { id: "t4", ch: 0, seq: "twist", bar: 4, hold: 1.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4 },
     { id: "t5", ch: 0, seq: "twist", bar: 5, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
-    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: 1.6, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },
-    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: 1.0, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
-    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: 1.0, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
-    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: 1.2, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
-    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 1.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
+    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: 1.0, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },
+    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: 0.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
+    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: 0.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
+    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: 0.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
+    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 0.9, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
     { id: "f5", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
     // Frame 4: Plan
     { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan" },
@@ -160,7 +160,7 @@
     const CX = 320, CY = 262, R = 192, W = "rgba(250,248,246,.14)", WS = "rgba(250,248,246,.8)", O = "rgba(241,64,11,.2)", VER = "#F1400B";
     const pill = (x, y, w, h, fill, stroke) => `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${(Math.min(w, h) / 2).toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
     const band = (d, k, l, sub) => { const hw = Math.sqrt(R * R - (Math.abs(d) + 32) ** 2);
-      return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60, W, WS)}<text x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 2}" font-size="21">${l}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 20}" font-size="13" font-style="italic" opacity=".75">${sub}</text></g>`; };
+      return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60, W, WS)}<text class="lab band" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 2}">${l.toUpperCase()}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 20}" font-size="13" font-style="italic" opacity=".75">${sub}</text></g>`; };
     const col = (dx, k, l, sub) => { const hh = Math.sqrt(R * R - (Math.abs(dx) + 30) ** 2);
       return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh, O, VER)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text><text class="sub" transform="translate(${CX + dx + 5} ${CY}) rotate(-90)" text-anchor="middle" font-size="13" font-style="italic" opacity=".85">${sub}</text></g>`; };
     const RO = 228, a = 0.62;
@@ -440,7 +440,7 @@
   camera.position.copy(STOPS[0].cam.pos); camera.fov = STOPS[0].cam.fov; applyStop(STOPS[0]);
   renderer.setAnimationLoop(frameLoop);
   { // loader: follow the people loader (musicians, then audience), then fade in and start the opening
-    const loader = $("#loader"), fill = $("#loaderFill"), pct = $("#loaderPct"), note = $("#loading");
+    const loader = $("#loader"), pct = $("#loaderPct"), note = $("#loading");
     let shown = 0, doneAt = 0, last = performance.now();
     const tick = () => {
       const tNow = performance.now(), dt = Math.min(0.5, (tNow - last) / 1000); last = tNow;
@@ -450,7 +450,7 @@
       if (m && /Audience/.test(txt)) goal = 0.6 + 0.4 * (+m[1] / +m[2]);
       if (ready) goal = 1;
       shown = Math.min(goal, shown + Math.max(dt * (ready ? 1.5 : 0.05), (goal - shown) * (1 - Math.exp(-dt * 5))));
-      fill.style.transform = `scaleX(${shown.toFixed(3)})`; pct.textContent = Math.round(shown * 100) + "%";
+      pct.textContent = Math.round(shown * 100) + "%";
       if (ready && shown > 0.995) {
         if (!doneAt) doneAt = performance.now();
         if (performance.now() - doneAt > 250) {
