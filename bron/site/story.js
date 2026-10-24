@@ -84,27 +84,28 @@
     { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 1.6, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
     { id: "f5", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
     // Frame 4: Plan
-    { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan", fw: "mini", on: "p" },
+    { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan" },
     // Frame 5: Blueprint
-    { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", fw: "mini", on: "b", focus: t => t.stand || t.env, caption: ["Blueprint", "The score on every stand"], top: 1 },
-    { id: "b2", ch: 3, seq: "bp", bar: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", fw: "mini", on: "b", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"], top: 1 },
-    { id: "b3", ch: 3, seq: "bp", bar: 2, hold: 2.6, dur: 1.8, cam: frame(orchBox, V(0, 0.75, 1), 42, 0.74), panel: "blueprint", fw: "mini", on: "b", line: 1, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player), caption: ["Value stream", "One melody, many hands"], top: 1 },
-    { id: "b4", ch: 3, seq: "bp", bar: 3, hold: 3.0, cam: frame(orchBox, V(0.06, 0.72, 1), 42, 0.72), panel: "blueprint", fw: "mini", on: "b", line: 2, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player) || LINE2.has(t.player), caption: ["Value streams", "Two melodies, eight specialists, four sections"], top: 1 },
+    { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: ["Blueprint", "The score on every stand"], top: 1 },
+    { id: "b2", ch: 3, seq: "bp", bar: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"], top: 1 },
+    { id: "b3", ch: 3, seq: "bp", bar: 2, hold: 2.6, dur: 1.8, cam: frame(orchBox, V(0, 0.75, 1), 42, 0.74), panel: "blueprint", line: 1, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player), caption: ["Value stream", "One melody, many hands"], top: 1 },
+    { id: "b4", ch: 3, seq: "bp", bar: 3, hold: 3.0, cam: frame(orchBox, V(0.06, 0.72, 1), 42, 0.72), panel: "blueprint", line: 2, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player) || LINE2.has(t.player), caption: ["Value streams", "Two melodies, eight specialists, four sections"], top: 1 },
     // Frame 6: Means
-    { id: "m1", name: "Means", ch: 4, seq: "means", bar: 0, hold: 3.6, cam: CAM2, panel: "means", fw: "mini", on: "m", labels: ALL4, focus: (t, s) => oneByOne(t, s, 0.4, 0.8), caption: ["People", "Four sections, many specialists"], top: 1 },
-    { id: "m2", ch: 4, seq: "means", bar: 1, hold: 2.6, dur: 0.5, cam: CAM2, panel: "means", fw: "mini", on: "m", glow: 1, caption: ["Means", "Their instruments"], top: 1 },
-    { id: "m3", ch: 4, seq: "means", bar: 2, hold: 3.0, dur: 2.2, cam: frame(kassaBox, V(-0.55, 0.32, 1), 38, 1.7), panel: "means", fw: "mini", on: "m", booth: 1, caption: ["Means", "And the budget that keeps them playing"], top: 1 },
+    { id: "m1", name: "Means", ch: 4, seq: "means", bar: 0, hold: 3.6, cam: CAM2, panel: "means", labels: ALL4, focus: (t, s) => oneByOne(t, s, 0.4, 0.8), caption: ["People", "Four sections, many specialists"], top: 1 },
+    { id: "m2", ch: 4, seq: "means", bar: 1, hold: 2.6, dur: 0.5, cam: CAM2, panel: "means", glow: 1, caption: ["Means", "Their instruments"], top: 1 },
+    { id: "m3", ch: 4, seq: "means", bar: 2, hold: 3.0, dur: 2.2, cam: frame(kassaBox, V(-0.55, 0.32, 1), 38, 1.7), panel: "means", booth: 1, caption: ["Means", "And the budget that keeps them playing"], top: 1 },
     // Frame 7: Orchestration
-    { id: "orch", name: "Orchestration", ch: 5, seq: "dims", bar: 0, hold: 3.6, cam: frame(condBox, V(0.1, 0.22, 1), 34, 1.7, 0.1), panel: "orchestration", fw: "mini", on: "o", focus: t => t.env || t.conductor || (t.stand && t.condStand) },
+    { id: "orch", name: "Orchestration", ch: 5, seq: "dims", bar: 0, hold: 3.6, cam: frame(condBox, V(0.1, 0.22, 1), 34, 1.7, 0.1), panel: "orchestration", focus: t => t.env || t.conductor || (t.stand && t.condStand) },
     // Frame 8: the two dimensions
-    { id: "d1", name: "Run and Change", ch: 6, seq: "dims", bar: 1, hold: 3.4, dur: 2.2, cam: CAM2, panel: "dims", fw: "mini", on: "r", top: 1 },
-    { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1, fw: "mini", on: "c", top: 1 },
+    { id: "d1", name: "Run and Change", ch: 6, seq: "dims", bar: 1, hold: 3.4, dur: 2.2, cam: CAM2, panel: "dims", top: 1 },
+    { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1, top: 1 },
     // Frame 9 and 10: your organisation
     { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25 },
     { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },
     // Part 4: The Collective. The camera rises over the bowl: tonight's concert and next season's rehearsal in one view
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
   ];
+  const FW_FLIP = { start: 0.1, end: 0.9 };   // the big diagram shrinks into the panel miniature over this part of the camera move (0 to 1)
   const STORY = { hold: 5, play: "Play story", pause: "Pause story", goTo: "Go to" };   // Play story: seconds on a stop without its own hold; button and segment labels
   const N = STOPS.length, idx = id => STOPS.findIndex(s => s.id === id);
   const SEQS = {};
@@ -198,11 +199,11 @@
     problems.classList.toggle("is-on", !!S.problems);
     lineEls.forEach(li => li.classList.toggle("is-shown", +li.dataset.line <= (S.lines ?? 4)));
     dimsLate.classList.toggle("is-late", !!S.late); $("#dimsOrgC").classList.toggle("is-late", !!S.late);
-    fwEl.classList.toggle("is-on", !!S.fw); fwEl.classList.toggle("is-mini", S.fw === "mini"); fwEl.classList.toggle("is-side", S.fw === "side"); fwEl.classList.toggle("is-coll", S.fw === "coll");
+    fwEl.classList.toggle("is-on", !!S.fw); fwEl.classList.toggle("is-side", S.fw === "side"); fwEl.classList.toggle("is-coll", S.fw === "coll");
     collEl.classList.toggle("is-on", !!S.coll);
     meetBtn.classList.toggle("is-hidden", !!S.coll);
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
-      g.style.opacity = S.fw === "mini" ? (k === S.on ? 1 : 0.16) : (S.show || "").includes(k) ? 1 : 0; });
+      g.style.opacity = (S.show || "").includes(k) ? 1 : 0; });
     shade.style.opacity = S.shade || 0; topShade.classList.toggle("is-on", !!S.top);
     hint.style.opacity = at === 0 ? 1 : 0;
     const n = segOf(at);
@@ -271,9 +272,18 @@
   if (matchMedia("(pointer: coarse)").matches) hint.textContent = "Swipe";
   // the framework figure is a table of contents: a part of it jumps to its frame
   const FW_TO = { p: "plan", b: "b1", m: "m1", o: "orch", r: "d1", c: "d2" };
-  fwEl.addEventListener("click", e => { const g = e.target.closest(".k"); if (!g || !fwEl.classList.contains("is-on")) return; if (!(fwEl.classList.contains("is-mini") || fwEl.classList.contains("is-side"))) return; goTo(idx(FW_TO[g.dataset.k])); });
+  fwEl.addEventListener("click", e => { const g = e.target.closest(".k"); if (!g || !fwEl.classList.contains("is-on")) return; if (!fwEl.classList.contains("is-side")) return; goTo(idx(FW_TO[g.dataset.k])); });
   { const cf = $("#collFw"); cf.innerHTML = fwEl.innerHTML.replace(/id="fwArrow"/, 'id="collArrow"').replace(/url\(#fwArrow\)/g, "url(#collArrow)");
     cf.addEventListener("click", e => { const g = e.target.closest(".k"); if (g) goTo(idx(FW_TO[g.dataset.k])); }); }
+  const panelFw = {};   // panel name -> its miniature: a copy of the big diagram with the panel's part lit
+  document.querySelectorAll("[data-panel-fw]").forEach(svg => { const k = svg.dataset.panelFw, id = "fwArrow-" + k;
+    svg.innerHTML = fwEl.innerHTML.replace(/id="fwArrow"/, `id="${id}"`).replace(/url\(#fwArrow\)/g, `url(#${id})`);
+    svg.querySelector(`[data-k="${k}"]`).classList.add("is-active"); svg.classList.add("is-" + k);
+    panelFw[svg.closest("[data-panel]").dataset.panel] = svg; });
+  let flip = null;
+  // the miniature to fly to when one stop shows the big diagram and the other a panel that has one
+  const flipTarget = (a, b) => { const big = a.fw === "big" ? a : b.fw === "big" ? b : null, other = big === a ? b : a;
+    return big && other.fw !== "big" && other.panel ? panelFw[other.panel] || null : null; };
   let meetFrom = null;   // the stop the Meet button was pressed on; a click outside the page goes back there
   meetBtn.addEventListener("click", () => { if (document.body.classList.contains("is-loading")) return; if (!STOPS[at].coll) meetFrom = at; goTo(idx("c0")); });
   document.addEventListener("click", e => {
@@ -380,6 +390,20 @@
     if (Q && !anim && !paused && at < Q.last && now - arrived >= S.hold) goTo(at + 1);
     else if (story && !anim && !paused && (!Q || at === Q.last) && now - arrived >= (S.hold || STORY.hold)) { if (at < N - 1) goTo(at + 1); else story = false; }
     if (paused && Q) barStart += dt;
+    { // FLIP: the big diagram shrinks into the panel miniature (and grows back) with the progress of the camera move
+      const mini = anim && !reduceMQ.matches ? flipTarget(STOPS[from], STOPS[anim.to]) : null;
+      if (mini) {
+        if (!flip || flip.mini !== mini) { if (flip) flip.mini.style.opacity = ""; fwEl.style.transform = ""; fwEl.classList.add("is-flip"); flip = { mini, box: fwEl.getBoundingClientRect() }; }
+        const grow = STOPS[anim.to].fw === "big", p = grow ? 1 - anim.k : anim.k;
+        const e = smoother(clamp((p - FW_FLIP.start) / (FW_FLIP.end - FW_FLIP.start), 0, 1)), B = flip.box, M = mini.getBoundingClientRect();
+        const dx = lerp(0, M.left + M.width / 2 - B.left - B.width / 2, e), dy = lerp(0, M.top + M.height / 2 - B.top - B.height / 2, e);
+        fwEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) translate(-50%, -50%) scale(${lerp(1, M.width / B.width, e).toFixed(4)})`;
+        fwEl.style.setProperty("--fw-text", (1 - e).toFixed(3));
+        const hand = clamp((e - 0.97) / 0.03, 0, 1);   // the last stretch, when both sit in the same place: the diagram hands over to the miniature
+        if (!grow) { fwEl.style.opacity = (1 - hand).toFixed(3); mini.style.opacity = hand.toFixed(3); }
+        else mini.style.opacity = "";
+      } else if (flip) { fwEl.classList.remove("is-flip"); fwEl.style.transform = fwEl.style.opacity = ""; fwEl.style.removeProperty("--fw-text"); flip.mini.style.opacity = ""; flip = null; }
+    }
     { // the active segment fills with the progress through its steps
       let f = anim ? anim.k : 1;
       if (Q) { let done = 0, all = 0; Q.bars.forEach((d, b) => { all += d; if (b < S.bar) done += d; }); f = (done + clamp((now - barStart) / Q.bars[S.bar], 0, 1) * Q.bars[S.bar]) / all; }
