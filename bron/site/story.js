@@ -141,6 +141,20 @@
     return t;
   }
   scene.traverse(o => { if (o.isMesh && o !== skyMesh) { meshes.push(o); o.material.transparent = true; } });
+
+  /* ---------- shadows: the sun's shadow map is redrawn only when something that casts a shadow changes ---------- */
+  // What changes it: a caster appearing or disappearing (fades), the people arriving, the brass turning in t5, and the live conductor, who moves all
+  // the time: while he does, the whole map is redrawn SHADOW_RATE times per second (his shadow is at most 1/15 s late, not visible; Kai's choice "a").
+  // The shadow camera is fixed (the sun's 150 m box does not follow the view), so camera moves need no redraw.
+  const SHADOW_RATE = 15;
+  renderer.shadowMap.autoUpdate = false;
+  const shadows = { dirty: true, last: -1, count: 0 };
+  function shadowTick(now) {
+    if (meshes.length !== shadows.count) { shadows.count = meshes.length; shadows.dirty = true; }   // the people arrived
+    const live = typeof conductor !== "undefined" && conductor && conductor.attached && !reduceMQ.matches;
+    if (live && now - shadows.last >= 1 / SHADOW_RATE - 1e-3) shadows.dirty = true;
+    if (shadows.dirty) { renderer.shadowMap.needsUpdate = true; shadows.dirty = false; shadows.last = now; }
+  }
   const litOf = (s, t, since) => (t.grass || t.audience) && s.id === "open" ? -FALLEN / (1 - FALLEN) : t.booth ? (s.booth ? 1 : -FALLEN / (1 - FALLEN)) : s.booth ? (t.env || t.audience ? 1 : 0.6) : !s.focus ? 1 : s.focus(t, since) ? 1 : (s.fallen || 0) / (1 - FALLEN);
 
   /* ---------- labels anchored to the sections ---------- */
@@ -443,8 +457,8 @@
   function tension(now, dt) {
     const want = STOPS[at].off && (!anim || anim.k > 0.6) ? 1 : 0;
     offT = want ? offT + dt : Math.max(0, offT - dt * 3); offK += (want - offK) * (1 - Math.exp(-dt * (want ? 2 : 6)));
-    if (offK < 0.001 && !want) { if (brass.moved) { brass.forEach(n => { n.rotation.y = n.userData.ry; n.rotation.x = n.userData.rx; n.position.y = n.userData.y0; }); brass.moved = false; } return; }
-    brass.moved = true;
+    if (offK < 0.001 && !want) { if (brass.moved) { brass.forEach(n => { n.rotation.y = n.userData.ry; n.rotation.x = n.userData.rx; n.position.y = n.userData.y0; }); brass.moved = false; shadows.dirty = true; } return; }
+    brass.moved = true; shadows.dirty = true;
     brass.forEach((n, i) => { const turn = smoother(clamp((offT - 0.2 - i * 0.12) / 1.4, 0, 1)), play = offK * Math.sin(now * 5.2 + i * 0.6);
       n.rotation.y = n.userData.ry + turn * (i % 2 ? 2.7 : -2.5); n.rotation.x = n.userData.rx + play * 0.035; n.position.y = n.userData.y0 + Math.max(0, play) * 0.02; });
     // the conductor lowers the baton once the brass has turned away
@@ -503,7 +517,8 @@
       const lit = lerp(litOf(F, t, since), litOf(S, t, since), mix);
       const goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim ? 1 : ease);
       if (Math.abs(goal - op) < 0.002) op = goal;   // land exactly on the goal; the old "skip steps under 0.0005" could stall a fade at 0.054, just above the cut-off, leaving people "visible" at 5 % and casting full shadows
-      if (op !== m.material.opacity) { m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env; }
+      if (op !== m.material.opacity) { const was = m.visible; m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env;
+        if (m.visible !== was && m.castShadow) shadows.dirty = true; }
     }
     // labels
     for (const k in labelEls) { const L = labelEls[k], want = (S.labels || []).includes(k) && (!anim || anim.k > 0.5) ? 1 : 0;
@@ -512,7 +527,7 @@
     fctx.setTransform(dpr, 0, 0, dpr, 0, 0); fctx.clearRect(0, 0, vw, vh);
     drawMelody(now, dt); drawChaos(now, dt); glowTick(dt); placeBeats();
     windU.value = now; tickPeople(now); tension(now, dt);
-    film.render();
+    shadowTick(now); film.render();
   }
 
   function resize() {

@@ -76,6 +76,7 @@ else:
     if test:   # alleen in de testbuild: herhaalbare beelden en toegang tot de renderer
         for a, b in [('    drawMelody(now, dt); drawChaos(now, dt);', '    drawMelody(window.__perfT ?? now, dt); drawChaos(window.__perfT ?? now, dt);'),
                      ('    windU.value = now; tickPeople(now); tension(now, dt);', '    windU.value = window.__perfT ?? now; tickPeople(window.__perfT ?? now); tension(window.__perfT ?? now, dt);'),
+                     ('    shadowTick(now); film.render();', '    shadowTick(window.__perfT ?? now); film.render();'),
                      ('  window.__scene = { root, camera,', '  window.__perf = { renderer, scene, camera, film, groups: { orkest, lessen, dir, pub, heuvels, graan, pod, bord, kassa, CHG, omg } };\n  window.__scene = { root, camera,')]:
             assert a in story, a; story = story.replace(a, b)
     head, d = runtime("site/", r(S, "head.html"))

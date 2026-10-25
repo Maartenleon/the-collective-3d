@@ -149,3 +149,41 @@ All 54 shots (27 stops x desktop and phone) against the phase-2 reference: highe
 - Fixed an existing fade bug that the comparison test kept catching (b2 and orch, alternating): the focus loop skipped opacity steps smaller than 0.0005, so a fade could stall at 0.054, just above the 0.054 cut-off below which a mesh is hidden. Those people stayed "visible" at 5 % and cast full shadows. Whether it happened depended on frame timing, so visitors could see it too. The loop now updates until the opacity is on its goal and snaps the last 0.002 (bron/site/story.js, focus loop).
 - compare.py waits until nothing fades any more before each shot (on top of the fixed settle time).
 - Clicking in the model page behaves the same as before (checked on the baseline and this branch with the same clicks).
+
+## Phase 4: skipped for now
+
+Step 1 (the map of what fades and moves together) was done and shown to Kai: about 25 units (environment, grass, audience, box office, stands, the conductor's stand, rehearsal, the rest of the strings, harp, piano, the rest of the woodwinds, percussion, 7 brass players and 6 other melody players one by one, the live conductor). Merging per unit and material (option A) would give about 500 draw calls instead of about 1,400, but not below 200, because the people use 69 different textures; that would need texture arrays and shader changes (option B). Kai chose to do phase 5 first and to come back to A if phase 5 brings little.
+
+## Phase 5: the shadow map is not redrawn every frame
+
+### What changed (bron/site/story.js, "shadows")
+
+- `renderer.shadowMap.autoUpdate = false`. The map is redrawn when a shadow caster appears or disappears (the fades switch `visible`), when the people arrive, while the brass turn in t5, and for the live conductor.
+- Checked: the shadow camera is fixed (the sun and its 150 m box do not follow the view), so camera moves need no update. The far hills neither cast nor receive shadows; the bowl terrain casts and receives (106k triangles, now only drawn into the map when it is redrawn).
+- The conductor moves all the time; two variants were built and shown to Kai, who chose (a); (b) was removed again:
+  - (a) the whole map is redrawn 15 times per second while he moves.
+  - (b) the map without him is kept; every frame only his part of the map (a small scissor region) is cleared and redrawn with his depth, and the kept map is merged on top wherever it is nearer the sun (his own render layer; three picks shadow casters by the rendering camera's layers).
+- The test build runs the 15-per-second rule on the story clock (`window.__perfT`), so frame-by-frame captures show what a 60 Hz visitor sees.
+
+### Result
+
+Still frames: both variants match the reference on all 54 shots (highest 0.16 at m1, the noise floor), and match "every frame" pixel for pixel.
+
+Moving: 90 frames at 60 per second of the conductor's shadow (`bron/test/out/schaduw/`, local only): (a) differs from "every frame" by 0.00-0.01 on three of four frames (his shadow is up to 1/15 s late), (b) by 0 (one frame 0.09).
+
+fps, interleaved (`bron/test/abfps.py`, 3 rounds, fresh browser each, uncapped), median:
+
+| | Stop | Every frame | (a) | (b) |
+|---|---|---|---|---|
+| desktop | open | 67 | 72 | 76 |
+| desktop | t5 | 106 | 107 | 107 |
+| desktop | orch | 99 | 96 | 93 |
+| desktop | problems | 68 | 75 | 78 |
+| phone | open | 132 | 139 | 135 |
+| phone | t5 | 128 | 127 | 125 |
+| phone | orch | 175 | 176 | 163 |
+| phone | problems | 91 | 101 | 104 |
+
+Kai's choice: (a), and phase 6 next, then decide about phase 4.
+
+Gain: about 5-15 % on the wide views (open, problems), nothing in t5 (the brass move every frame, so the map is redrawn every frame anyway) and nothing or slightly less in orch (the conductor close up). Smaller than the share of draw calls suggested (the shadow pass is about half of them): on this Mac the frame time is mostly what fills the screen (see phase 2), not the number of draw calls.
