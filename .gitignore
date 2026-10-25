@@ -156,3 +156,5 @@ vite.config.ts.timestamp-*
 # test build of the website (python3 bron/build.py test) and the local screenshot references
 /test.html
 bron/test/ref/
+bron/bake/.bin/
+bron/bake/bake.html

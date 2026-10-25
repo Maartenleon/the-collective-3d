@@ -32,8 +32,9 @@ Wide horizon, small ensemble, only the conductor bright orange-red (long red coa
 ## Files
 
 ```
-index.html                built website, in the repo root so it is the main URL (~14 MB, scene inlined); links site/styles.css and site/icons/
+index.html                built website, in the repo root so it is the main URL (~1.3 MB: scene code and the conductor's avatar inlined); links site/styles.css, site/icons/, site/people.glb
 site/styles.css           the website's stylesheet, copied by the build (linked with ?v=<hash> so browsers never keep an old one)
+site/people.glb           the baked seated people (musicians, rehearsal players, audience) with their textures; copied by the build from bron/assets/baked/, linked as people.glb?v=<hash> and preloaded
 site/3d.html              tiny redirect to ../ (old links keep working); written by the build
 site/orkest-model.html    built model only, free orbit camera + isolation panel (for checking the scene; not linked from the website)
 site/icons/               favicon (same as the 2D site: dark square, vermilion dot), linked from both pages
@@ -42,7 +43,9 @@ bron/model/               the 3D scene (shared by both builds)
   head.html               page shell + scene config (STAGE, BOARD, colours, camera presets)
   body.js                 renderer, film-look post pass, materials, stage/bowl/hills/board/rehearsal geometry, hierarchy
   _dress_src.js           concert dress helpers
-  _people_rest.js         Rocketbox loading, seated poses (IK), baking to static meshes, dress, the live conductor
+  _people_common.js       shared by site, model page and bake: Rocketbox materials (rbMaterial, tintBody), register/unregister, the live conductor
+  _people_bake.js         the people pipeline (seated poses by IK, head swaps, baking skinned meshes, dress, audience) and the export; only in the bake page
+  _people_rest.js         site and model page: loads people.glb (progress for the loader), rebuilds the materials from the recipes in the extras, places and registers everyone, builds the two conductors
   tail.js                 model-only UI: isolation, scene tree, click-to-select, cameras
   layout-gen.py           older generator for the seating layout (reference)
 bron/site/                the scroll story (replaces tail.js in the site build)
@@ -51,7 +54,9 @@ bron/site/                the scroll story (replaces tail.js in the site build)
   content.js              the words of the problems (cards + left panel) and framework parts (right panel); edit text here
   story.js                STOPS (frames), camera moves, focus/fade, melody lines, glow, tension, input, side panels
 bron/assets/rocketbox/    pre-processed Microsoft Rocketbox avatars (FBX + textures), MIT licence
-bron/assets/heads.json, prefix.json   head geometry used to give musicians varied faces
+bron/assets/heads.json, prefix.json   head geometry used to give musicians varied faces (bake only)
+bron/assets/baked/people.glb          output of the bake (committed): meshopt-compressed people + the original JPG/PNG textures as named images
+bron/bake/bake.py         the bake: builds bron/bake/bake.html (build.py bake), runs it in Chrome, GLTFExporter, gltfpack v0.18 (downloaded to bron/bake/.bin/, gitignored), adds the textures
 bron/assets/pipeline/     scripts that produced the processed assets (reference; originals from github.com/microsoft/Microsoft-Rocketbox)
 bron/test/                Playwright screenshot scripts (open.js: shared launch + open by URL)
 docs/                     story line, scan, change list, part 4 text, model purchase research, inputs from Kai
@@ -61,7 +66,8 @@ beelden/                  latest reference screenshots
 ## Build and test
 
 ```
-python3 bron/build.py          # -> index.html (+ site/styles.css, site/3d.html redirect)
+python3 bron/bake/bake.py      # -> bron/assets/baked/people.glb; only after changing the people (poses, clothes, colours, faces, seating, _people_bake.js/_people_common.js)
+python3 bron/build.py          # -> index.html (+ site/styles.css, site/people.glb, site/3d.html redirect)
 python3 bron/build.py model    # -> site/orkest-model.html
 python3 bron/build.py test     # -> test.html (in .gitignore): seeded Math.random, fixed time for what keeps moving (window.__perfT), window.__perf (renderer, scene, camera, film, groups)
 ```
@@ -73,7 +79,9 @@ python3 bron/test/compare.py shoot                        # reference screenshot
 python3 bron/test/compare.py check --label <name>         # shoot again and compare with the reference (mean difference, diff images)
 ```
 
-No npm needed for the build. three.js r147 loads from cdn.jsdelivr.net (UMD build, legacy colour mode: hex colours are linear).
+No npm needed for the build. three.js r147 loads from cdn.jsdelivr.net (UMD build, legacy colour mode: hex colours are linear), including GLTFLoader and libs/meshopt_decoder.js (meshoptimizer 0.18, which is why the bake uses gltfpack 0.18).
+The pages fetch site/people.glb, so they only work over http (a local server or online), not by opening the file (file:// blocks the fetch).
+Baked people: each person is a node "Lichaam" with extras { list: "mus"|"aud", i, outfit } and is attached to MUS[i].m / AUD[i].m; every mesh has extras { n: name, spec: material recipe }. gltfpack puts each mesh in a child node that undoes the quantization (the recipe stays on the named parent) and quantizes the UVs with one texture transform, which the loader copies onto the textures. The bake must reproduce the old pipeline exactly: same MUS/AUD order, same womenSeen counting.
 
 Screenshots: serve the folder above the repo first (`cd ~/Downloads && python3 -m http.server 8099`). The scripts open the site by URL (default http://127.0.0.1:8099/the-collective-3d/; pass another URL or a file path as the first argument), never by pasting the HTML into an empty page, because the site uses relative paths.
 ```
@@ -117,7 +125,7 @@ Public repo github.com/Maartenleon/the-collective-3d, served by GitHub Pages fro
 
 1. Client quote + one result with a number in part 4 (Kai supplies).
 2. Final email address (placeholder soundcheck@thecollective.nu) and where "Let's talk" links.
-3. Smaller file: compress models (FBX to compressed GLB), expected 3-5x smaller; lazy-load audience/rehearsal/box office.
+3. Performance work on branch `perf` (see docs/perf.md): the people are baked into site/people.glb (loads faster, no smaller download: 102 posed people instead of 10 avatars); next phases: fewer draw calls, shadow updates, starting earlier.
 4. Programme board text (frame 4) to confirm with Kai.
 5. Phone: Means section labels overlap; problems list overlaps the stage in frame 10.
 6. The 8 problems now come from docs/SYMPTOMS.md of the 2D site (bron/site/content.js); the panel texts (recognise, wrong, solve) are first drafts to check with Kai. Routes after frame 10 are on hold until Kai says otherwise.

@@ -16,6 +16,10 @@ VIEWS = {"desktop": {"viewport": {"width": 1440, "height": 900}},
 SETTLE_MS = 4500   # fades (.9 s + delay), the beat texts, the Orchestration arrow, the diagram FLIP and the tension in t5 are done by then
 FIXED_T = 10.0
 
+STILL_JS = """() => new Promise(res => { const sum = () => { let s = 0; window.__perf.scene.traverse(o => { if (o.isMesh) s += o.material.opacity + (o.visible ? 1 : 0); }); return s; };
+  let last = sum(), n = 0; const t0 = performance.now(); const tick = () => { const now = sum(); n = Math.abs(now - last) < 1e-4 ? n + 1 : 0; last = now;
+    if (n >= 10 || performance.now() - t0 > 5000) res(); else requestAnimationFrame(tick); }; requestAnimationFrame(tick); })"""
+
 def shoot(out):
     os.makedirs(out, exist_ok=True)
     with sync_playwright() as p:
@@ -28,6 +32,7 @@ def shoot(out):
             ids = pg.evaluate("__story.stops.map(s => s.id)")
             for i, sid in enumerate(ids):
                 pg.evaluate("i => __story.go(i)", i); pg.wait_for_timeout(SETTLE_MS)
+                pg.evaluate(STILL_JS)   # and until nothing fades any more (a slow frame once caught musicians still casting shadows)
                 pg.screenshot(path=os.path.join(out, "%s-%02d-%s.png" % (vname, i, sid)))
             print(vname, len(ids), "stops", "errors:", errs or "none"); pg.close()
         b.close()

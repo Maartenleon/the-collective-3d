@@ -94,3 +94,58 @@ Observations for the next phases:
 - The far hills are 253k triangles in 4 meshes, the bowl terrain 106k in 1: few draw calls, many triangles.
 - The draw calls are much the same per stop (1300-1470), so the fps differences between stops come from what fills the screen: switching off the far hills in "open" raised it from 80 to 114 fps, the terrain to 89, the shadow pass to 87, the people only to 78 (one quick test, desktop).
 - Measurement artefact found and fixed: right after the three cold loads, the first stop measured 12 fps (instead of about 75). The fps is now measured in a fresh browser after 5 s of warming up.
+
+## Phase 3: the people baked in advance
+
+### What changed
+
+- The seated people (54 musicians and rehearsal players, 48 in the audience) are no longer built in the browser. `bron/bake/bake.py` runs the old pipeline once (FBX parsing, IK poses, head swaps, dress, baking skinned meshes) in Chrome, exports the result with GLTFExporter, compresses it with gltfpack 0.18 (`-cc -kn -ke -vt 16`: meshopt, 14-bit positions, 8-bit normals, 16-bit UVs) and adds the 69 original JPG/PNG textures as named images (byte for byte). Output: `bron/assets/baked/people.glb`, copied by the build to `site/people.glb?v=<hash>` and preloaded from the head.
+- gltfpack 0.18 because three r147's `libs/meshopt_decoder.js` is meshoptimizer 0.18 (newer gltfpack versions may write a format that decoder does not read).
+- The site loads people.glb with GLTFLoader and the meshopt decoder, rebuilds every material from the recipe stored per mesh (rbMaterial, tintBody, material(), the contact-shadow material), so colours come from the same code as before, and registers everyone as before (focus, fading, clicking). The loader shows the real progress: bytes in (to 70 %), decoded (80 %), placed (100 %).
+- The two conductors stay live: only Business_Male_01's FBX and its four textures remain in index.html; the nine other FBX files and heads.json are gone from the page.
+- Re-indexing (mergeVertices) per mesh before export: each piece keeps only its own vertices (5.26 M vertices in the scene before, 1.25 M now; same triangles).
+
+### Size
+
+| | Baseline | Phase 3 |
+|---|---|---|
+| index.html | 14.18 MB (gzip 8.44) | 1.29 MB (gzip 0.71) |
+| site/people.glb | - | 9.52 MB (gzip 7.86): geometry 5.92 MB, textures 3.60 MB |
+| What a visitor downloads (gzip) | 8.44 MB | 8.57 MB |
+
+The download is not smaller: the file now holds 102 finished, individually posed people (514,700 vertices) instead of 10 avatars from which the browser posed them. gltfpack `-c` gave 6.51 MB geometry (5.12 MB gzip), `-cc` 5.92 MB (4.41 MB gzip); `-cc` is used.
+
+### Load times (same session; the baseline is served from a worktree of 3f6834c next to this branch)
+
+| | Baseline: scene / people / loader gone | Phase 3: scene / people / loader gone |
+|---|---|---|
+| desktop 1440x900 (GPU) | 1.37 / 2.85 / 3.20 s | 1.18 / 1.66 / 1.96 s |
+| phone 390x844 (GPU) | 1.37 / 2.92 / 3.26 s | 1.11 / 1.54 / 1.80 s |
+| software rendering (no GPU, SwiftShader), one cold load | 27.1 / - / 78.6 s | 28.6 / 45.7 / 51.8 s |
+
+Local loading, so without download time; online the download of people.glb (7.86 MB gzip) comes on top, starting right away thanks to the preload.
+
+Without a GPU the old wait was not the building itself but the frames in between: the people code waited one frame after every 4 people, and under software rendering one frame takes over a second (26 frames, about 45 s). Placing is cheap now, so it waits one frame in total. The rest (about 28 s before the scene runs, and frames drawn behind the loader that nobody sees) is for phase 6.
+
+### Per frame and memory
+
+fps per run varies a lot on this Mac (the same build measured 73 and 106 fps at "open" in two sessions), so fps was compared by interleaving: baseline and phase 3 alternately, three rounds, a fresh browser each time, 4 s per stop, desktop:
+
+| Stop | Baseline (3 rounds) | Phase 3 (3 rounds) |
+|---|---|---|
+| open | 47, 43, 43 (median 43) | 47, 46, 46 (median 46) |
+| t5 | 86, 94, 88 (median 88) | 96, 92, 94 (median 94) |
+| problems | 50, 52, 52 (median 52) | 51, 55, 89 (median 55) |
+
+So fps is unchanged or slightly better, as expected: the same meshes are drawn (1,305-1,467 draw calls, the same triangles). Memory: the JS heap went from 170-202 MB to 98-139 MB (no FBX, templates or base64 textures kept around). Vertices in the scene: 5.26 M -> 1.25 M (re-indexed per piece).
+
+### Comparison test
+
+All 54 shots (27 stops x desktop and phone) against the phase-2 reference: highest mean difference 0.16 (m1, the timed section lights, same as the noise floor), next t5 0.07 and b4 0.06; median 0.01. Nothing above the noise floor. In t5, the closest view of the musicians, the diff image shows a faint trace on the black trousers (8-bit normals); it is not visible side by side.
+
+### Also in this phase
+
+- The model page's head had no `<meta charset="utf-8">`; over a local server (which sends no charset) names showed as "Muzikant Â· Viool". Added; GitHub Pages was not affected.
+- Fixed an existing fade bug that the comparison test kept catching (b2 and orch, alternating): the focus loop skipped opacity steps smaller than 0.0005, so a fade could stall at 0.054, just above the 0.054 cut-off below which a mesh is hidden. Those people stayed "visible" at 5 % and cast full shadows. Whether it happened depended on frame timing, so visitors could see it too. The loop now updates until the opacity is on its goal and snaps the last 0.002 (bron/site/story.js, focus loop).
+- compare.py waits until nothing fades any more before each shot (on top of the fixed settle time).
+- Clicking in the model page behaves the same as before (checked on the baseline and this branch with the same clicks).

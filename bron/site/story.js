@@ -501,8 +501,9 @@
     for (const m of meshes) {
       const t = m.userData.tags || (m.userData.tags = tagsOf(m));
       const lit = lerp(litOf(F, t, since), litOf(S, t, since), mix);
-      const goal = FALLEN + (1 - FALLEN) * lit, op = m.material.opacity + (goal - m.material.opacity) * (anim ? 1 : ease);
-      if (Math.abs(m.material.opacity - op) > 0.0005) { m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env; }
+      const goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim ? 1 : ease);
+      if (Math.abs(goal - op) < 0.002) op = goal;   // land exactly on the goal; the old "skip steps under 0.0005" could stall a fade at 0.054, just above the cut-off, leaving people "visible" at 5 % and casting full shadows
+      if (op !== m.material.opacity) { m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env; }
     }
     // labels
     for (const k in labelEls) { const L = labelEls[k], want = (S.labels || []).includes(k) && (!anim || anim.k > 0.5) ? 1 : 0;
@@ -524,15 +525,13 @@
   addEventListener("resize", resize); resize();
   camera.position.copy(STOPS[0].cam.pos); camera.fov = STOPS[0].cam.fov; applyStop(STOPS[0]);
   renderer.setAnimationLoop(frameLoop);
-  { // loader: follow the people loader (musicians, then audience), then fade in and start the opening
+  { // loader: follow the people loader (people.glb in, then placed), then fade in and start the opening
     const loader = $("#loader"), pct = $("#loaderPct"), note = $("#loading");
     let shown = 0, doneAt = 0, last = performance.now();
     const tick = () => {
       const tNow = performance.now(), dt = Math.min(0.5, (tNow - last) / 1000); last = tNow;
-      const txt = note.textContent, m = txt.match(/(\d+) \/ (\d+)/), ready = !!window.__people || /could not/.test(txt);
-      let goal = 0.08;
-      if (m && /Musicians/.test(txt)) goal = 0.1 + 0.5 * (+m[1] / +m[2]);
-      if (m && /Audience/.test(txt)) goal = 0.6 + 0.4 * (+m[1] / +m[2]);
+      const ready = !!window.__people || /could not/.test(note.textContent);
+      let goal = 0.04 + 0.96 * (window.__peopleProgress || 0);   // people.glb: bytes in (to 70 %), decoded (80 %), placed (100 %)
       if (ready) goal = 1;
       shown = Math.min(goal, shown + Math.max(dt * (ready ? 1.5 : 0.05), (goal - shown) * (1 - Math.exp(-dt * 5))));
       pct.textContent = Math.round(shown * 100) + "%";

@@ -13,10 +13,10 @@ BASE = "http://127.0.0.1:8099/the-collective-3d/"
 FPS_STOPS = ["open", "t5", "problems"]
 ARGS = ["--use-angle=metal", "--enable-gpu", "--ignore-gpu-blocklist", "--disable-gpu-vsync", "--disable-frame-rate-limit"]   # no 60 fps cap: the fps shows the headroom
 
-def sizes():
+def sizes(repo):
     out = {}
     for rel in ["index.html", "site/styles.css", "site/people.glb"]:
-        f = os.path.join(REPO, rel)
+        f = os.path.join(repo, rel)
         if not os.path.exists(f): continue
         raw = open(f, "rb").read()
         out[rel] = {"raw": len(raw), "gzip": len(gzip.compress(raw, 6))}
@@ -67,8 +67,11 @@ def runtime(p, opts):   # a fresh browser, warmed up first: right after the cold
     b.close(); return out, errs
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--runs", type=int, default=3); ap.add_argument("--label", default="run"); a = ap.parse_args()
-    res = {"label": a.label, "sizes": sizes(), "viewports": {}}
+    global BASE
+    ap = argparse.ArgumentParser(); ap.add_argument("--runs", type=int, default=3); ap.add_argument("--label", default="run")
+    ap.add_argument("--base", default=BASE, help="site URL (another checkout can be served elsewhere, e.g. a baseline worktree)"); ap.add_argument("--repo", default=REPO, help="checkout whose file sizes are reported"); a = ap.parse_args()
+    BASE = a.base
+    res = {"label": a.label, "url": BASE, "sizes": sizes(a.repo), "viewports": {}}
     with sync_playwright() as p:
         b = p.chromium.launch(channel="chrome", args=ARGS)
         for name, opts in [("desktop 1440x900", {"viewport": {"width": 1440, "height": 900}}),
