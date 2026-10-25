@@ -77,12 +77,12 @@
     { id: "t4", ch: 0, seq: "twist", bar: 4, hold: 1.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4 },
     { id: "t5", ch: 0, seq: "twist", bar: 5, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
-    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: 0.5, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },
-    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: 0.25, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
-    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: 0.25, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
-    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: 0.25, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
-    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 0.4, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
-    { id: "f5", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.25, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
+    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },
+    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: 0.15, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
+    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: 0.15, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
+    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: 0.15, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
+    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 0.25, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
+    { id: "f5", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
     // Frame 4: Plan
     { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan" },
     // Frame 5: Blueprint
@@ -162,14 +162,24 @@
     const pill = (x, y, w, h, fill, stroke) => `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${(Math.min(w, h) / 2).toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
     const band = (d, k, l, sub) => { const hw = Math.sqrt(R * R - (Math.abs(d) + 32) ** 2);
       return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60, W, WS)}<text class="lab band" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 2}">${l.toUpperCase()}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 20}" font-size="13" font-style="italic" opacity=".75">${sub}</text></g>`; };
-    const col = (dx, k, l, sub) => { const hh = Math.sqrt(R * R - (Math.abs(dx) + 30) ** 2);
+    const SPAN = 104 + 30;   // Run and Change reach from the top of Plan to the bottom of Means, so their labels line up
+    const col = (dx, k, l, sub) => { const hh = SPAN;
       return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh, O, VER)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text><text class="sub" transform="translate(${CX + dx + 5} ${CY}) rotate(-90)" text-anchor="middle" font-size="13" font-style="italic" opacity=".85">${sub}</text></g>`; };
     const RO = 228, a = 0.62;
     fwEl.innerHTML = `<defs><marker id="fwArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#FAF8F6"/></marker></defs>
       <circle cx="${CX}" cy="${CY}" r="205" fill="rgba(26,14,10,.18)" stroke="rgba(250,248,246,.4)"/>`
       + band(-104, "p", "Plan", "the piece") + band(0, "b", "Blueprint", "the score") + band(104, "m", "Means", "the orchestra") + col(40, "r", "Run", "tonight\u2019s concert") + col(110, "c", "Change", "next season\u2019s symphony")
-      + `<g class="k" data-k="o"><path d="M ${CX} ${CY - RO} A ${RO} ${RO} 0 1 1 ${(CX - RO * Math.sin(a)).toFixed(1)} ${(CY - RO * Math.cos(a)).toFixed(1)}" fill="none" stroke="#FAF8F6" stroke-width="2.4" marker-end="url(#fwArrow)"/>
+      + `<g class="k" data-k="o"><path d="M ${CX} ${CY - RO} A ${RO} ${RO} 0 1 1 ${(CX - RO * Math.sin(a)).toFixed(1)} ${(CY - RO * Math.cos(a)).toFixed(1)}" class="arc" pathLength="1" fill="none" stroke="#FAF8F6" stroke-width="2.4" marker-end="url(#fwArrow)"/>
         <text class="lab" x="${CX}" y="${CY + RO + 30}" text-anchor="middle" font-size="16">ORCHESTRATION</text><text class="sub" x="${CX}" y="${CY + RO + 50}" text-anchor="middle" font-size="13" font-style="italic" opacity=".75">the conductor</text></g>`;
+  }
+  { // the Orchestration arrow draws itself clockwise along the circle when it appears; the arrowhead comes at the end
+    const g = fwEl.querySelector('[data-k="o"]'), arc = g.querySelector(".arc"), head = arc.getAttribute("marker-end");
+    var drawArc = on => {
+      if (on === g.classList.contains("is-shown")) return;
+      g.classList.toggle("is-shown", on);
+      if (on && reduceMQ.matches) arc.setAttribute("marker-end", head); else arc.removeAttribute("marker-end");
+    };
+    arc.addEventListener("transitionend", e => { if (e.propertyName === "stroke-dashoffset" && g.classList.contains("is-shown")) arc.setAttribute("marker-end", head); });
   }
   let vw = 0, vh = 0, dpr = 1;
   const toScreen = v => { const q = v.clone().project(camera); return [(q.x + 1) / 2 * vw, (1 - q.y) / 2 * vh, q.z < 1]; };
@@ -179,9 +189,15 @@
   let at = 0, from = 0, anim = null, arrived = 0, started = 0, paused = false, story = false, preview = -1, playShown = null, barStart = 0, curBar = -1;
   const camNow = () => ({ pos: camera.position.clone(), target: camTarget.clone(), fov: camera.fov });
   const camTarget = STOPS[0].cam.target.clone();
+  const sameCam = (a, b) => a.pos.equals(b.pos) && a.target.equals(b.target) && a.fov === b.fov;
   function goTo(i, instant) {
     i = clamp(i, 0, N - 1); if (i === at && !anim) return;
     const now = clock.getElapsedTime(), S = STOPS[i], P = STOPS[at];
+    if (anim && !instant && sameCam(S.cam, STOPS[anim.to].cam)) {   // same view as where the camera is heading: let that move run on
+      anim.to = i; at = i; started = now;
+      if (S.seq && S.bar !== curBar) { curBar = S.bar; barStart = now; }
+      applyStop(S); return;
+    }
     const inSeq = S.seq && P.seq === S.seq && i === at + 1;
     const dist = camera.position.distanceTo(S.cam.pos);
     const dur = reduceMQ.matches || instant ? 0 : inSeq ? (S.dur || 1.2) : clamp(1.1 + dist * 0.022, 1.2, 2.8);
@@ -204,7 +220,7 @@
     collEl.classList.toggle("is-on", !!S.coll);
     meetBtn.classList.toggle("is-hidden", !!S.coll);
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
-      g.style.opacity = (S.show || "").includes(k) ? 1 : 0; });
+      g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o")); });
     shade.style.opacity = S.shade || 0; topShade.classList.toggle("is-on", !!S.top);
     hint.style.opacity = at === 0 ? 1 : 0;
     const n = segOf(at);
@@ -446,7 +462,7 @@
     const S = STOPS[at], F = STOPS[from], since = now - started, mix = anim ? kk : 1;
     // auto-advance inside a sequence
     const Q = S.seq && SEQS[S.seq];
-    if (Q && !anim && !paused && at < Q.last && now - arrived >= S.hold) goTo(at + 1);
+    if (Q && !paused && at < Q.last && (anim ? sameCam(STOPS[at + 1].cam, STOPS[anim.to].cam) && now - started >= S.hold : now - arrived >= S.hold)) goTo(at + 1);   // steps with the same view don't wait for the camera
     else if (story && !anim && !paused && (!Q || at === Q.last) && now - arrived >= (S.hold || STORY.hold)) { if (at < N - 1) goTo(at + 1); else story = false; }
     if (paused && Q) barStart += dt;
     { // FLIP: the big diagram shrinks into the panel miniature (and grows back) with the progress of the camera move

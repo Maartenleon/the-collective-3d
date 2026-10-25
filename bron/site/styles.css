@@ -183,7 +183,7 @@ p, ul, h1, h2 { margin: 0; }
 .loader__open { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(46rem, calc(100% - 40px)); text-align: center; text-shadow: var(--shadow-text); }
 .loader__open b { display: block; font: 400 var(--text-beat)/1.15 var(--font-serif); color: var(--color-text); }
 .loader__open i { display: block; margin-top: .3em; font: italic 400 var(--text-lede)/1.25 var(--font-serif); color: var(--color-text-muted); }
-.loader__pct { display: block; margin-top: var(--space-m); font: 400 var(--text-beat)/1.15 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--color-text); }   /* as large as the title above it */
+.loader__pct { display: block; margin-top: var(--space-m); font: 400 var(--text-lede)/1.25 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--color-body); }   /* size of the line above it, colour of the panel body text */
 .is-loading .beat { visibility: hidden; }
 
 @media (max-width: 720px) {
@@ -220,7 +220,9 @@ p, ul, h1, h2 { margin: 0; }
 .fw-glass { position: absolute; z-index: 3; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;   /* the diagram's circle as glass, like the panels; story.js keeps it on the circle */
   background: var(--color-glass); -webkit-backdrop-filter: var(--blur-glass); backdrop-filter: var(--blur-glass); }
 .fw > circle { fill: none; }   /* the glass behind it is the fill */
-.fw .k { transition: opacity .25s ease; }
+.fw .k { transition: opacity .2s ease; }
+.fw .arc { stroke-dasharray: 1; stroke-dashoffset: 1; }   /* Orchestration: drawn clockwise when it appears (story.js drawArc) */
+.fw .k.is-shown .arc { stroke-dashoffset: 0; transition: stroke-dashoffset .9s var(--ease-in-out); }
 .fw text { font-family: var(--font-serif); fill: var(--color-text); }
 .fw .lab { font-family: var(--font-sans); font-size: 13px; letter-spacing: .14em; }
 .fw.is-flip { opacity: 1; visibility: visible; transition: none; }   /* shrinking into a panel: position and fade come from the film */

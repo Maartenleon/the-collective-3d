@@ -182,7 +182,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
           col = mix(vec3(l), col, 0.84);                                               // slightly faded colour
           col = mix(col, col * vec3(1.04, 0.99, 0.90), smoothstep(0.35, 1.0, l));       // warm, creamy highlights
           col = col * 0.93 + vec3(0.055, 0.038, 0.030) * (1.0 - col);                   // lifted, warm blacks; softer contrast
-          col *= mix(1.0, 0.66, smoothstep(0.12, 0.55, r2 * 1.6));                      // vignette
+          col *= mix(1.0, 0.66, smoothstep(0.12, 0.55, r2 * 1.6) * (1.0 - smoothstep(0.3, 0.55, vUv.y)));   // vignette, lower half only: the sky stays clean
           float g = fHash(vUv * res + fract(time * 7.13) * 91.7) + fHash(vUv * res * 0.5 + fract(time * 3.7) * 37.1) - 1.0;
           col += g * grainAmt * (0.35 + 0.65 * (1.0 - abs(l - 0.45) * 1.6));          // grain, strongest in the mid tones
           gl_FragColor = vec4(col, 1.0);
