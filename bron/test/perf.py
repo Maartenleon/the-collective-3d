@@ -15,7 +15,7 @@ ARGS = ["--use-angle=metal", "--enable-gpu", "--ignore-gpu-blocklist", "--disabl
 
 def sizes(repo):
     out = {}
-    for rel in ["index.html", "site/styles.css", "site/people.glb"]:
+    for rel in ["index.html", "site/styles.css", "site/people.glb", "site/orchestra.glb", "site/audience.glb"]:
         f = os.path.join(repo, rel)
         if not os.path.exists(f): continue
         raw = open(f, "rb").read()
@@ -30,8 +30,9 @@ def cold_load(b, url, opts):
     pg.wait_for_function("window.__story", timeout=600000, polling=50); t_story = pg.evaluate("performance.now()")
     pg.wait_for_function("window.__people", timeout=600000, polling=50); t_people = pg.evaluate("performance.now()"); people = pg.evaluate("window.__people.total")
     pg.wait_for_function("!document.body.classList.contains('is-loading')", timeout=600000, polling=50); t_ready = pg.evaluate("performance.now()")
+    pg.wait_for_function("window.__audience || !document.querySelector('link[href*=\"orchestra.glb\"]')", timeout=600000, polling=50); t_aud = pg.evaluate("window.__audience ? performance.now() : null")   # baked audience (phase 6); older builds have none
     ctx.close()
-    return t_people / 1000, t_ready / 1000, errs, t_story / 1000, people / 1000
+    return t_people / 1000, t_ready / 1000, errs, t_story / 1000, people / 1000, (t_aud or t_ready) / 1000
 
 # counts and triangles of the whole scene, per group; drawn calls and triangles of one frame, with and without the shadow pass
 SCENE_JS = """() => {
@@ -59,7 +60,7 @@ FPS_JS = """() => new Promise(res => { let n = 0; const t0 = performance.now(); 
 def runtime(p, opts):   # a fresh browser, warmed up first: right after the cold loads the first stop measured far too low (12 fps instead of 80)
     b = p.chromium.launch(channel="chrome", args=ARGS)
     pg = b.new_page(**opts); errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
-    pg.goto(BASE + "test.html"); pg.wait_for_function("window.__people && !document.body.classList.contains('is-loading')", timeout=600000)
+    pg.goto(BASE + "test.html"); pg.wait_for_function("window.__people && !document.body.classList.contains('is-loading')", timeout=600000); pg.wait_for_timeout(1000)
     pg.evaluate("__story.pause(true)"); pg.wait_for_timeout(5000); out = {}
     for sid in FPS_STOPS:
         pg.evaluate("i => __story.go(i)", sid); pg.wait_for_timeout(4000)
@@ -79,14 +80,14 @@ def main():
             loads = [cold_load(b, BASE, opts) for _ in range(a.runs)]
             rt, errs = runtime(p, opts)
             res["viewports"][name] = {"timeToPeople_s": round(statistics.median(l[0] for l in loads), 2), "timeToReady_s": round(statistics.median(l[1] for l in loads), 2),
-                                      "timeToScene_s": round(statistics.median(l[3] for l in loads), 2), "peopleBuild_s": round(statistics.median(l[4] for l in loads), 2),
+                                      "timeToScene_s": round(statistics.median(l[3] for l in loads), 2), "peopleBuild_s": round(statistics.median(l[4] for l in loads), 2), "timeToAudience_s": round(statistics.median(l[5] for l in loads), 2),
                                       "loads": [[round(l[0], 2), round(l[1], 2)] for l in loads], "stops": rt, "errors": sum((l[2] for l in loads), []) + errs}
         b.close()
     os.makedirs(os.path.join(REPO, "bron/test/out"), exist_ok=True)
     f = os.path.join(REPO, "bron/test/out", "perf-%s.json" % a.label); json.dump(res, open(f, "w"), indent=1)
     for k, v in res["sizes"].items(): print("%-16s %6.2f MB raw  %6.2f MB gzip" % (k, v["raw"] / 1e6, v["gzip"] / 1e6))
     for vp, v in res["viewports"].items():
-        print("\n%s: scene %.2f s, people %.2f s (building them %.2f s), ready %.2f s (median of %d cold loads: %s), errors: %s" % (vp, v["timeToScene_s"], v["timeToPeople_s"], v["peopleBuild_s"], v["timeToReady_s"], a.runs, v["loads"], v["errors"] or "none"))
+        print("\n%s: scene %.2f s, people %.2f s (building them %.2f s), ready %.2f s, audience %.2f s (median of %d cold loads: %s), errors: %s" % (vp, v["timeToScene_s"], v["timeToPeople_s"], v["peopleBuild_s"], v["timeToReady_s"], v["timeToAudience_s"], a.runs, v["loads"], v["errors"] or "none"))
         for sid, m in v["stops"].items():
             fr = m["frame"]
             print("  %-9s fps %5.1f | calls %5d (shadow %4d) | triangles %9d (shadow %9d) | meshes %d, visible %d, casters %d, materials %d, textures %d | heap %s MB"

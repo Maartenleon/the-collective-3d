@@ -206,8 +206,21 @@
   const camNow = () => ({ pos: camera.position.clone(), target: camTarget.clone(), fov: camera.fov });
   const camTarget = STOPS[0].cam.target.clone();
   const sameCam = (a, b) => a.pos.equals(b.pos) && a.target.equals(b.target) && a.fov === b.fov;
+  // The audience loads after the opening has started. A visitor who jumps straight to a stop that shows it before it is in waits there a moment:
+  // the camera leaves once the audience has arrived (it then fades in during the move), or after AUDIENCE_WAIT seconds if it cannot load.
+  const AUDIENCE_WAIT = 8, pubBox = box(pub), seeCam = new THREE.PerspectiveCamera(), seeFrustum = new THREE.Frustum(), seeM = new THREE.Matrix4();
+  let waitGo = null;
+  function showsAudience(S) {
+    if (litOf(S, { audience: true }, 99) < 0.5) return false;   // hidden or faded there
+    Object.assign(seeCam, { fov: S.cam.fov, aspect: camera.aspect, zoom: camera.zoom, near: camera.near, far: camera.far }); seeCam.position.copy(S.cam.pos); seeCam.lookAt(S.cam.target);
+    seeCam.updateMatrixWorld(); seeCam.updateProjectionMatrix(); seeFrustum.setFromProjectionMatrix(seeM.multiplyMatrices(seeCam.projectionMatrix, seeCam.matrixWorldInverse));
+    return seeFrustum.intersectsBox(pubBox);
+  }
   function goTo(i, instant) {
     i = clamp(i, 0, N - 1); if (i === at && !anim) return;
+    if (!window.__audience && clock.getElapsedTime() - (waitGo ? waitGo.since : clock.getElapsedTime()) < AUDIENCE_WAIT && showsAudience(STOPS[i])) {
+      waitGo = { i, instant, since: waitGo ? waitGo.since : clock.getElapsedTime() }; return; }   // the latest wish wins; see frameLoop
+    waitGo = null;
     const now = clock.getElapsedTime(), S = STOPS[i], P = STOPS[at];
     if (anim && !instant && sameCam(S.cam, STOPS[anim.to].cam)) {   // same view as where the camera is heading: let that move run on
       anim.to = i; at = i; started = now;
@@ -423,7 +436,7 @@
     GREY.value = glowK;
     if (want && !greyDone && window.__people) { greyDone = true; // the musicians lose their colour: a desaturate step in their shaders
       for (const m of meshes) { const t = m.userData.tags || (m.userData.tags = tagsOf(m)); if (!(t.person || t.chair) || t.instrument || t.conductor) continue;
-        for (const mt of [].concat(m.material)) { if (mt.userData.grey) continue; mt.userData.grey = true;
+        for (const mt of [].concat(m.material)) { if (mt.userData.grey || mt.userData.tint) continue; mt.userData.grey = true;   // tinted clothes (audience, rehearsal) keep their tint: replacing their shader hook dropped the tint, and before only a shared program cache hid that
           mt.onBeforeCompile = sh => { sh.uniforms.uGrey = GREY; sh.fragmentShader = "uniform float uGrey;\n" + sh.fragmentShader.replace("#include <map_fragment>", "#include <map_fragment>\n  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(dot(diffuseColor.rgb, vec3(.299, .587, .114)) * 0.45 + 0.16), uGrey);"); };
           mt.needsUpdate = true; } } }
   }
@@ -478,6 +491,7 @@
     }
     camera.lookAt(camTarget); camera.updateProjectionMatrix();
     const S = STOPS[at], F = STOPS[from], since = now - started, mix = anim ? kk : 1;
+    if (waitGo && (window.__audience || now - waitGo.since >= AUDIENCE_WAIT)) goTo(waitGo.i, waitGo.instant);   // the audience is in (or will not come): go now
     // auto-advance inside a sequence
     const Q = S.seq && SEQS[S.seq];
     if (Q && !paused && at < Q.last && (anim ? sameCam(STOPS[at + 1].cam, STOPS[anim.to].cam) && now - started >= S.hold : now - arrived >= S.hold)) goTo(at + 1);   // steps with the same view don't wait for the camera
@@ -515,10 +529,10 @@
     for (const m of meshes) {
       const t = m.userData.tags || (m.userData.tags = tagsOf(m));
       const lit = lerp(litOf(F, t, since), litOf(S, t, since), mix);
-      const goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim ? 1 : ease);
-      if (Math.abs(goal - op) < 0.002) op = goal;   // land exactly on the goal; the old "skip steps under 0.0005" could stall a fade at 0.054, just above the cut-off, leaving people "visible" at 5 % and casting full shadows
-      if (op !== m.material.opacity) { const was = m.visible; m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env;
-        if (m.visible !== was && m.castShadow) shadows.dirty = true; }
+      const fresh = m.userData.fadeIn, goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim && !fresh ? 1 : ease);   // the late audience fades in, also during a camera move
+      if (Math.abs(goal - op) < 0.002) { op = goal; m.userData.fadeIn = false; }   // land exactly on the goal; the old "skip steps under 0.0005" could stall a fade at 0.054, just above the cut-off, leaving people "visible" at 5 % and casting full shadows
+      if (op !== m.material.opacity || fresh) { const was = m.visible; m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env;
+        if (m.visible !== was && m.castShadow) shadows.dirty = true; }   // late arrivals (fresh) always get their visibility set once: at opacity 0 with a goal of 0 nothing else would
     }
     // labels
     for (const k in labelEls) { const L = labelEls[k], want = (S.labels || []).includes(k) && (!anim || anim.k > 0.5) ? 1 : 0;
@@ -527,7 +541,8 @@
     fctx.setTransform(dpr, 0, 0, dpr, 0, 0); fctx.clearRect(0, 0, vw, vh);
     drawMelody(now, dt); drawChaos(now, dt); glowTick(dt); placeBeats();
     windU.value = now; tickPeople(now); tension(now, dt);
-    shadowTick(now); film.render();
+    if (document.body.classList.contains("is-loading") && now - (frameLoop.drawn || -1) < 0.25) return;   // behind the loader nobody sees the scene: draw it 4 times a second, so slow devices load sooner
+    frameLoop.drawn = now; shadowTick(now); film.render();
   }
 
   function resize() {

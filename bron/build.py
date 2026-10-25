@@ -1,12 +1,13 @@
-# Bouwt de HTML-bestanden (de scène zit erin verpakt; de zittende mensen komen uit site/people.glb):
+# Bouwt de HTML-bestanden (de scène zit erin verpakt; de zittende mensen komen uit site/orchestra.glb en site/audience.glb):
 #   python3 bron/build.py          -> index.html              (website met scrollverhaal, in de hoofdmap: de hoofd-URL van GitHub Pages)
 #                                     site/styles.css         (de stylesheet waar index.html naar linkt)
-#                                     site/people.glb         (de gebakken muzikanten en het publiek, gekopieerd uit bron/assets/baked/)
+#                                     site/orchestra.glb      (de gebakken muzikanten met hun textures, gekopieerd uit bron/assets/baked/)
+#                                     site/audience.glb       (het gebakken publiek; laadt na het orkest)
 #                                     site/3d.html            (klein doorverwijsbestand naar ../, zodat oude links blijven werken)
 #   python3 bron/build.py model    -> site/orkest-model.html  (alleen het 3D-model, vrij rondkijken)
 #   python3 bron/build.py test     -> test.html               (testbuild voor bron/test/perf.py en compare.py: vast toeval, vaste tijd voor wat
 #                                                               blijft bewegen, en window.__perf met renderer, scène, camera en film; staat in .gitignore)
-#   python3 bron/build.py bake     -> bron/bake/bake.html     (de volledige pijplijn die de mensen bouwt; bron/bake/bake.py draait hem en maakt people.glb)
+#   python3 bron/build.py bake     -> bron/bake/bake.html     (de volledige pijplijn die de mensen bouwt; bron/bake/bake.py draait hem en maakt de .glb's)
 # Muzikanten: Microsoft Rocketbox avatars (MIT-licentie), voorbewerkt in bron/assets.
 import json, base64, glob, hashlib, os, shutil, struct, sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -46,11 +47,14 @@ REDIRECT = """<!doctype html>
 </body>
 </html>
 """
-def runtime(prefix, head):   # site and model page: people.glb next to the pages (hash in the link, so a new bake never sticks in a cache), preloaded from the head
-    src = os.path.join(ASSETS, "baked", "people.glb"); b = open(src, "rb").read(); shutil.copyfile(src, os.path.join(out_dir, "people.glb"))
-    url = prefix + "people.glb?v=" + hashlib.md5(b).hexdigest()[:8]; icon = 'apple-touch-icon.png">\n'; assert head.count(icon) == 1
-    head = head.replace(icon, icon + '<link rel="preload" href="%s" as="fetch" crossorigin>\n' % url)   # right after the icons, early in the head
-    return head, data({k: A[k] for k in CONDUCTOR_FBX}, {k: T[k] for k in CONDUCTOR_TEX}, {}) + "  const PEOPLE = " + json.dumps({"url": url, "bytes": len(b)}) + ";\n"
+def runtime(prefix, head):   # site and model page: the baked people next to the pages (a hash in each link, so a new bake never sticks in a cache)
+    people = {}
+    for name in ["orchestra", "audience"]:
+        src = os.path.join(ASSETS, "baked", name + ".glb"); b = open(src, "rb").read(); shutil.copyfile(src, os.path.join(out_dir, name + ".glb"))
+        people[name] = {"url": prefix + name + ".glb?v=" + hashlib.md5(b).hexdigest()[:8], "bytes": len(b)}
+    icon = 'apple-touch-icon.png">\n'; assert head.count(icon) == 1   # the orchestra is preloaded right after the icons, early in the head; the audience comes after it
+    head = head.replace(icon, icon + '<link rel="preload" href="%s" as="fetch" crossorigin>\n' % people["orchestra"]["url"])
+    return head, data({k: A[k] for k in CONDUCTOR_FBX}, {k: T[k] for k in CONDUCTOR_TEX}, {}) + "  const PEOPLE = " + json.dumps(people) + ";\n"
 
 if target == "bake":
     head = r(M, "head.html"); a = "<script>\n(() => {"; assert head.count(a) == 1
@@ -69,14 +73,14 @@ else:
                  '  controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.49; controls.minDistance = 1.2; controls.maxDistance = 140;\n']:
         assert line in body; body = body.replace(line, "")             # op de site stuurt het verhaal de camera
     people = r(M, "_people_rest.js")
-    for a, b in [('"Muzikanten laden… "', '"Musicians arriving… "'), ('"Publiek laden… "', '"Audience arriving… "'), ('" van "', '" / "'),
+    for a, b in [('"Muzikanten laden… "', '"Musicians arriving… "'), ('" van "', '" / "'),
                  ("De muzikanten konden niet laden in deze browser.", "The musicians could not load in this browser.")]:
         assert a in people, a; people = people.replace(a, b)
     story = r(S, "story.js")
     if test:   # alleen in de testbuild: herhaalbare beelden en toegang tot de renderer
         for a, b in [('    drawMelody(now, dt); drawChaos(now, dt);', '    drawMelody(window.__perfT ?? now, dt); drawChaos(window.__perfT ?? now, dt);'),
                      ('    windU.value = now; tickPeople(now); tension(now, dt);', '    windU.value = window.__perfT ?? now; tickPeople(window.__perfT ?? now); tension(window.__perfT ?? now, dt);'),
-                     ('    shadowTick(now); film.render();', '    shadowTick(window.__perfT ?? now); film.render();'),
+                     ('    frameLoop.drawn = now; shadowTick(now); film.render();', '    frameLoop.drawn = now; shadowTick(window.__perfT ?? now); film.render();'),
                      ('  window.__scene = { root, camera,', '  window.__perf = { renderer, scene, camera, film, groups: { orkest, lessen, dir, pub, heuvels, graan, pod, bord, kassa, CHG, omg } };\n  window.__scene = { root, camera,')]:
             assert a in story, a; story = story.replace(a, b)
     head, d = runtime("site/", r(S, "head.html"))

@@ -187,3 +187,39 @@ fps, interleaved (`bron/test/abfps.py`, 3 rounds, fresh browser each, uncapped),
 Kai's choice: (a), and phase 6 next, then decide about phase 4.
 
 Gain: about 5-15 % on the wide views (open, problems), nothing in t5 (the brass move every frame, so the map is redrawn every frame anyway) and nothing or slightly less in orch (the conductor close up). Smaller than the share of draw calls suggested (the shadow pass is about half of them): on this Mac the frame time is mostly what fills the screen (see phase 2), not the number of draw calls.
+
+## Phase 6: starting earlier, and small gains
+
+### What changed
+
+- The bake writes two files: `orchestra.glb` (54 musicians and rehearsal players, with all 69 textures, 6.77 MB, gzip 5.81) and `audience.glb` (48 people, geometry only, 2.75 MB, gzip 2.08). The loader waits only for the orchestra; the audience downloads meanwhile, is placed afterwards and fades in (registered at opacity 0 with `userData.fadeIn`, so it eases in even during a camera move). Its seats stay empty until then (the stand-in figures are removed when the orchestra is in). Textures are not downloaded twice: the audience gets clones of the orchestra's textures (shared image and GPU upload) with its own UV transform, because gltfpack quantizes UVs per file.
+- Downloaded before the site starts (gzip): 6.52 MB (index.html 0.71 + orchestra 5.81), was 8.57 after phase 3 and 8.44 at the baseline.
+- `antialias: false` on the WebGLRenderer: the canvas only gets the film pass's full-screen quad; the scene stays 4x (phones 2x) multisampled in the film target. No pixel difference.
+- While the loader is up, the scene is drawn 4 times a second instead of every frame (nobody sees it). Without a GPU the loader is gone about 3 s sooner (two alternating cold loads with SwiftShader: phase 5 39.6 / 38.6 s, phase 6 36.8 / 35.0 s).
+- Per-frame JS outside drawing (focus loop, labels, getComputedStyle, getBoundingClientRect) is 2-4 % of the main thread in a profile (problems and open, uncapped); 93 % is three's rendering (uniform uploads and draw calls). Not changed: nothing measurable to gain there.
+
+### Two existing bugs this phase exposed (both fixed)
+
+- Late arrivals at opacity 0 with a goal of 0 never got `visible = false` (the focus loop only acted on opacity changes), so the hidden audience was drawn in "open" (1,701 draw calls instead of 1,307). Late arrivals now always get their visibility set once.
+- The grey step of the glow stops (t2, m2) replaced the shader hook of every person material, also of the tinted ones (audience, rehearsal). That dropped the tint; only a shared program cache key ("tint") hid it, which made the outcome depend on what was compiled and drawn first. The audience, now compiled later, came out without its tint (dark brown instead of e.g. deep garnet). Tinted materials are now left out of the grey step: the audience looks exactly as before (question stop back at the noise floor). The rehearsal players at d2 would then show their intended everyday greys and creams, but online they showed a leftover dark tint after t2; Kai chose to keep the online look on purpose: the rehearsal tint is now one dark charcoal, 0x2b2927 (an audience colour; it matches the online d2 within 0.002).
+
+### Comparison test
+
+All 54 shots at the noise floor (highest m1 0.16; d2 0.09 after the rehearsal tint choice).
+
+### Quick click-through right after loading (simulated 4G, 1.5 MB/s)
+
+First version: loader gone at 6.4 s (orchestra in); jumping straight to "question", the camera arrived at about 7.2 s with the audience seats empty and the audience faded in at 8.4 s. Options shown to Kai: empty seats then fade-in, the stand-in mannequins until the audience is in (not natural: pale faceless figures), the loader waiting for the audience too (about 1.4 s later for everyone), or the camera waiting. Kai chose the last: a jump to a stop that shows the audience (not hidden there and its seats inside the target camera's view) waits until the audience is in, at most 8 s, then the camera leaves and the audience fades in during the move. Measured: a jump to plan leaves at once (6.3 s); a jump to question waits until the audience is in (7.7 s) and then leaves.
+
+### Load times and fps
+
+Local loads (no download time), same session, median of 3 cold loads:
+
+| | Phase 5: scene / orchestra placed / loader gone | Phase 6: scene / orchestra placed / loader gone / audience in |
+|---|---|---|
+| desktop | 0.95 / 1.38 / 1.66 s | 1.03 / 1.05 / 1.75 / 1.77 s |
+| phone | 1.56 / 1.58 / 1.78 s | 1.04 / 1.05 / 1.78 / 1.80 s |
+
+Locally the people are placed sooner, but the loader disappears at the same moment: after "ready" the percentage still counts up to 100 % (about 0.5 s) and waits 250 ms. Online the gain is the 2 MB (gzip) the visitor no longer waits for: about 1.4 s at 1.5 MB/s.
+
+fps, interleaved (3 rounds, fresh browser each, uncapped), median: desktop open 121 -> 124, t5 164 -> 162, problems 120 -> 121; phone open 207 -> 210, t5 169 -> 172, problems 151 -> 152. Unchanged, as expected (the same is drawn; antialias only affected the final quad).

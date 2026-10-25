@@ -2,7 +2,7 @@
   /* ---------- renderer ---------- */
   const small = Math.min(innerWidth, innerHeight) < 640;
   const canvas = document.getElementById("c");
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });   // the canvas only gets the film pass's full-screen quad; the scene itself is multisampled in the film target
   renderer.setPixelRatio(Math.min(devicePixelRatio, small ? 1.5 : 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;

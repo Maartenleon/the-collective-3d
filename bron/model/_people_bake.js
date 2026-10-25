@@ -182,10 +182,10 @@
     const me = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ ...CLOTH, roughness: 0.75 })); me.material.envMapIntensity = 0.2; me.name = "Slippen"; parent.add(me);
   }
   let womenSeen = 0;
-  // audience and rehearsal colours (sRGB): dark evening wear (charcoal, navy, deep brown, black, a little deep garnet); rehearsal in everyday greys and creams
+  // audience and rehearsal colours (sRGB): dark evening wear (charcoal, navy, deep brown, black, a little deep garnet); the rehearsal in dark charcoal
   const AUD_MEN = [0x1f1e22, 0x2a221c, 0x1c222b, 0x2b2927, 0x241c18, 0x302a24, 0x201a1a];
   const AUD_WOMEN = [0x3a0e0a, 0x3a2a16, 0x2a1220, 0x18171a, 0x2e2a26, 0x3d1a0e, 0x111113, 0x330906];
-  const REH = [0x8a8078, 0xcfc2ae, 0x4d5563, 0xa89a84, 0x5a5040];
+  const REH = [0x2b2927];   // the rehearsal in one dark charcoal: what the site showed at d2 until phase 6 (Kai's choice), instead of the everyday greys and creams 0x8a8078, 0xcfc2ae, 0x4d5563, 0xa89a84, 0x5a5040
   function audiencePose(i, h) {   // seated, watching the stage; some hands clasped, some turned to a neighbour
     const r = k => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
     const hk = r(1), side = r(5) < 0.5 ? 1 : -1;
@@ -228,7 +228,8 @@
   }
 
   /* ---------- the bake: build every seated person once, exactly as the site used to, and export them as one glTF ---------- */
-  // Run by bron/bake/bake.py (via python3 bron/build.py bake). Each person is one node "Lichaam" with extras { list: "mus" | "aud", i: index in MUS or AUD,
+  // Run by bron/bake/bake.py (via python3 bron/build.py bake). Two files: the orchestra (MUS: musicians and rehearsal players) and the audience (AUD),
+  // so the site can start once the orchestra is in. Each person is one node "Lichaam" with extras { list: "mus" | "aud", i: index in MUS or AUD,
   // outfit }; every mesh keeps its name (n) and a material recipe (spec) in its extras, because the site rebuilds the materials itself (rbMaterial,
   // tintBody, material()) rather than taking glTF materials. All meshes share one stand-in material with a stand-in texture, so gltfpack writes one
   // texture transform for the quantized UVs; the real textures are added to the file afterwards as the original JPG/PNG bytes.
@@ -258,7 +259,13 @@
         if (o.geometry !== BLOB_GEO) o.geometry = THREE.BufferGeometryUtils.mergeVertices(o.geometry);   // re-indexed: each piece keeps only its own vertices
         o.material = holder; meshCount++; triangles += o.geometry.index.count / 3; });
     }
-    const glb = await new Promise((res, rej) => new THREE.GLTFExporter().parse(people.map(p => p[0]), res, rej, { binary: true, onlyVisible: false }));
-    const bytes = new Uint8Array(glb); let bin = ""; for (let k = 0; k < bytes.length; k += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 0x8000));
-    return { glb: btoa(bin), textures: [...used].sort(), people: people.length, meshes: meshCount, triangles };
+    const b64 = buf => { const bytes = new Uint8Array(buf); let bin = ""; for (let k = 0; k < bytes.length; k += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 0x8000)); return btoa(bin); };
+    const files = {};
+    for (const list of ["mus", "aud"]) {
+      const set = people.filter(p => p[1] === list), tex = new Set();
+      for (const [g] of set) g.traverse(o => { if (o.isMesh && o.userData.spec.map) tex.add(o.userData.spec.map); });
+      const glb = await new Promise((res, rej) => new THREE.GLTFExporter().parse(set.map(p => p[0]), res, rej, { binary: true, onlyVisible: false }));
+      files[list] = { glb: b64(glb), textures: [...tex].sort(), people: set.length };
+    }
+    return { files, textures: [...used].sort(), people: people.length, meshes: meshCount, triangles };
   })();

@@ -26,7 +26,7 @@ def shoot(out):
         b = p.chromium.launch(channel="chrome", args=["--use-angle=metal", "--enable-gpu", "--ignore-gpu-blocklist"])
         for vname, opts in VIEWS.items():
             pg = b.new_page(**opts); errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
-            pg.goto(URL); pg.wait_for_function("window.__people && document.body.classList.contains('is-ready')", timeout=600000)
+            pg.goto(URL); pg.wait_for_function("window.__people && window.__audience && document.body.classList.contains('is-ready')", timeout=600000)
             pg.wait_for_timeout(2500)   # the interface fade-in after loading
             pg.evaluate("t => { window.__perfT = t; __story.pause(true); }", FIXED_T)
             ids = pg.evaluate("__story.stops.map(s => s.id)")

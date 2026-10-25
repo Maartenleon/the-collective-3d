@@ -1,10 +1,11 @@
-# Bakes the seated people (musicians, rehearsal players, audience) into bron/assets/baked/people.glb.
+# Bakes the seated people into two files: bron/assets/baked/orchestra.glb (musicians and rehearsal players, with their textures) and
+# bron/assets/baked/audience.glb (the audience, with only the textures the orchestra file does not have; it reuses the rest, nothing is downloaded twice).
 #   python3 bron/bake/bake.py
 # Run it again after changing the people: their poses, clothes, colours, faces, the seating (body.js) or _people_bake.js / _people_common.js.
 # Then build as usual (python3 bron/build.py, and model): the build copies people.glb to site/ with a new hash in its link.
 # Steps: build bron/bake/bake.html (the full old pipeline: FBX, IK poses, dress, baking) -> run it in Chrome -> GLTFExporter -> gltfpack v0.18
 # (meshopt compression and quantization; the same meshoptimizer version as three r147's decoder) -> add the original JPG/PNG textures as plain
-# buffer views (no re-encoding) -> bron/assets/baked/people.glb.
+# buffer views (no re-encoding) -> bron/assets/baked/orchestra.glb and audience.glb.
 import hashlib, io, json, os, platform, struct, subprocess, sys, urllib.request, zipfile
 from playwright.sync_api import sync_playwright
 
@@ -50,12 +51,15 @@ def main():
         pg.goto("file://" + os.path.join(HERE, "bake.html")); r = pg.evaluate("window.__bake", None); b.close()
     if errs: sys.exit("bake page errors: %s" % errs)
     import base64
-    raw = os.path.join(BIN, "people-raw.glb"), os.path.join(BIN, "people-packed.glb")
-    open(raw[0], "wb").write(base64.b64decode(r["glb"]))
-    subprocess.run([gltfpack(), "-i", raw[0], "-o", raw[1]] + GLTFPACK_ARGS, check=True)
-    out = add_textures(open(raw[1], "rb").read(), r["textures"])
-    dst = os.path.join(BRON, "assets/baked/people.glb"); os.makedirs(os.path.dirname(dst), exist_ok=True); open(dst, "wb").write(out)
     print("%d people, %d meshes, %d triangles, %d textures" % (r["people"], r["meshes"], r["triangles"], len(r["textures"])))
-    print("exported %.2f MB -> gltfpack %.2f MB -> with textures %.2f MB: %s" % (os.path.getsize(raw[0]) / 1e6, os.path.getsize(raw[1]) / 1e6, len(out) / 1e6, os.path.relpath(dst, REPO)))
+    stored = set()
+    for list_, name in [("mus", "orchestra"), ("aud", "audience")]:   # each texture goes in the first file that needs it: the orchestra's own, then the audience's extra ones
+        f = r["files"][list_]; raw = os.path.join(BIN, name + "-raw.glb"), os.path.join(BIN, name + "-packed.glb")
+        open(raw[0], "wb").write(base64.b64decode(f["glb"]))
+        subprocess.run([gltfpack(), "-i", raw[0], "-o", raw[1]] + GLTFPACK_ARGS, check=True)
+        keys = [k for k in f["textures"] if k not in stored]; stored.update(keys)
+        out = add_textures(open(raw[1], "rb").read(), keys)
+        dst = os.path.join(BRON, "assets/baked", name + ".glb"); os.makedirs(os.path.dirname(dst), exist_ok=True); open(dst, "wb").write(out)
+        print("%-9s %3d people: exported %.2f MB -> gltfpack %.2f MB -> with %d textures %.2f MB: %s" % (name, f["people"], os.path.getsize(raw[0]) / 1e6, os.path.getsize(raw[1]) / 1e6, len(keys), len(out) / 1e6, os.path.relpath(dst, REPO)))
 
 if __name__ == "__main__": main()
