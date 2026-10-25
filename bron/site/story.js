@@ -191,15 +191,34 @@
       + `<g class="k" data-k="o"><path d="M ${CX} ${CY - RO} A ${RO} ${RO} 0 1 1 ${(CX - RO * Math.sin(a)).toFixed(1)} ${(CY - RO * Math.cos(a)).toFixed(1)}" class="arc" pathLength="1" marker-end="url(#fwArrow)"/>
         <text class="lab lab--big" x="${CX}" y="${CY + RO + 30}" text-anchor="middle">ORCHESTRATION</text><text class="sub" x="${CX}" y="${CY + RO + 50}" text-anchor="middle">the conductor</text></g>`;
   }
-  { // the Orchestration arrow draws itself clockwise along the circle when it appears; the arrowhead comes at the end
-    const g = fwEl.querySelector('[data-k="o"]'), arc = g.querySelector(".arc"), head = arc.getAttribute("marker-end");
-    var drawArc = (on, loop) => {   // loop: on the framework frame the arrow keeps going round (draws, then its tail follows), a continuous motion
-      loop = on && loop && !reduceMQ.matches; g.classList.toggle("is-loop", loop);
-      if (on === g.classList.contains("is-shown")) { if (loop) arc.setAttribute("marker-end", head); return; }
-      g.classList.toggle("is-shown", on);
-      if (on && (reduceMQ.matches || loop)) arc.setAttribute("marker-end", head); else arc.removeAttribute("marker-end");
+  { // the Orchestration arrow: the line draws itself clockwise and its head rides on the drawn end, so the head appears and moves with the line.
+    // Once elsewhere; on the framework frame it loops: drawn, held, then the tail runs after the head until both are gone, and again.
+    // The head is a separate path (the copies in the panels keep their marker); set up on first use, after those copies were made.
+    const g = fwEl.querySelector('[data-k="o"]'), arc = g.querySelector(".arc"), ARC = { draw: 0.9, loop: 4.2, drawn: 0.4, hold: 0.65 };
+    let tip = null, L = 0, mode = "off", t0 = 0, idle = false;
+    const show = (tail, head) => { const a = Math.max(0, head - tail);
+      arc.style.strokeDasharray = (a * L).toFixed(2) + " " + (2 * L).toFixed(2); arc.style.strokeDashoffset = (-tail * L).toFixed(2);
+      if (a < 0.002) { tip.style.opacity = "0"; return; }
+      const p = arc.getPointAtLength(head * L), q = arc.getPointAtLength(Math.max(0, head * L - 2));
+      tip.setAttribute("transform", `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${(Math.atan2(p.y - q.y, p.x - q.x) * 180 / Math.PI).toFixed(1)})`);
+      tip.style.opacity = Math.min(1, a / 0.05).toFixed(3); };   // a tiny arrow fades rather than pops
+    var arcTick = now => {
+      if (!tip || (mode === "off" && idle)) return;
+      if (mode === "off") { show(0, 0); idle = true; return; } idle = false;
+      if (reduceMQ.matches) return show(0, 1);
+      if (mode === "once") return show(0, smoother(clamp((now - t0) / ARC.draw, 0, 1)));
+      const u = ((now - t0) % ARC.loop) / ARC.loop;
+      if (u < ARC.drawn) show(0, smoother(u / ARC.drawn)); else if (u < ARC.hold) show(0, 1); else show(smoother((u - ARC.hold) / (1 - ARC.hold)), 1);
     };
-    arc.addEventListener("transitionend", e => { if (e.propertyName === "stroke-dashoffset" && g.classList.contains("is-shown")) arc.setAttribute("marker-end", head); });
+    var drawArc = (on, loop) => {
+      if (!tip) { arc.removeAttribute("marker-end"); arc.removeAttribute("pathLength"); L = arc.getTotalLength();
+        tip = document.createElementNS("http://www.w3.org/2000/svg", "path"); tip.setAttribute("class", "tip"); tip.setAttribute("d", "M-6 -5.5L6 0L-6 5.5z"); g.appendChild(tip); }
+      const now = clock.getElapsedTime(), next = !on ? "off" : loop && !reduceMQ.matches ? "loop" : "once";
+      if (next === mode) return;
+      if (next === "loop") t0 = mode === "once" ? now - ARC.loop * ARC.drawn : now;   // already drawn: go on from the drawn state
+      else if (next === "once") t0 = mode === "loop" ? -1e9 : now;
+      mode = next; idle = false; g.classList.toggle("is-shown", on); arcTick(now);
+    };
   }
   let vw = 0, vh = 0, dpr = 1;
   const toScreen = v => { const q = v.clone().project(camera); return [(q.x + 1) / 2 * vw, (1 - q.y) / 2 * vh, q.z < 1]; };
@@ -620,7 +639,7 @@
           for (let j = 0; j < i; j++) { const p = shown[j]; if (Math.abs(q.x - p.x) < (p.L.w + q.L.w) / 2 + 14 && Math.abs(q.y - p.y) < 24) { q.y = p.y - 24; moved = true; } } } }
       for (const { L, x, y } of shown) { L.el.style.opacity = L.a.toFixed(3); L.el.style.transform = `translate3d(${(x - L.w / 2).toFixed(1)}px, ${(y - 30 + (1 - L.a) * 8).toFixed(1)}px, 0)`; } }
     fctx.setTransform(dpr, 0, 0, dpr, 0, 0); fctx.clearRect(0, 0, vw, vh);
-    drawMelody(now, dt); drawChaos(now, dt); glowTick(dt); placeBeats();
+    drawMelody(now, dt); drawChaos(now, dt); glowTick(dt); placeBeats(); arcTick(now);
     windU.value = now; tickPeople(now); tension(now, dt);
     if (document.body.classList.contains("is-loading") && now - (frameLoop.drawn || -1) < 0.25) return;   // behind the loader nobody sees the scene: draw it 4 times a second, so slow devices load sooner
     mergeTick(); frameLoop.drawn = now; shadowTick(now); film.render();

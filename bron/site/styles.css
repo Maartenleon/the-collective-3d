@@ -229,15 +229,11 @@ p, ul, h1, h2 { margin: 0; }
 .fw > circle { fill: none; }   /* the glass behind it is the fill */
 .fw .ring { stroke: var(--panel-border); }
 .fw .part { fill: var(--panel-fill); stroke: var(--panel-border); stroke-width: 1.5; }   /* every part looks like a story panel: no coloured parts */
-.fw .arc { fill: none; stroke: var(--color-text); stroke-width: 2.4; }
+.fw .arc { fill: none; stroke: var(--color-text); stroke-width: 2.4; }   /* drawn by story.js (arcTick): the line and its head move together */
 .fw .tip { fill: var(--color-text); }
 .fw .sub { font-size: 15px; font-style: italic; opacity: .78; }
 .fw .lab.lab--big { font-size: 16px; }
 .fw .k { transition: opacity .2s ease; }
-.fw .arc { stroke-dasharray: 1; stroke-dashoffset: 1; }   /* Orchestration: drawn clockwise when it appears (story.js drawArc) */
-.fw .k.is-shown .arc { stroke-dashoffset: 0; transition: stroke-dashoffset .9s var(--ease-in-out); }
-.fw .k.is-shown.is-loop .arc { animation: arc-loop 4.2s var(--ease-in-out) infinite; }   /* framework frame: drawn, held, then the tail runs after the head, and again */
-@keyframes arc-loop { 0% { stroke-dashoffset: 1; } 40% { stroke-dashoffset: 0; } 65% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -1; } }
 .fw text { font-family: var(--font-serif); fill: var(--color-text); }
 .fw .lab { font-family: var(--font-sans); font-size: 13px; letter-spacing: .14em; }
 .fw.is-flip { opacity: 1; visibility: visible; transition: none; }   /* shrinking into a panel: position and fade come from the film */
