@@ -152,3 +152,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# test build of the website (python3 bron/build.py test) and the local screenshot references
+/test.html
+bron/test/ref/

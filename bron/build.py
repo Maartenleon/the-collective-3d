@@ -3,6 +3,8 @@
 #                                     site/styles.css         (de stylesheet waar index.html naar linkt)
 #                                     site/3d.html            (klein doorverwijsbestand naar ../, zodat oude links blijven werken)
 #   python3 bron/build.py model    -> site/orkest-model.html  (alleen het 3D-model, vrij rondkijken)
+#   python3 bron/build.py test     -> test.html               (testbuild voor bron/test/perf.py en compare.py: vast toeval, vaste tijd voor wat
+#                                                               blijft bewegen, en window.__perf met renderer, scène, camera en film; staat in .gitignore)
 # Muzikanten: Microsoft Rocketbox avatars (MIT-licentie), voorbewerkt in bron/assets.
 import json, base64, glob, hashlib, os, struct, sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +45,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "model":
     s = r(M, "head.html") + r(M, "body.js") + r(M, "_dress_src.js") + data + r(M, "_people_rest.js") + r(M, "tail.js")
     out = os.path.join(out_dir, "orkest-model.html")
 else:
+    test = len(sys.argv) > 1 and sys.argv[1] == "test"
     cfg = r(M, "head.html").split('  "use strict";\n', 1)[1]          # scène-instellingen uit het model
     body = r(M, "body.js")
     for line in ['  const controls = new THREE.OrbitControls(camera, canvas);\n',
@@ -53,10 +56,19 @@ else:
                  ('"Publiek laden… " + (done - MUS.length) + " van " + AUD.length', '"Audience arriving… " + (done - MUS.length) + " / " + AUD.length'),
                  ("De muzikanten konden niet laden in deze browser.", "The musicians could not load in this browser.")]:
         assert a in people, a; people = people.replace(a, b)
-    s = r(S, "head.html") + cfg + body + r(M, "_dress_src.js") + data + people + r(S, "content.js") + r(S, "story.js")
-    out = os.path.join(REPO, "index.html")
+    story = r(S, "story.js")
+    if test:   # alleen in de testbuild: herhaalbare beelden en toegang tot de renderer
+        for a, b in [('    drawMelody(now, dt); drawChaos(now, dt);', '    drawMelody(window.__perfT ?? now, dt); drawChaos(window.__perfT ?? now, dt);'),
+                     ('    windU.value = now; tickPeople(now); tension(now, dt);', '    windU.value = window.__perfT ?? now; tickPeople(window.__perfT ?? now); tension(window.__perfT ?? now, dt);'),
+                     ('  window.__scene = { root, camera,', '  window.__perf = { renderer, scene, camera, film, groups: { orkest, lessen, dir, pub, heuvels, graan, pod, bord, kassa, CHG, omg } };\n  window.__scene = { root, camera,')]:
+            assert a in story, a; story = story.replace(a, b)
+    s = r(S, "head.html") + cfg + body + r(M, "_dress_src.js") + data + people + r(S, "content.js") + story
+    if test:   # vast toeval (mulberry32), zodat korrel, graan en gezichten bij elke lading gelijk zijn
+        a = '(() => {\n  "use strict";\n'; assert s.count(a) == 1
+        s = s.replace(a, a + '  Math.random = (() => { let a = 1; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })();\n')
+    out = os.path.join(REPO, "test.html" if test else "index.html")
     css = r(S, "styles.css"); open(os.path.join(out_dir, "styles.css"), "w", encoding="utf-8").write(css)   # index.html linkt naar site/styles.css
     link = '<link rel="stylesheet" href="site/styles.css">'; assert link in s
     s = s.replace(link, '<link rel="stylesheet" href="site/styles.css?v=' + hashlib.md5(css.encode()).hexdigest()[:8] + '">')   # nieuwe versie = nieuwe link, dus de browser haalt nooit een oude stylesheet uit zijn cache
-    open(os.path.join(out_dir, "3d.html"), "w", encoding="utf-8").write(REDIRECT)   # oude links naar site/3d.html sturen door naar de hoofd-URL
+    if not test: open(os.path.join(out_dir, "3d.html"), "w", encoding="utf-8").write(REDIRECT)   # oude links naar site/3d.html sturen door naar de hoofd-URL
 open(out, "w", encoding="utf-8").write(s); print(out, round(len(s) / 1e6, 2), "MB")

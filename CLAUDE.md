@@ -63,6 +63,14 @@ beelden/                  latest reference screenshots
 ```
 python3 bron/build.py          # -> index.html (+ site/styles.css, site/3d.html redirect)
 python3 bron/build.py model    # -> site/orkest-model.html
+python3 bron/build.py test     # -> test.html (in .gitignore): seeded Math.random, fixed time for what keeps moving (window.__perfT), window.__perf (renderer, scene, camera, film, groups)
+```
+
+Performance and visual checks (Python Playwright with the installed Chrome and the GPU; see docs/perf.md):
+```
+python3 bron/test/perf.py --label <name>                  # sizes, load times, draw calls, triangles, counts, heap, fps
+python3 bron/test/compare.py shoot                        # reference screenshots of every stop at 1440x900 and 390x844 -> bron/test/ref/ (in .gitignore)
+python3 bron/test/compare.py check --label <name>         # shoot again and compare with the reference (mean difference, diff images)
 ```
 
 No npm needed for the build. three.js r147 loads from cdn.jsdelivr.net (UMD build, legacy colour mode: hex colours are linear).
