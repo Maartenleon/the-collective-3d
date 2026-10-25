@@ -1,25 +1,26 @@
 # The Collective · 3D-website: overdracht
 
-Stand: 21 oktober 2026. Dit pakket bevat alles om verder te gaan met het 3D-model, de website en de verhaallijn, ook in een ander Claude-account.
+Stand: 25 oktober 2026. Dit pakket bevat alles om verder te gaan met het 3D-model, de website en de verhaallijn, ook in een ander Claude-account.
 
 ## Snel bekijken
 
-Open `site/3d.html` in Chrome, Edge of Safari. Dat is de website zoals hij nu is (versie 10): scroll, swipe of gebruik de pijltjestoetsen. Het bestand is ongeveer 14 MB en heeft internet nodig voor three.js.
+De website staat online op https://maartenleon.github.io/the-collective-3d/ (de hoofd-URL, zonder tussenpagina). Scroll, swipe of gebruik de pijltjestoetsen. Lokaal: `index.html` in de hoofdmap is de website. Het bestand is ongeveer 14 MB en heeft internet nodig voor three.js. Het oude adres `site/3d.html` stuurt door naar de hoofd-URL.
 
-`site/orkest-model.html` is alleen het 3D-model, waarin je vrij kunt rondkijken en onderdelen los kunt bekijken.
+`site/orkest-model.html` is alleen het 3D-model, waarin je vrij kunt rondkijken en onderdelen los kunt bekijken. De website linkt er niet naar; het adres is https://maartenleon.github.io/the-collective-3d/site/orkest-model.html.
 
 ## Verder werken met Claude
 
 1. Maak in het nieuwe Claude-account een project (of een Claude Code-sessie) en upload deze hele map, of zet hem in een GitHub-repository en koppel die.
 2. Zeg tegen Claude: "Lees eerst CLAUDE.md." Daarin staan de context, de afspraken, hoe je bouwt en test, en wat nog open staat.
-3. Na een wijziging bouwt Claude de site opnieuw met `python3 bron/build.py`.
+3. Na een wijziging bouwt Claude de site opnieuw met `python3 bron/build.py` (maakt `index.html`) en het model met `python3 bron/build.py model`.
 
 ## Wat zit erin
 
 | Map of bestand | Wat |
 | --- | --- |
 | `CLAUDE.md` | Startinstructie voor Claude (Engels): context, besluiten, werkwijze, bestanden, bouwen en testen |
-| `site/` | De gebouwde website en het losse 3D-model |
+| `index.html` | De gebouwde website (de hoofd-URL) |
+| `site/` | De stylesheet en icoontjes van de website, het losse 3D-model en een doorverwijzing van het oude adres `site/3d.html` |
 | `bron/` | De broncode en de muzikanten (Microsoft Rocketbox, MIT-licentie), plus testscripts |
 | `docs/verhaallijn-v3.md` | De volledige verhaallijn zoals hij nu op de site staat |
 | `docs/aanpassingen-na-de-scan.md` | Wat er na de scan is aangepast en wat nog open staat |

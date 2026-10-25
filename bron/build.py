@@ -1,5 +1,7 @@
-# Bouwt de twee losse HTML-bestanden (alles erin verpakt, geen server nodig):
-#   python3 bron/build.py          -> site/3d.html            (website met scrollverhaal)
+# Bouwt de twee HTML-bestanden (de scène zit erin verpakt):
+#   python3 bron/build.py          -> index.html              (website met scrollverhaal, in de hoofdmap: de hoofd-URL van GitHub Pages)
+#                                     site/styles.css         (de stylesheet waar index.html naar linkt)
+#                                     site/3d.html            (klein doorverwijsbestand naar ../, zodat oude links blijven werken)
 #   python3 bron/build.py model    -> site/orkest-model.html  (alleen het 3D-model, vrij rondkijken)
 # Muzikanten: Microsoft Rocketbox avatars (MIT-licentie), voorbewerkt in bron/assets.
 import json, base64, glob, hashlib, os, struct, sys
@@ -21,7 +23,21 @@ for k, v in H.items():
     HEADS[k] = {"pre": PRE[k], "nv": v["nv"], "bones": v["boneNames"], "pos": pk(v["pos"], "h"), "nor": pk(v["nor"], "b"), "uv": pk([round(x / 65535 * 8192) for x in v["uv"]], "h"),
                 "si": pk(v["si"], "B"), "sw": pk(v["sw"], "B"), "ih": pk(v["idxHead"], "H"), "ia": pk(v["idxHair"], "H") if v["idxHair"] else None}
 data = "\n  const HEADS = " + json.dumps(HEADS) + ";\n  const ASSETS = " + json.dumps(A) + ";\n  const TEXTURES = " + json.dumps(T) + ";\n"
-out_dir = os.path.join(os.path.dirname(ROOT), "site"); os.makedirs(out_dir, exist_ok=True)
+REPO = os.path.dirname(ROOT); out_dir = os.path.join(REPO, "site"); os.makedirs(out_dir, exist_ok=True)
+REDIRECT = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Collective</title>
+<meta http-equiv="refresh" content="0; url=../">
+<link rel="canonical" href="../">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+</head>
+<body style="background:#1A0E0A;color:#FAF8F6;font:14px/1.6 system-ui,sans-serif">
+<p>The website moved to <a href="../" style="color:#FCE8D8">the main address</a>.</p>
+</body>
+</html>
+"""
 
 if len(sys.argv) > 1 and sys.argv[1] == "model":
     s = r(M, "head.html") + r(M, "body.js") + r(M, "_dress_src.js") + data + r(M, "_people_rest.js") + r(M, "tail.js")
@@ -38,8 +54,9 @@ else:
                  ("De muzikanten konden niet laden in deze browser.", "The musicians could not load in this browser.")]:
         assert a in people, a; people = people.replace(a, b)
     s = r(S, "head.html") + cfg + body + r(M, "_dress_src.js") + data + people + r(S, "content.js") + r(S, "story.js")
-    out = os.path.join(out_dir, "3d.html")
-    css = r(S, "styles.css"); open(os.path.join(out_dir, "styles.css"), "w", encoding="utf-8").write(css)   # 3d.html linkt naar styles.css
-    link = '<link rel="stylesheet" href="styles.css">'; assert link in s
-    s = s.replace(link, '<link rel="stylesheet" href="styles.css?v=' + hashlib.md5(css.encode()).hexdigest()[:8] + '">')   # nieuwe versie = nieuwe link, dus de browser haalt nooit een oude stylesheet uit zijn cache
+    out = os.path.join(REPO, "index.html")
+    css = r(S, "styles.css"); open(os.path.join(out_dir, "styles.css"), "w", encoding="utf-8").write(css)   # index.html linkt naar site/styles.css
+    link = '<link rel="stylesheet" href="site/styles.css">'; assert link in s
+    s = s.replace(link, '<link rel="stylesheet" href="site/styles.css?v=' + hashlib.md5(css.encode()).hexdigest()[:8] + '">')   # nieuwe versie = nieuwe link, dus de browser haalt nooit een oude stylesheet uit zijn cache
+    open(os.path.join(out_dir, "3d.html"), "w", encoding="utf-8").write(REDIRECT)   # oude links naar site/3d.html sturen door naar de hoofd-URL
 open(out, "w", encoding="utf-8").write(s); print(out, round(len(s) / 1e6, 2), "MB")

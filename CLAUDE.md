@@ -32,10 +32,12 @@ Wide horizon, small ensemble, only the conductor bright orange-red (long red coa
 ## Files
 
 ```
-site/3d.html              built website (open in a browser; ~14 MB, everything inlined)
-site/orkest-model.html    built model only, free orbit camera + isolation panel (for checking the scene)
-site/icons/               favicon (same as the 2D site: dark square, vermilion dot), linked from both pages and index.html
-bron/build.py             builds both files from the sources below
+index.html                built website, in the repo root so it is the main URL (~14 MB, scene inlined); links site/styles.css and site/icons/
+site/styles.css           the website's stylesheet, copied by the build (linked with ?v=<hash> so browsers never keep an old one)
+site/3d.html              tiny redirect to ../ (old links keep working); written by the build
+site/orkest-model.html    built model only, free orbit camera + isolation panel (for checking the scene; not linked from the website)
+site/icons/               favicon (same as the 2D site: dark square, vermilion dot), linked from both pages
+bron/build.py             builds both pages from the sources below
 bron/model/               the 3D scene (shared by both builds)
   head.html               page shell + scene config (STAGE, BOARD, colours, camera presets)
   body.js                 renderer, film-look post pass, materials, stage/bowl/hills/board/rehearsal geometry, hierarchy
@@ -44,13 +46,14 @@ bron/model/               the 3D scene (shared by both builds)
   tail.js                 model-only UI: isolation, scene tree, click-to-select, cameras
   layout-gen.py           older generator for the seating layout (reference)
 bron/site/                the scroll story (replaces tail.js in the site build)
-  head.html               all text panels and the loader (plain --color-bg screen with the opening text and a serif percentage); CSS lives in styles.css
+  head.html               all text panels and the loader (plain --color-bg screen with the opening text and a serif percentage); paths are relative to the repo root (site/styles.css, site/icons/)
+  styles.css              all website CSS
   content.js              the words of the problems (cards + left panel) and framework parts (right panel); edit text here
   story.js                STOPS (frames), camera moves, focus/fade, melody lines, glow, tension, input, side panels
 bron/assets/rocketbox/    pre-processed Microsoft Rocketbox avatars (FBX + textures), MIT licence
 bron/assets/heads.json, prefix.json   head geometry used to give musicians varied faces
 bron/assets/pipeline/     scripts that produced the processed assets (reference; originals from github.com/microsoft/Microsoft-Rocketbox)
-bron/test/                Playwright screenshot scripts
+bron/test/                Playwright screenshot scripts (open.js: shared launch + open by URL)
 docs/                     story line, scan, change list, part 4 text, model purchase research, inputs from Kai
 beelden/                  latest reference screenshots
 ```
@@ -58,17 +61,18 @@ beelden/                  latest reference screenshots
 ## Build and test
 
 ```
-python3 bron/build.py          # -> site/3d.html
+python3 bron/build.py          # -> index.html (+ site/styles.css, site/3d.html redirect)
 python3 bron/build.py model    # -> site/orkest-model.html
 ```
 
 No npm needed for the build. three.js r147 loads from cdn.jsdelivr.net (UMD build, legacy colour mode: hex colours are linear).
 
-Screenshots (headless, software GL):
+Screenshots: serve the folder above the repo first (`cd ~/Downloads && python3 -m http.server 8099`). The scripts open the site by URL (default http://127.0.0.1:8099/the-collective-3d/; pass another URL or a file path as the first argument), never by pasting the HTML into an empty page, because the site uses relative paths.
 ```
 cd bron/test && npm install
-PFX=out/a STOPS='["open","t5","c0"]' WAIT=4000 node story10.js ../../site/3d.html     # MOB=1 for a 390x844 phone
+PFX=out/a STOPS='["open","t5","c0"]' WAIT=4000 node story10.js     # MOB=1 for a 390x844 phone
 ```
+`open.js` uses the Chromium of the earlier sandbox (software GL) when it exists, otherwise the installed Chrome.
 `story10.js` reads `STOPS` (indices or stop ids) and saves one PNG per stop. `poster.js` made the old loader photo (no longer used: the loader is a plain dark screen, and the brand, About button, timeline and scroll hint fade in once loading is done, class `is-ready`). `ten.js` screenshots the tension stop at given times. Loading takes ~2 minutes under software rendering. `window.__story` exposes `go(i|id)`, `stops`, `pause(bool)`. Without Node, Python Playwright with the installed Chrome works too (`channel="chrome"`, loads in seconds with the GPU).
 
 ## How the story code works (bron/site/story.js)
@@ -88,9 +92,9 @@ PFX=out/a STOPS='["open","t5","c0"]' WAIT=4000 node story10.js ../../site/3d.htm
 
 Public repo github.com/Maartenleon/the-collective-3d, served by GitHub Pages from branch `main`, folder `/ (root)`, no GitHub Actions and no build on GitHub (the token has no Workflows rights; ask before adding Actions).
 
-- Website: https://maartenleon.github.io/the-collective-3d/ (root `index.html` redirects to `site/3d.html`)
+- Website: https://maartenleon.github.io/the-collective-3d/ (root `index.html` is the website itself; `site/3d.html` redirects there)
 - Model builder: https://maartenleon.github.io/the-collective-3d/site/orkest-model.html
-- Built files are committed: run `python3 bron/build.py` (and `model`) before committing; `site/styles.css` is copied by the build.
+- Built files are committed: run `python3 bron/build.py` (and `model`) before committing; `index.html`, `site/styles.css` and `site/3d.html` are written by the build.
 - All paths relative (no leading `/`, no localhost): the site lives under the subpath `/the-collective-3d/`. Pages is case-sensitive, macOS is not: keep file names and references lowercase and identical.
 - `.nojekyll` in the root stays (no Jekyll processing). Do not move or rename folders without asking.
 - Test before pushing: serve the parent folder (`cd ~/Downloads && python3 -m http.server 8099`) and open http://127.0.0.1:8099/the-collective-3d/; there must be no 404s.
