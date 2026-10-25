@@ -19,7 +19,6 @@
   const player = n => orkest.getObjectByName("Muzikant · " + n);
   const orchBox = box(orkest), standBox = box(lessen), boardBox = box(bord), condBox = box(dir);
   const nextBox = box(bord2).union(box(rep));
-  const boardFront = V(Math.sin(BOARD.rotY), 0.12, Math.cos(BOARD.rotY));
   const nextFront = V(Math.sin(NEXT.board.rotY), 0.0, Math.cos(NEXT.board.rotY));
 
   /* ---------- the two melody lines (value streams), each through four players in different sections ---------- */
@@ -39,10 +38,10 @@
     p.add(new THREE.BoxGeometry(1.25, 0.06, 0.32), "tier", M(0, 0.98, 0.78));
     p.build(kassa, true);
     const cv = document.createElement("canvas"); cv.width = 512; cv.height = 128; const x = cv.getContext("2d");
-    x.fillStyle = "#e8b897"; x.fillRect(0, 0, 512, 128); x.strokeStyle = "#5c0f07"; x.lineWidth = 4; x.strokeRect(10, 10, 492, 108);
+    x.fillStyle = CARD; x.fillRect(0, 0, 512, 128); x.strokeStyle = INK; x.lineWidth = 4; x.strokeRect(10, 10, 492, 108);   // white card and dark ink, like the programme board
     const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding;
-    const draw = () => { x.fillStyle = "#e8b897"; x.fillRect(14, 14, 484, 100);
-      x.fillStyle = "#3a120c"; x.font = "700 64px 'Barlow Condensed', 'DIN Condensed', 'Arial Narrow', sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("BOX OFFICE", 256, 68); t.needsUpdate = true; };   // the same sans as the programme board
+    const draw = () => { x.fillStyle = CARD; x.fillRect(14, 14, 484, 100);
+      x.fillStyle = INK; x.font = "700 64px 'Barlow Condensed', 'DIN Condensed', 'Arial Narrow', sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("BOX OFFICE", 256, 68); t.needsUpdate = true; };   // the same sans as the programme board
     draw(); document.fonts && document.fonts.load("700 64px 'Barlow Condensed'").then(draw, () => {});
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.375), new THREE.MeshStandardMaterial({ map: t, roughness: 0.8, emissive: 0x3a2014, emissiveIntensity: 0.3 }));
     sign.position.set(0, 2.5, 0.75); kassa.add(sign);
@@ -88,7 +87,7 @@
     { id: "f5", ch: 1, seq: "fw", bar: 2, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmor", shade: 0.3 },
     { id: "f6", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
     // Frame 4: Plan
-    { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan" },
+    { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, V(0.62, 0.2, 1), 40, NARROW ? 2.3 : 1.9, 0.2), panel: "plan" },
     // Frame 5: Blueprint
     { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: ["Blueprint", "The score on every stand"] },
     { id: "b2", ch: 3, seq: "bp", bar: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"] },
@@ -138,6 +137,7 @@
       if (/^Muzikant · /.test(n.name)) t.player = n.name.slice(11);
       if (n.parent === orkest) t.section = n.name;
       if (n === kassa) t.booth = true;
+      if (n === bord) t.board = true;
       if (n.name === "Graan") t.grass = true;
     }
     return t;
@@ -157,7 +157,8 @@
     if (live && now - shadows.last >= 1 / SHADOW_RATE - 1e-3) shadows.dirty = true;
     if (shadows.dirty) { renderer.shadowMap.needsUpdate = true; shadows.dirty = false; shadows.last = now; }
   }
-  const litOf = (s, t, since) => (t.grass || t.audience) && s.id === "open" ? -FALLEN / (1 - FALLEN) : t.booth ? (s.booth ? 1 : -FALLEN / (1 - FALLEN)) : s.booth ? (t.env || t.audience ? 1 : 0.6) : !s.focus ? 1 : s.focus(t, since) ? 1 : (s.fallen || 0) / (1 - FALLEN);
+  const AUDIENCE_FROM = STOPS.findIndex(s => s.id === "question");   // the audience is there from "So, how does your organisation sound?" on
+  const litOf = (s, t, since) => (t.grass || t.board) && s.id === "open" || t.audience && STOPS.indexOf(s) < AUDIENCE_FROM ? -FALLEN / (1 - FALLEN) : t.booth ? (s.booth ? 1 : -FALLEN / (1 - FALLEN)) : s.booth ? (t.env || t.audience ? 1 : 0.6) : !s.focus ? 1 : s.focus(t, since) ? 1 : (s.fallen || 0) / (1 - FALLEN);
 
   /* ---------- labels anchored to the sections ---------- */
   const labelEls = {}; document.querySelectorAll("[data-label]").forEach(el => (labelEls[el.dataset.label] = { el, a: 0 }));
@@ -439,11 +440,11 @@
     });
   }
   /* ---------- frame 2 and Means: the instruments glow while the musicians go grey ---------- */
-  const GLOW = new THREE.Color(0xff7420); let glowK = 0; const glowMats = new Set();   // the instruments glow; the musicians keep their own colours (no grey step: Kai)
+  const GLOW = new THREE.Color(0xff7420), GLOW_SELF = 1.6, GLOW_AMOUNT = 0.06, glowTmp = new THREE.Color(); let glowK = 0; const glowMats = new Set();   // the instruments glow; the musicians keep their own colours (no grey step: Kai)
   function glowTick(dt) {
     const want = STOPS[at].glow && (!anim || anim.k > 0.4) ? 1 : 0; glowK += (want - glowK) * (1 - Math.exp(-dt * 4));
     if (!glowMats.size || (window.__people && !glowMats.people && (glowMats.people = true))) for (const m of meshes) { const t = m.userData.tags || (m.userData.tags = tagsOf(m)); if (t.instrument && m.material && m.material.emissive) { if (!m.userData.ownMat) { m.material = m.material.clone(); m.userData.ownMat = true; m.material.userData.e0 = m.material.emissive.clone(); m.material.userData.i0 = m.material.emissiveIntensity; } glowMats.add(m.material); } }
-    for (const mt of glowMats) { mt.emissive.copy(mt.userData.e0).lerp(GLOW, glowK); mt.emissiveIntensity = mt.userData.i0 + glowK * 0.4; if (mt.color) { if (!mt.userData.c0) mt.userData.c0 = mt.color.clone(); mt.color.copy(mt.userData.c0).lerp(GLOW, glowK * 0.6); } }
+    for (const mt of glowMats) { glowTmp.copy(mt.color).multiplyScalar(GLOW_SELF).lerp(GLOW, GLOW_AMOUNT); mt.emissive.copy(mt.userData.e0).lerp(glowTmp, glowK); }   // they light up in their own colour (dark wood stays wood, brass stays brass), with a touch of warmth
   }
   /* ---------- frame 2: different views, as loose lines in many colours crossing over the orchestra ---------- */
   const CHAOS_RGB = ["241, 64, 11", "222, 170, 72", "252, 232, 216", "196, 160, 214", "232, 132, 96", "176, 196, 214", "240, 200, 150"];
@@ -593,15 +594,16 @@
     // the audience and the grass (hidden in the opening) change only where nobody sees it: while the camera still sees their place during a move
     // they keep their opacity; out of view they switch at once; in view after arriving they fade
     seeFrustum.setFromProjectionMatrix(seeM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-    const inView = { audience: seeFrustum.intersectsBox(pubBox), grass: seeFrustum.intersectsBox(grassBox) };
+    const inView = { audience: seeFrustum.intersectsBox(pubBox), grass: seeFrustum.intersectsBox(grassBox), board: seeFrustum.intersectsBox(boardBox) };
     for (const m of meshes) {
       const t = m.userData.tags || (m.userData.tags = tagsOf(m));
       const lit = lerp(litOf(F, t, since), litOf(S, t, since), mix);
       const fresh = m.userData.fadeIn, goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim && !fresh ? 1 : ease);   // the late audience fades in, also during a camera move
-      if (t.audience || t.grass) { const seen = t.audience ? inView.audience : inView.grass; if (!seen) op = goal; else if (anim) op = m.material.opacity; }
+      if (t.audience || t.grass || t.board) { const seen = t.audience ? inView.audience : t.grass ? inView.grass : inView.board; if (!seen) op = goal; else if (anim) op = m.material.opacity; }
       if (Math.abs(goal - op) < 0.002) { op = goal; m.userData.fadeIn = false; }   // land exactly on the goal; the old "skip steps under 0.0005" could stall a fade at 0.054, just above the cut-off, leaving people "visible" at 5 % and casting full shadows
-      if (op !== m.material.opacity || fresh) { const was = m.visible; m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env;
-        if (m.visible !== was && m.castShadow) shadows.dirty = true; }   // late arrivals (fresh) always get their visibility set once: at opacity 0 with a goal of 0 nothing else would
+      if (op !== m.material.opacity || fresh) { const was = m.visible, cast = m.castShadow; m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env;
+        if (m.userData.cast0 === undefined) m.userData.cast0 = m.castShadow; m.castShadow = m.userData.cast0 && op > 0.5;   // a faded figure leaves no shadow behind
+        if ((m.visible !== was && cast) || m.castShadow !== cast) shadows.dirty = true; }   // late arrivals (fresh) always get their visibility set once: at opacity 0 with a goal of 0 nothing else would
     }
     // labels
     { const shown = [];   // the section names; a label that would touch a nearer one moves up a line, so each stays above its own section

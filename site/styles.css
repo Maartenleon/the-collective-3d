@@ -13,7 +13,7 @@
   --font-serif: "EB Garamond", Garamond, Georgia, serif; --font-sans: "Restart Soft", "Figtree", ui-sans-serif, system-ui, sans-serif;
   --text-ui: .75rem; --text-body: var(--text-ui); --leading-body: 1.6; --text-lede: clamp(1.05rem, 1.45vw, 1.4rem); --text-beat: clamp(1.5rem, 2.3vw, 2.25rem); --text-h3: 1.45rem; --text-h3-sm: 1.25rem;
   --space-3xs: .25rem; --space-2xs: .4rem; --space-xs: .6rem; --space-s: .85rem; --space-m: 1.25rem; --space-l: 1.75rem;
-  --gutter: clamp(20px, 7vw, 120px); --nav-top: calc(20px + env(safe-area-inset-top, 0px)); --brand-nudge: 9.5px; --beat-width: 46rem; --panel-width: 20rem; --panel-offset: 72px; --timeline-offset: 30px; --space-segment: 4px; --problems-top: calc(max(70px, 9vh) + 56px); --problems-fw-size: min(52vh, 36vw); --panel-fw-size: 64px;
+  --gutter: clamp(20px, 7vw, 120px); --nav-top: calc(20px + env(safe-area-inset-top, 0px)); --brand-nudge: 9.5px; --beat-width: 46rem; --panel-width: 20rem; --panel-offset: 72px; --timeline-offset: 30px; --space-segment: 4px; --problems-top: max(84px, 10vh); --problems-fw-size: min(52vh, 36vw); --panel-fw-size: 64px;
   --radius-glass: 18px; --radius-pill: 999px; --blur-glass: blur(18px) saturate(1.15);
   --shadow-glass: 0 20px 50px -30px rgb(0 0 0 / .6); --shadow-text: 0 1px 30px rgb(var(--rgb-shadow) / .45);
   --ease-out: cubic-bezier(.16, .84, .24, 1); --ease-in-out: cubic-bezier(.4, 0, .6, 1);
@@ -30,9 +30,9 @@ p, ul, h1, h2 { margin: 0; }
 .floor { position: absolute; inset: auto 0 0 0; height: 22vh; pointer-events: none; background: linear-gradient(to top, rgb(var(--rgb-shadow) / .55), rgb(var(--rgb-shadow) / 0)); }
 .shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--dur-slow) ease; background: rgb(var(--rgb-shadow) / .55); }
 .shade.is-on { opacity: 1; }
-.fore { position: absolute; inset: auto 0 0 0; height: 55vh; pointer-events: none; opacity: 0; transition: opacity var(--dur-slow) ease;   /* dark, soft foreground: the audience recedes */
-  background: linear-gradient(to top, rgb(var(--rgb-shadow) / .85), rgb(var(--rgb-shadow) / .5) 45%, rgb(var(--rgb-shadow) / 0));
-  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); -webkit-mask-image: linear-gradient(to top, #000 40%, transparent); mask-image: linear-gradient(to top, #000 40%, transparent); }
+.fore { position: absolute; inset: auto 0 0 0; height: 55vh; pointer-events: none; opacity: 0; transition: opacity var(--dur-slow) ease;   /* a dark foreground: the audience recedes */
+  background: linear-gradient(to top, rgb(var(--rgb-shadow) / .94), rgb(var(--rgb-shadow) / .72) 45%, rgb(var(--rgb-shadow) / 0));   /* dark, not blurred */
+  -webkit-mask-image: linear-gradient(to top, #000 40%, transparent); mask-image: linear-gradient(to top, #000 40%, transparent); }
 .fore.is-on { opacity: 1; }
 
 /* ---- beats: centred lines over the film, as on the site ---- */

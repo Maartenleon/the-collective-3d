@@ -827,7 +827,7 @@
     return g;
   }
   const bord = makeBoard(group("Bord", RUN), BOARD); bord.userData.count = 1;
-  const [bxx, bzz] = toThree(BOARD.x, BOARD.y); bord.position.set(bxx, STAGE.floor, bzz); bord.rotation.y = BOARD.rotY;
+  const [bxx, bzz] = toThree(BOARD.x, BOARD.y); bord.position.set(bxx, terrainH(bxx, bzz), bzz);   // on the ground beside the stage bord.rotation.y = BOARD.rotY;
 
   // CHANGE · morgen: next season's board and a small mixed team rehearsing the next piece, on the terrace at the rim
   const CHG = group("CHANGE · morgen", root);

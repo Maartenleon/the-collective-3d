@@ -122,7 +122,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
   ];
   const STAND_SHARE = 4;   // one shared music stand per four musicians
   const AUDIENCE = { rows: 4, perRow: 12, firstZ: 38, rowGap: 1.15, seatGap: 0.9 };
-  const BOARD = { x: 8.6, y: -1.6, rotY: -0.3, title: "TONIGHT'S SYMPHONY", lines: ["The Show", "Must Go On"], foot: "· THE ORCHESTRA ·" };   // programme board on the stage, right of the orchestra
+  const BOARD = { x: 19, y: -4, rotY: 0.3, title: "TONIGHT'S SYMPHONY", lines: ["The Show", "Must Go On"], foot: "· THE ORCHESTRA ·" };   // programme board beside the stage, on the ground to the right, just outside the opening shot (Kai); faces the front
   // CHANGE · tomorrow: a flat terrace on the left rim of the bowl, out of the opening shot: next season's board and a small rehearsal
   const NEXT = { x: -37, z: 1, r: 6.5, rehearsal: [-36.4, 0.4], ring: 2.0,
     board: { at: [-39.8, -1.4], rotY: 0.96, title: "NEXT SEASON'S SYMPHONY", lines: ["The Next", "Episode"], foot: "· IN REHEARSAL ·" },
@@ -964,7 +964,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
     return g;
   }
   const bord = makeBoard(group("Bord", RUN), BOARD); bord.userData.count = 1;
-  const [bxx, bzz] = toThree(BOARD.x, BOARD.y); bord.position.set(bxx, STAGE.floor, bzz); bord.rotation.y = BOARD.rotY;
+  const [bxx, bzz] = toThree(BOARD.x, BOARD.y); bord.position.set(bxx, terrainH(bxx, bzz), bzz);   // on the ground beside the stage bord.rotation.y = BOARD.rotY;
 
   // CHANGE · morgen: next season's board and a small mixed team rehearsing the next piece, on the terrace at the rim
   const CHG = group("CHANGE · morgen", root);
