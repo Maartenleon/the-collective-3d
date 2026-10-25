@@ -40,8 +40,10 @@
     p.build(kassa, true);
     const cv = document.createElement("canvas"); cv.width = 512; cv.height = 128; const x = cv.getContext("2d");
     x.fillStyle = "#e8b897"; x.fillRect(0, 0, 512, 128); x.strokeStyle = "#5c0f07"; x.lineWidth = 4; x.strokeRect(10, 10, 492, 108);
-    x.fillStyle = "#3a120c"; x.font = "500 54px Georgia, serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("BOX  OFFICE", 256, 66);
     const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding;
+    const draw = () => { x.fillStyle = "#e8b897"; x.fillRect(14, 14, 484, 100);
+      x.fillStyle = "#3a120c"; x.font = "700 64px 'Barlow Condensed', 'DIN Condensed', 'Arial Narrow', sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("BOX OFFICE", 256, 68); t.needsUpdate = true; };   // the same sans as the programme board
+    draw(); document.fonts && document.fonts.load("700 64px 'Barlow Condensed'").then(draw, () => {});
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.375), new THREE.MeshStandardMaterial({ map: t, roughness: 0.8, emissive: 0x3a2014, emissiveIntensity: 0.3 }));
     sign.position.set(0, 2.5, 0.75); kassa.add(sign);
     const KX = 11.5, KZ = 45.5; kassa.position.set(KX, terrainH(KX, KZ), KZ); kassa.rotation.y = -0.75;
@@ -68,7 +70,7 @@
   const oneByOne = (t, s, t0 = 0.3, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || (i >= 0 && i <= 3 && (t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")))); };
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
   const STOPS = [
-    { id: "open", name: "The concert", ch: 0, cam: K([0, 2.0, 36], [0, 4.4, -10], 34), beats: ["opening"] },
+    { id: "open", name: "The concert", ch: 0, cam: K([0, 3.2, 90], [0, 5.95, -20], NARROW ? 19 : 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills (a little wider on phones so the orchestra fits)
     // Frame 2: It isn't. Roles, skills, views, one performance
     { id: "t0", name: "It isn’t", ch: 0, seq: "twist", bar: 0, hold: 1.4, cam: CAM2, beats: ["twist"], lines: 0 },
     { id: "t1", ch: 0, seq: "twist", bar: 1, hold: 3.4, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, focus: (t, s) => oneByOne(t, s) },
@@ -86,21 +88,21 @@
     // Frame 4: Plan
     { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan" },
     // Frame 5: Blueprint
-    { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: ["Blueprint", "The score on every stand"], top: 1 },
-    { id: "b2", ch: 3, seq: "bp", bar: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"], top: 1 },
-    { id: "b3", ch: 3, seq: "bp", bar: 2, hold: 2.6, dur: 1.8, cam: frame(orchBox, V(0, 0.75, 1), 42, 0.74), panel: "blueprint", line: 1, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player), caption: ["Value stream", "One melody, many hands"], top: 1 },
-    { id: "b4", ch: 3, seq: "bp", bar: 3, hold: 3.0, cam: frame(orchBox, V(0.06, 0.72, 1), 42, 0.72), panel: "blueprint", line: 2, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player) || LINE2.has(t.player), caption: ["Value streams", "Two melodies, eight specialists, four sections"], top: 1 },
+    { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: ["Blueprint", "The score on every stand"] },
+    { id: "b2", ch: 3, seq: "bp", bar: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"] },
+    { id: "b3", ch: 3, seq: "bp", bar: 2, hold: 2.6, dur: 1.8, cam: frame(orchBox, V(0, 0.75, 1), 42, 0.74), panel: "blueprint", line: 1, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player), caption: ["Value stream", "One melody, many hands"] },
+    { id: "b4", ch: 3, seq: "bp", bar: 3, hold: 3.0, cam: frame(orchBox, V(0.06, 0.72, 1), 42, 0.72), panel: "blueprint", line: 2, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player) || LINE2.has(t.player), caption: ["Value streams", "Two melodies, eight specialists, four sections"] },
     // Frame 6: Means
-    { id: "m1", name: "Means", ch: 4, seq: "means", bar: 0, hold: 3.6, cam: CAM2, panel: "means", labels: ALL4, focus: (t, s) => oneByOne(t, s, 0.4, 0.8), caption: ["People", "Four sections, many specialists"], top: 1 },
-    { id: "m2", ch: 4, seq: "means", bar: 1, hold: 2.6, dur: 0.5, cam: CAM2, panel: "means", glow: 1, caption: ["Means", "Their instruments"], top: 1 },
-    { id: "m3", ch: 4, seq: "means", bar: 2, hold: 3.0, dur: 2.2, cam: frame(kassaBox, V(-0.55, 0.32, 1), 38, 1.7), panel: "means", booth: 1, caption: ["Means", "And the budget that keeps them playing"], top: 1 },
+    { id: "m1", name: "Means", ch: 4, seq: "means", bar: 0, hold: 3.6, cam: CAM2, panel: "means", labels: ALL4, focus: (t, s) => oneByOne(t, s, 0.4, 0.8), caption: ["People", "Four sections, many specialists"] },
+    { id: "m2", ch: 4, seq: "means", bar: 1, hold: 2.6, dur: 0.5, cam: CAM2, panel: "means", glow: 1, caption: ["Means", "Their instruments"] },
+    { id: "m3", ch: 4, seq: "means", bar: 2, hold: 3.0, dur: 2.2, cam: frame(kassaBox, V(-0.55, 0.32, 1), 38, 1.7), panel: "means", booth: 1, caption: ["Means", "And the budget that keeps them playing"] },
     // Frame 7: Orchestration
     { id: "orch", name: "Orchestration", ch: 5, seq: "dims", bar: 0, hold: 3.6, cam: frame(condBox, V(0.1, 0.22, 1), 34, 1.7, 0.1), panel: "orchestration", focus: t => t.env || t.conductor || (t.stand && t.condStand) },
     // Frame 8: the two dimensions
-    { id: "d1", name: "Run and Change", ch: 6, seq: "dims", bar: 1, hold: 3.4, dur: 2.2, cam: CAM2, panel: "dims", top: 1 },
-    { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1, top: 1 },
+    { id: "d1", name: "Run and Change", ch: 6, seq: "dims", bar: 1, hold: 3.4, dur: 2.2, cam: CAM2, panel: "dims" },
+    { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
     // Frame 9 and 10: your organisation
-    { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25 },
+    { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
     { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },
     // Part 4: The Collective. The camera rises over the bowl: tonight's concert and next season's rehearsal in one view
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
@@ -139,7 +141,7 @@
     return t;
   }
   scene.traverse(o => { if (o.isMesh && o !== skyMesh) { meshes.push(o); o.material.transparent = true; } });
-  const litOf = (s, t, since) => t.grass && s.id === "open" ? -FALLEN / (1 - FALLEN) : t.booth ? (s.booth ? 1 : -FALLEN / (1 - FALLEN)) : s.booth ? (t.env || t.audience ? 1 : 0.6) : !s.focus ? 1 : s.focus(t, since) ? 1 : (s.fallen || 0) / (1 - FALLEN);
+  const litOf = (s, t, since) => (t.grass || t.audience) && s.id === "open" ? -FALLEN / (1 - FALLEN) : t.booth ? (s.booth ? 1 : -FALLEN / (1 - FALLEN)) : s.booth ? (t.env || t.audience ? 1 : 0.6) : !s.focus ? 1 : s.focus(t, since) ? 1 : (s.fallen || 0) / (1 - FALLEN);
 
   /* ---------- labels anchored to the sections ---------- */
   const labelEls = {}; document.querySelectorAll("[data-label]").forEach(el => (labelEls[el.dataset.label] = { el, a: 0 }));
@@ -152,7 +154,7 @@
   const beats = {}; document.querySelectorAll("[data-beat]").forEach(el => (beats[el.dataset.beat] = el));
   const panels = {}; document.querySelectorAll("[data-panel]").forEach(el => (panels[el.dataset.panel] = el));
   const caption = $("#caption"), capKind = $("#captionKind"), capText = $("#captionText");
-  const shade = $("#shade"), topShade = $("#topShade"), problems = $("#problems"), hint = $("#hint");
+  const shade = $("#shade"), fore = $("#fore"), problems = $("#problems"), hint = $("#hint");
   const tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
   const collEl = $("#coll"), meetBtn = $("#meet");
   const fwGlass = $("[data-fw-glass]");
@@ -221,7 +223,7 @@
     meetBtn.classList.toggle("is-hidden", !!S.coll);
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
       g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o")); });
-    shade.style.opacity = S.shade || 0; topShade.classList.toggle("is-on", !!S.top);
+    shade.style.opacity = S.shade || 0; fore.classList.toggle("is-on", !!S.fore);
     hint.style.opacity = at === 0 ? 1 : 0;
     const n = segOf(at);
     segBtns.forEach((b, k) => { b.setAttribute("aria-current", k === n ? "step" : "false"); b.tabIndex = k === n ? 0 : -1; segFills[k].style.transform = `scaleX(${k < n ? 1 : 0})`; });
@@ -361,17 +363,21 @@
   });
   let meetFrom = null;   // the stop the Meet button was pressed on; a click outside the page goes back there
   meetBtn.addEventListener("click", () => { if (document.body.classList.contains("is-loading")) return; if (!STOPS[at].coll) meetFrom = at; goTo(idx("c0")); });
+  const leaveColl = () => { const back = meetFrom; meetFrom = null; if (back !== null) goTo(back); else step(-1); };
   document.addEventListener("click", e => {
     if (!STOPS[at].coll || e.target.closest("button, a, .coll__page, .fw, [data-timeline]")) return;
-    const back = meetFrom; meetFrom = null; if (back !== null) goTo(back); else step(-1);
+    leaveColl();
   });
+  $("[data-coll-close]").addEventListener("click", () => { if (STOPS[at].coll) leaveColl(); });   // the small cross does the same as a click beside the page
 
   /* ---------- per frame ---------- */
   function placeBeats() {   // beats marked data-anchor sit centred above the conductor, as on the site
     const [, y] = toScreen(V(0, STAGE.floor + STAGE.wall.high + 0.9, -STAGE.zb));   // above the back wall
     for (const k in beats) { const el = beats[k]; if (!el.dataset.anchor || !el.classList.contains("is-on")) continue;
       const h = el.offsetHeight; el.style.top = clamp(y - h - 26, vh < 600 ? 64 : 84, vh * 0.55).toFixed(0) + "px"; }
+    if (document.body.classList.contains("is-loading") && beats.opening.style.top) loaderOpen.style.top = beats.opening.style.top;   // the loader text sits exactly where the opening text will be
   }
+  const loaderOpen = $("#loader .loader__open");
   function drawMelody(now, dt) {
     const S = STOPS[at], live = !anim || anim.k > 0.6;
     MELODY.forEach((L, li) => {
@@ -507,7 +513,7 @@
     fctx.setTransform(dpr, 0, 0, dpr, 0, 0); fctx.clearRect(0, 0, vw, vh);
     drawMelody(now, dt); drawChaos(now, dt); glowTick(dt); placeBeats();
     windU.value = now; tickPeople(now); tension(now, dt);
-    film.render(now);
+    film.render();
   }
 
   function resize() {
@@ -535,8 +541,8 @@
       if (ready && shown > 0.995) {
         if (!doneAt) doneAt = performance.now();
         if (performance.now() - doneAt > 250) {
-          loader.classList.add("is-done"); document.body.classList.remove("is-loading");
-          for (const k in beats) beats[k].classList.remove("is-on"); void document.body.offsetWidth; applyStop(STOPS[at]);   // replay the opening text
+          loader.classList.add("is-done"); document.body.classList.remove("is-loading"); document.body.classList.add("is-ready");
+          // no replay of the opening text: it already sits exactly under the loader text, so the hand-over is seamless
           return;
         }
       }

@@ -14,7 +14,7 @@
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 600);
   const controls = new THREE.OrbitControls(camera, canvas);
   /* ---------- film look: the scene renders into an HDR buffer, then one pass gives it the aged, warm photo feel of
-     the reference (soft halation around bright parts, lifted warm blacks, softer contrast, slight fade, vignette, moving grain).
+     the reference (soft halation around bright parts, lifted warm blacks, softer contrast, slight fade, a vignette low in the frame). No grain or lens fringing: a clean image.
      Phones get the same look with fewer samples. ---------- */
   const film = (() => {
     const HF = THREE.HalfFloatType, q = small ? 4 : 3;
@@ -27,42 +27,38 @@
     const blur = new THREE.ShaderMaterial({ uniforms: { t: { value: null }, dir: { value: new THREE.Vector2() } }, vertexShader: VS, depthTest: false, depthWrite: false,
       fragmentShader: "uniform sampler2D t; uniform vec2 dir; varying vec2 vUv; void main(){ vec3 c = texture2D(t, vUv).rgb * 0.227; c += (texture2D(t, vUv + dir * 1.385).rgb + texture2D(t, vUv - dir * 1.385).rgb) * 0.316; c += (texture2D(t, vUv + dir * 3.231).rgb + texture2D(t, vUv - dir * 3.231).rgb) * 0.070; gl_FragColor = vec4(c, 1.); }" });
     const final = new THREE.ShaderMaterial({ depthTest: false, depthWrite: false,
-      uniforms: { tS: { value: null }, tB: { value: null }, exp: { value: 0.9 }, time: { value: 0 }, res: { value: new THREE.Vector2(1, 1) }, ca: { value: small ? 0 : 1 }, grainAmt: { value: small ? 0.045 : 0.055 } },
+      uniforms: { tS: { value: null }, tB: { value: null }, exp: { value: 0.9 } },
       vertexShader: VS, fragmentShader: `
-        uniform sampler2D tS, tB; uniform float exp, time, ca, grainAmt; uniform vec2 res; varying vec2 vUv;
+        uniform sampler2D tS, tB; uniform float exp; varying vec2 vUv;
         vec3 fRrtOdt(vec3 v){ vec3 a = v * (v + 0.0245786) - 0.000090537; vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081; return a / b; }
         vec3 fAces(vec3 c){ const mat3 I = mat3(0.59719, 0.07600, 0.02840, 0.35458, 0.90834, 0.13383, 0.04823, 0.01566, 0.83777);
           const mat3 O = mat3(1.60475, -0.10208, -0.00327, -0.53108, 1.10813, -0.07276, -0.07367, -0.00605, 1.07602);
           c *= exp / 0.6; c = I * c; c = fRrtOdt(c); c = O * c; return clamp(c, 0.0, 1.0); }
         vec3 fSRGB(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
-        float fHash(vec2 p){ p = fract(p * vec2(443.897, 441.423)); p += dot(p, p.yx + 19.19); return fract((p.x + p.y) * p.x); }
         void main(){
           vec2 d = vUv - 0.5; float r2 = dot(d, d);
           vec4 s = texture2D(tS, vUv);
           vec3 c = s.rgb;
-          if (ca > 0.5) { c.r = texture2D(tS, vUv - d * r2 * 0.012).r; c.b = texture2D(tS, vUv + d * r2 * 0.012).b; }   // a touch of lens fringing toward the edges
           vec3 hal = texture2D(tB, vUv).rgb;
           c += hal * vec3(1.0, 0.62, 0.42) * 0.55;                                     // warm halation, as on film
           vec3 col = mix(c + hal * vec3(1.0, 0.62, 0.42) * 0.25, fSRGB(fAces(c)), s.a);   // the sky is already in screen colour (alpha 0)
           float l = dot(col, vec3(0.299, 0.587, 0.114));
           col = mix(vec3(l), col, 0.84);                                               // slightly faded colour
-          col = mix(col, col * vec3(1.04, 0.99, 0.90), smoothstep(0.35, 1.0, l));       // warm, creamy highlights
+          col = mix(col, col * mix(vec3(1.04, 0.99, 0.90), vec3(1.06, 0.97, 0.87), s.a), smoothstep(0.35, 1.0, l));   // warm, creamy highlights; golden-hour gold on the lit scene, not on the sky
           col = col * 0.93 + vec3(0.055, 0.038, 0.030) * (1.0 - col);                   // lifted, warm blacks; softer contrast
           col *= mix(1.0, 0.66, smoothstep(0.12, 0.55, r2 * 1.6) * (1.0 - smoothstep(0.3, 0.55, vUv.y)));   // vignette, lower half only: the sky stays clean
-          float g = fHash(vUv * res + fract(time * 7.13) * 91.7) + fHash(vUv * res * 0.5 + fract(time * 3.7) * 37.1) - 1.0;
-          col += g * grainAmt * (0.35 + 0.65 * (1.0 - abs(l - 0.45) * 1.6));          // grain, strongest in the mid tones
           gl_FragColor = vec4(col, 1.0);
         }` });
     const pass = (m, target) => { quad.material = m; renderer.setRenderTarget(target); renderer.render(qs, qc); };
     return {
       setSize(w, h) { const pr = renderer.getPixelRatio(), W = Math.max(1, Math.floor(w * pr)), H = Math.max(1, Math.floor(h * pr));
-        main.setSize(W, H); A.setSize(Math.max(1, W >> q), Math.max(1, H >> q)); B.setSize(Math.max(1, W >> q), Math.max(1, H >> q)); final.uniforms.res.value.set(W, H); },
-      render(t) {
+        main.setSize(W, H); A.setSize(Math.max(1, W >> q), Math.max(1, H >> q)); B.setSize(Math.max(1, W >> q), Math.max(1, H >> q)); },
+      render() {
         renderer.setRenderTarget(main); renderer.render(scene, camera);
         bright.uniforms.t.value = main.texture; bright.uniforms.exp.value = renderer.toneMappingExposure; pass(bright, A);
         const iw = 1 / A.width, ih = 1 / A.height;
         for (const k of small ? [1] : [1, 2.2]) { blur.uniforms.t.value = A.texture; blur.uniforms.dir.value.set(iw * k, 0); pass(blur, B); blur.uniforms.t.value = B.texture; blur.uniforms.dir.value.set(0, ih * k); pass(blur, A); }
-        Object.assign(final.uniforms.tS, { value: main.texture }); final.uniforms.tB.value = A.texture; final.uniforms.time.value = t; final.uniforms.exp.value = renderer.toneMappingExposure;
+        Object.assign(final.uniforms.tS, { value: main.texture }); final.uniforms.tB.value = A.texture; final.uniforms.exp.value = renderer.toneMappingExposure;
         pass(final, null);
       } };
   })();
@@ -499,9 +495,9 @@
   const omg = group("Omgeving", RUN);
   const skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { top: { value: new THREE.Color(0x8f97b4) }, mid: { value: new THREE.Color(0x9da4bf) }, low: { value: new THREE.Color(0xb9b6c4) } },
+    uniforms: { top: { value: new THREE.Color(0x9aa3c2) }, mid: { value: new THREE.Color(0x98a0bf) }, low: { value: new THREE.Color(0x939bbb) } },   // cool lavender blue, a touch darker toward the hills
     vertexShader: "varying float h; void main(){ h = normalize(position).y; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }",
-    fragmentShader: "uniform vec3 top; uniform vec3 mid; uniform vec3 low; varying float h; void main(){ vec3 c = mix(low, mid, smoothstep(-0.02, 0.18, h)); c = mix(c, top, smoothstep(0.18, 0.7, h)); c = mix(c, vec3(0.86, 0.74, 0.66), (1.0 - smoothstep(0.0, 0.13, h)) * smoothstep(-0.05, 0.0, h) * 0.55); gl_FragColor = vec4(c, 0.); }"
+    fragmentShader: "uniform vec3 top; uniform vec3 mid; uniform vec3 low; varying float h; void main(){ vec3 c = mix(low, mid, smoothstep(-0.02, 0.18, h)); c = mix(c, top, smoothstep(0.18, 0.7, h)); gl_FragColor = vec4(c, 0.); }"
   });
   { const env = new THREE.Scene(); env.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), skyMat));
     const gnd = new THREE.Mesh(new THREE.CircleGeometry(9.9, 32), new THREE.MeshBasicMaterial({ color: 0x6a4026 })); gnd.rotation.x = -Math.PI / 2; gnd.position.y = -0.4; env.add(gnd);
@@ -544,50 +540,50 @@
     g.setAttribute("color", new THREE.BufferAttribute(col, 3)); g.computeVertexNormals();
     // fine soil texture so close-ups are not plastic
     const cv = document.createElement("canvas"); cv.width = cv.height = 256; const x2 = cv.getContext("2d"), id = x2.createImageData(256, 256);
-    for (let i = 0; i < id.data.length; i += 4) { const v = 196 + Math.random() * 59; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
-    x2.putImageData(id, 0, 0); const soil = new THREE.CanvasTexture(cv); soil.wrapS = soil.wrapT = THREE.RepeatWrapping; soil.repeat.set(160, 160);
+    for (let i = 0; i < id.data.length; i += 4) { const v = 226 + Math.random() * 29; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+    x2.putImageData(id, 0, 0); const soil = new THREE.CanvasTexture(cv); soil.wrapS = soil.wrapT = THREE.RepeatWrapping; soil.repeat.set(320, 320);
     const mat = material("earth", { map: soil });
     mat.onBeforeCompile = sh => {   // smooth velvet earth: soft tone patches, no furrows, rust and dark patches, all in world space
       sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\n varying vec3 vW;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\n vW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
       sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\n varying vec3 vW;\n" + NOISE_GLSL).replace("#include <map_fragment>", `#include <map_fragment>
         float wob = sin(vW.x * 0.045) * 1.6 + sin(vW.z * 0.06 + vW.x * 0.01) * 1.2 + vnoise(vW.xz * 0.08) * 1.5;
-        float big = fbm(vW.xz * 0.025 + 3.0), mid = fbm(vW.xz * 0.12), clod = fbm(vW.xz * 1.7), grit = vnoise(vW.xz * 9.0);
+        float big = fbm(vW.xz * 0.025 + 3.0), mid = fbm(vW.xz * 0.12), clod = fbm(vW.xz * 6.0), grit = vnoise(vW.xz * 18.0);
         vec3 rust = vec3(0.16, 0.05, 0.02), deep = vec3(0.03, 0.009, 0.006), dust = vec3(0.16, 0.085, 0.06);
         float lum0 = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11)); diffuseColor.rgb = mix(diffuseColor.rgb, lum0 * vec3(1.45, 0.82, 0.66), 0.6);   // less candy red, more maroon-brown
-        diffuseColor.rgb = mix(diffuseColor.rgb, rust, smoothstep(0.5, 0.75, big) * 0.7);          // rusty, sun-baked patches
-        diffuseColor.rgb = mix(diffuseColor.rgb, deep, smoothstep(0.52, 0.28, mid) * 0.6);          // damp, darker earth
-        diffuseColor.rgb = mix(diffuseColor.rgb, dust, smoothstep(0.62, 0.9, clod) * 0.35);         // dry tops of clods
+        diffuseColor.rgb = mix(diffuseColor.rgb, rust, smoothstep(0.5, 0.75, big) * 0.35);          // rusty, sun-baked patches
+        diffuseColor.rgb = mix(diffuseColor.rgb, deep, smoothstep(0.52, 0.28, mid) * 0.3);          // damp, darker earth
+        diffuseColor.rgb = mix(diffuseColor.rgb, dust, smoothstep(0.62, 0.9, clod) * 0.15);         // dry tops of clods
         float far = smoothstep(16.0, 46.0, length(vW.xz - vec2(0.0, -3.0))) * smoothstep(1.5, 9.0, vW.y);     // up the bowl and toward the rim
         float front = (1.0 - smoothstep(16.0, 22.0, abs(vW.x))) * smoothstep(7.5, 10.0, vW.z) * (1.0 - smoothstep(30.0, 34.0, vW.z));   // the ground in front of the stage
-        diffuseColor.rgb *= mix(1.0, (0.82 + 0.34 * clod) * (0.92 + 0.16 * grit), 1.0 - 0.6 * far);    // no furrows, but clods and grit give the soil depth (softer in the haze)
-        diffuseColor.rgb *= 0.66 * (1.0 - 0.14 * front);                                              // darker bowl; a little darker in front of the stage
+        diffuseColor.rgb *= mix(1.0, (0.96 + 0.08 * clod) * (0.98 + 0.04 * grit), 1.0 - 0.6 * far);    // no furrows, but clods and grit give the soil depth (softer in the haze)
+        diffuseColor.rgb *= 0.28 * (1.0 - 0.14 * front);                                              // darker bowl; a little darker in front of the stage
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.13, 0.075, 0.08), far * 0.4);
-        float shade = max(smoothstep(-3.0, 3.0, (5.5 + 0.22 * vW.x) - vW.y), smoothstep(8.0, 13.0, vW.z)) * (1.0 - smoothstep(28.0, 32.0, vW.z));   // below a line that climbs to the right, and all of the ground in front of the stage
-        diffuseColor.rgb *= 1.0 - 0.72 * shade;   // a long soft shadow over the front of the bowl, like the site photo                 // evening haze: the rim melts toward the hills
+        float shade = max(smoothstep(-0.35, 0.35, (5.5 + 0.22 * vW.x) - vW.y), smoothstep(8.0, 13.0, vW.z)) * (1.0 - smoothstep(28.0, 32.0, vW.z));   // below a line that climbs to the right, and all of the ground in front of the stage
+        diffuseColor.rgb *= 1.0 - 0.84 * shade;   // a long, sharp-edged shadow over the front of the bowl, like the site photo                 // evening haze: the rim melts toward the hills
       `).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
-        { float e = 0.06; float c0 = fbm(vW.xz * 1.7), cx = fbm((vW.xz + vec2(e, 0.0)) * 1.7), cz = fbm((vW.xz + vec2(0.0, e)) * 1.7);
+        { float e = 0.02; float c0 = fbm(vW.xz * 6.0), cx = fbm((vW.xz + vec2(e, 0.0)) * 6.0), cz = fbm((vW.xz + vec2(0.0, e)) * 6.0);
           float far = smoothstep(16.0, 46.0, length(vW.xz - vec2(0.0, -3.0))) * smoothstep(1.5, 9.0, vW.y);
-          vec3 dW = vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * 0.16 * (1.0 - 0.6 * far);           // clods catch the low sun
+          vec3 dW = vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * 0.035 * (1.0 - 0.6 * far);           // fine, flat clods catch the low sun
           normal = normalize(normal + mat3(viewMatrix) * dW); }`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
         { float front = (1.0 - smoothstep(16.0, 22.0, abs(vW.x))) * smoothstep(7.5, 10.0, vW.z) * (1.0 - smoothstep(30.0, 34.0, vW.z));
-          roughnessFactor = mix(roughnessFactor, 0.55, front * 0.7 * smoothstep(0.4, 0.7, fbm(vW.xz * 1.7))); }   // soft sheen on the clod tops in front of the stage`);
+          roughnessFactor = mix(roughnessFactor, 0.55, front * 0.35 * smoothstep(0.4, 0.7, fbm(vW.xz * 6.0))); }   // soft sheen on the clod tops in front of the stage`);
     };
     const m = new THREE.Mesh(g, mat); m.name = "Aarde"; m.receiveShadow = true; m.castShadow = true; heuvels.add(m); }
-  { // far ranges: four layers of ridged hills, each paler and bluer (haze), lit from the side so the flanks read
-    const LAYERS = [[170, 38, 0x6a6fa4, 0.0], [235, 50, 0x737aac, 1.3], [305, 62, 0x7c85b2, 2.6], [380, 74, 0x8690b8, 3.9]];   // v9 shapes, in deep blue-lavender
-    const ridge = (a, s) => { let h = 0, amp = 1, f = 7; for (let o = 0; o < 5; o++) { h += amp * Math.sin(a * f + s * (o + 1) + Math.sin(a * f * 0.37 + o) * 1.5); amp *= 0.45; f *= 2.3; } return 0.5 + 0.35 * h; };   // soft rolling ranges, no peaks
+  { // far ranges: four layers of low rolling hills, each a little higher and hazier, lit from the side so the round flanks read
+    const LAYERS = [[255, 34, 0x3b527a, 2.6], [300, 40, 0x40577f, 3.9], [345, 46, 0x465c84, 5.2], [390, 52, 0x4c6289, 6.5]];   // from the opening camera a low band just above the rim; the first one barely clears it
+    const roll = (a, s) => 0.55 * Math.sin(a * 21 + s) + 0.3 * Math.sin(a * 47 + s * 2.1 + Math.sin(a * 9 + s)) + 0.15 * Math.sin(a * 97 + s * 3.7);   // low, subtle swells, no peaks
     LAYERS.forEach(([R, H, col, seed], li) => {
-      const seg = small ? 360 : 720, rows = 22, g = new THREE.CylinderGeometry(1, 1, 1, seg, rows, true);
-      const p = g.attributes.position, cols = new Float32Array(p.count * 3), c0 = new THREE.Color(col), c1 = new THREE.Color(0x9ea4c2), c = new THREE.Color();
+      const seg = small ? 720 : 1440, rows = 22, g = new THREE.CylinderGeometry(1, 1, 1, seg, rows, true);
+      const p = g.attributes.position, cols = new Float32Array(p.count * 3), c0 = new THREE.Color(col), c1 = new THREE.Color(0x6f86ad), c = new THREE.Color();
       for (let i = 0; i < p.count; i++) { const a = Math.atan2(p.getZ(i), p.getX(i)), t = p.getY(i) + 0.5;
-        const top = H * (0.68 + 0.32 * ridge(a, seed));
-        const RR = R - 25 * t + (2.2 * Math.sin(a * 23 + seed + t * 2) + 1.2 * Math.sin(a * 57 + seed * 2)) * Math.sin(t * Math.PI);   // gentle folds in the flanks
+        const k = roll(a, seed), top = H + 0.5 * k;
+        const RR = R - (25 + 2 * k) * t;   // a higher hill also reaches further forward: round flanks that catch the light
         p.setXYZ(i, Math.cos(a) * RR, -6 + top * Math.pow(t, 0.8), Math.sin(a) * RR);
         c.copy(c0).lerp(c1, 0.15 + 0.35 * (1 - t)).convertSRGBToLinear(); cols.set([c.r, c.g, c.b], i * 3); }
       g.setAttribute("color", new THREE.BufferAttribute(cols, 3)); g.computeVertexNormals();
-      const fm = material("far", { side: THREE.BackSide, fog: false, color: 0x3c3c3c, emissive: col, emissiveIntensity: 0.42 + li * 0.08 });
+      const fm = material("far", { side: THREE.BackSide, fog: false, color: 0x8a7470, emissive: col, emissiveIntensity: 0.26 + li * 0.04 });   // warm rose where the sun reaches, slate blue in the shade
       fm.onBeforeCompile = sh => {   // sculpted flanks: erosion gullies running downhill, gold where the sun hits, lilac in the folds
-        sh.uniforms.depth = { value: li / 3 };
+        sh.uniforms.depth = { value: li / 5 };
         sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\n varying vec3 vW;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\n vW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
         sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\n uniform float depth; varying vec3 vW;\n" + NOISE_GLSL).replace("#include <map_fragment>", `#include <map_fragment>
           float ang = atan(vW.z, vW.x), R = length(vW.xz);
@@ -596,11 +592,14 @@
           diffuseColor.rgb *= 0.9 + 0.15 * gl;
           diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.74, 0.55, 0.54), smoothstep(0.4, 0.85, tone) * 0.6 * (1.0 - depth * 0.35));   // peach where the grass catches the sun
           diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.52, 0.50, 0.66), smoothstep(0.45, 0.2, gl) * 0.3);                            // lilac in the gullies
+        `).replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+          { vec3 nW = normalize((vec4(normal, 0.0) * viewMatrix).xyz); float sunK = smoothstep(0.0, 0.45, dot(nW, normalize(vec3(0.88, 0.26, 0.40))));
+            totalEmissiveRadiance = mix(totalEmissiveRadiance, vec3(0.17, 0.105, 0.105), sunK * 0.7 * (1.0 - depth * 0.3)); }   // flanks turned to the low sun glow rose, as in the reference
         `).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
           { float ang = atan(vW.z, vW.x), R = length(vW.xz); vec2 q = vec2(ang * R * 0.06, vW.y * 0.03), e = vec2(0.03, 0.0);
             float c0 = ridged(q), cu = ridged(q + e.xy), cv = ridged(q + e.yx); c0 *= 0.75; cu *= 0.75; cv *= 0.75;
             vec3 T = vec3(-sin(ang), 0.0, cos(ang));
-            vec3 dW = -(T * (cu - c0) / 0.03 + vec3(0.0, 1.0, 0.0) * (cv - c0) / 0.03) * (0.1 - depth * 0.04);
+            vec3 dW = -(T * (cu - c0) / 0.03 + vec3(0.0, 1.0, 0.0) * (cv - c0) / 0.03) * (0.05 - depth * 0.02);
             normal = normalize(normal + mat3(viewMatrix) * dW); }`);
       };
       const m = new THREE.Mesh(g, fm); m.name = "Bergketen " + (li + 1); m.renderOrder = -1; heuvels.add(m); });
@@ -668,21 +667,6 @@
     gspots.forEach(([px, pz, g], i) => { o.position.set(px, terrainH(px, pz), pz); o.rotation.set(0, Math.random() * Math.PI, 0); const k = 0.6 + Math.random() * 0.7; o.scale.set(k, k * (0.8 + g * 0.6), k); o.updateMatrix(); gm.setMatrixAt(i, o.matrix);
       tc.set(Math.random() < 0.15 ? 0x4a4632 : 0xa09c84).convertSRGBToLinear(); tc.multiplyScalar(0.6 + Math.random() * 0.3); gm.setColorAt(i, tc); });
     graan.add(gm); }
-  { // a few low, dark tufts on the open ground in front of the stage (not in the opening shot's centre)
-    const cv = document.createElement("canvas"); cv.width = 128; cv.height = 64; const x = cv.getContext("2d");
-    for (let i = 0; i < 70; i++) { const bx = 10 + Math.random() * 108, h = 18 + Math.random() * 40, lean = (Math.random() - 0.5) * 26;
-      x.strokeStyle = ["#3a2a1c", "#4a3a26", "#2c2016", "#56462e"][i % 4]; x.lineWidth = 1 + Math.random() * 1.4;
-      x.beginPath(); x.moveTo(bx, 64); x.quadraticCurveTo(bx + lean * 0.2, 64 - h * 0.6, bx + lean, 64 - h); x.stroke(); }
-    const tex = new THREE.CanvasTexture(cv); tex.encoding = THREE.sRGBEncoding;
-    const q = new THREE.PlaneGeometry(0.5, 0.25); q.translate(0, 0.125, 0); const q2 = q.clone(); q2.rotateY(Math.PI / 2);
-    const spots = [];
-    for (let i = 0; i < (small ? 70 : 140); i++) { const px = (Math.random() - 0.5) * 40, pz = 9 + Math.random() * 24;
-      if (Math.abs(px) < 0.5 * (37 - pz) * 0.35 + 1.5 && Math.random() < 0.85) continue;   // mostly off the central sight line
-      if (Math.hypot(px / (STAGE.rx + 1.5), pz / (STAGE.zf + 1.5)) < 1) continue; spots.push([px, pz]); }
-    const tm = new THREE.InstancedMesh(THREE.BufferGeometryUtils.mergeBufferGeometries([q, q2]), material("stalk", { map: tex, color: 0xffffff }), spots.length); tm.name = "Plukjes";
-    const o = new THREE.Object3D();
-    spots.forEach(([px, pz], i) => { o.position.set(px, terrainH(px, pz), pz); o.rotation.set(0, Math.random() * Math.PI, 0); const k = 0.6 + Math.random() * 0.8; o.scale.set(k, k, k); o.updateMatrix(); tm.setMatrixAt(i, o.matrix); });
-    tm.receiveShadow = true; tm.visible = false; graan.add(tm); }   // off: the ground in front of the stage now lies in shadow
   group("Licht", omg).userData.note = "zon en hemellicht";
 
   // Podium
@@ -697,8 +681,7 @@
   const grow = (T, d) => ({ r: [T.r[0] - d, T.r[1] + d], deg: [T.deg[0] - d * 9, T.deg[1] + d * 9] });   // a slightly larger sector for the shadow gap
   new Part("Trede 1 · houtblazers").add(slab(sector(STAGE.tier1), STAGE.tier1.h - 0.03, STAGE.floor + 0.03), "tier").add(slab(sector(grow(STAGE.tier1, -0.03)), 0.031, STAGE.floor), "reveal").build(pod, true);
   new Part("Trede 2 · koper en slagwerk").add(slab(sector(STAGE.tier2), STAGE.tier2.h - 0.03, STAGE.floor + 0.03), "tier").add(slab(sector(grow(STAGE.tier2, -0.03)), 0.031, STAGE.floor), "reveal").build(pod, true);
-  { // back: two smooth curved bands along the back of the floor, a low one in front and a taller one behind, with a shadow seam between;
-    // each rises gently to the sides and fades into the floor at its ends
+  { // back: one smooth curved band along the back of the floor; it rises gently to the sides and fades into the floor at its ends
     const W = STAGE.wall, wall = new Part("Achterwand");
     const band = (k0, k1, t0, low, high, key) => {
       const t1 = Math.PI - t0, N = 160, R = 2, C = R + 3, pos = [], uv = [], idx = [];
@@ -712,13 +695,7 @@
       const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
       geo.setIndex(idx); const flat = geo.toNonIndexed(); flat.computeVertexNormals(); wall.add(flat, key); };   // faceted: crisp edges between face and top
     const d = W.t / STAGE.zb;
-    band(1 - 2 * d - 0.012, 1 - d - 0.012, 0.08 * Math.PI, W.low * 0.8, W.high * 0.78, "tier");   // front band: lower, as light as the floor
-    band(1 - d, 1.0, 0.04 * Math.PI, W.low * 1.25, W.high * 1.12, "wall");                 // rear band: taller, longer and a shade darker, so the two read apart
-    { // dark reveal in the floor between the two bands: the shadow seam
-      const k0 = 1 - d - 0.012, k1 = 1 - d, t0 = 0.08 * Math.PI, N = 120, sh = new THREE.Shape(), Q = (k, t) => [STAGE.rx * k * Math.cos(t), STAGE.zb * k * Math.sin(t)];
-      for (let i = 0; i <= N; i++) { const p = Q(k1, t0 + (Math.PI - 2 * t0) * i / N); i ? sh.lineTo(...p) : sh.moveTo(...p); }
-      for (let i = N; i >= 0; i--) sh.lineTo(...Q(k0, t0 + (Math.PI - 2 * t0) * i / N));
-      wall.add(slab(sh, 0.006, STAGE.floor), "reveal"); }
+    band(1 - d, 1.0, 0.04 * Math.PI, W.low * 1.25, W.high * 1.12, "wall");
     wall.build(pod, true); }
   const [cx0, cz0] = toThree(...CONDUCTOR);
   new Part("Dirigentenbok").add(new THREE.BoxGeometry(1, 0.25, 0.8), "tier", M(cx0, STAGE.floor + 0.125, cz0 + 0.4)).build(pod, true);
@@ -814,48 +791,39 @@
   }
   dir.position.set(cx0, STAGE.floor + 0.25, cz0 + 0.4); dir.rotation.y = Math.PI;
 
-  // Bord: a classic standing programme board, aged parchment in a slim dark-bronze frame with a gilt line, on two posts and a foot
-  MAT.bronze = { color: 0x0f0905, roughness: 0.42, metalness: 0.75 };
-  MAT.gilt = { color: 0x6a4a1c, roughness: 0.35, metalness: 0.9 };
-  const BW = 1.3, BH = 1.75, BY = 0.5;   // panel size and the height of its lower edge above the floor (m)
+  // Bord: a plaster-white card with bold condensed capitals in a slim black metal frame on two legs
+  MAT.iron = { color: 0x16120f, roughness: 0.45, metalness: 0.6 };
+  const BW = 1.1, BH = 1.5, BY = 0.45;   // card size and the height of its lower edge above the floor (m)
+  const CARD = "#f2ede5", INK = "#1c1512";   // the colour of the stage plaster
   function makeBoard(g, cfg) {
-    const cv = document.createElement("canvas"); cv.width = 768; cv.height = 1034;
+    const CW = 768, CH = Math.round(CW * BH / BW), cv = document.createElement("canvas"); cv.width = CW; cv.height = CH;
     const tx = new THREE.CanvasTexture(cv); tx.encoding = THREE.sRGBEncoding; tx.anisotropy = 8;
     function draw() {
-      const x = cv.getContext("2d"), W = 768, H = 1034;
-      x.fillStyle = "#e8b897"; x.fillRect(0, 0, W, H);   // soft peach paper
-      const rnd = (() => { let a = 11; return () => (a = (a * 16807) % 2147483647) / 2147483647; })();
-      for (let i = 0; i < 90; i++) { const px = rnd() * W, py = rnd() * H, r = 30 + rnd() * 140, gr = x.createRadialGradient(px, py, 0, px, py, r);   // foxing and age
-        gr.addColorStop(0, rnd() < 0.5 ? "rgba(150,110,60,.07)" : "rgba(255,250,235,.08)"); gr.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = gr; x.fillRect(px - r, py - r, 2 * r, 2 * r); }
-      const edge = x.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.75); edge.addColorStop(0, "rgba(0,0,0,0)"); edge.addColorStop(1, "rgba(110,70,30,.22)"); x.fillStyle = edge; x.fillRect(0, 0, W, H);
-      x.strokeStyle = "#5C0F07"; x.lineWidth = 3; x.strokeRect(38, 38, W - 76, H - 76); x.lineWidth = 1.2; x.strokeRect(50, 50, W - 100, H - 100);
-      x.textAlign = "center"; x.fillStyle = "#5C0F07";
-      const t = cfg.title.split("").join(String.fromCharCode(8202)).replace(/ /g, "   ");
-      let fs = 30; do { x.font = "500 " + fs + "px 'EB Garamond', Garamond, Georgia, serif"; } while (x.measureText(t).width > W - 150 && --fs > 18);
-      x.fillText(t, W / 2, 190);
-      x.strokeStyle = "#5C0F07"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(W / 2 - 120, 236); x.lineTo(W / 2 - 18, 236); x.moveTo(W / 2 + 18, 236); x.lineTo(W / 2 + 120, 236); x.stroke();
-      x.save(); x.translate(W / 2, 236); x.rotate(Math.PI / 4); x.fillRect(-6, -6, 12, 12); x.restore();
-      x.fillStyle = "#1e1310"; x.font = "italic 400 128px 'EB Garamond', Garamond, Georgia, serif";
-      cfg.lines.forEach((l, i) => x.fillText(l, W / 2, 470 + i * 150));
-      x.fillStyle = "#b8321f"; x.fillRect(W / 2 - 34, 700, 68, 4);
-      x.fillStyle = "#5C0F07"; x.font = "400 26px 'EB Garamond', Garamond, Georgia, serif"; x.fillText(cfg.foot, W / 2, 880);
+      const x = cv.getContext("2d"), font = n => "700 " + n + "px 'Barlow Condensed', 'DIN Condensed', 'Arial Narrow', sans-serif";
+      const fit = (lines, n, w) => { do { x.font = font(n); } while (Math.max(...lines.map(l => x.measureText(l).width)) > w && --n > 20); return n; };
+      x.fillStyle = CARD; x.fillRect(0, 0, CW, CH);
+      x.fillStyle = INK; x.textAlign = "center"; x.textBaseline = "alphabetic";
+      const title = cfg.title.toUpperCase(), lines = cfg.lines.map(l => l.toUpperCase()), foot = cfg.foot.toUpperCase();
+      x.font = font(fit([title], 44, CW - 160)); x.fillText(title, CW / 2, CH * 0.16);   // small title, as on the old board
+      const big = fit(lines, 150, CW - 140); x.font = font(big);
+      lines.forEach((l, i) => x.fillText(l, CW / 2, CH * 0.42 + i * big * 1.0));   // the big lines
+      x.font = font(fit([foot], 36, CW - 160)); x.fillText(foot, CW / 2, CH * 0.86);   // small foot line
       tx.needsUpdate = true;
     }
-    draw(); document.fonts && document.fonts.load("italic 128px 'EB Garamond'").then(draw, () => {});
-    const bp = new Part("Paneel"), fr = 0.045, cy = BY + BH / 2;
-    bp.add(new THREE.PlaneGeometry(BW, BH), "board", M(0, cy, 0.012), { map: tx, emissiveMap: tx, color: 0x606060, emissiveIntensity: 0.35, roughness: 0.95 });
-    bp.add(new THREE.BoxGeometry(BW + 0.02, BH + 0.02, 0.018), "bronze", M(0, cy, 0));                                     // backing board
-    for (const [w, h, px, py] of [[BW + 2 * fr, fr, 0, BH / 2 + fr / 2], [BW + 2 * fr, fr, 0, -BH / 2 - fr / 2], [fr, BH, -BW / 2 - fr / 2, 0], [fr, BH, BW / 2 + fr / 2, 0]])
-      bp.add(new THREE.BoxGeometry(w, h, 0.05), "bronze", M(px, cy + py, 0.008));                                          // slim moulded frame
-    for (const [w, h, px, py] of [[BW, 0.008, 0, BH / 2 - 0.004], [BW, 0.008, 0, -BH / 2 + 0.004], [0.008, BH, -BW / 2 + 0.004, 0], [0.008, BH, BW / 2 - 0.004, 0]])
-      bp.add(new THREE.BoxGeometry(w, h, 0.012), "gilt", M(px, cy + py, 0.02));                                            // gilt inner line
-    bp.add(new THREE.SphereGeometry(0.035, 12, 8), "gilt", M(-BW / 2 - fr / 2, cy + BH / 2 + fr + 0.03, 0)).add(new THREE.SphereGeometry(0.035, 12, 8), "gilt", M(BW / 2 + fr / 2, cy + BH / 2 + fr + 0.03, 0));
+    draw(); document.fonts && document.fonts.load("700 96px 'Barlow Condensed'").then(draw, () => {});
+    const plain = document.createElement("canvas"); plain.width = plain.height = 4; plain.getContext("2d").fillStyle = CARD; plain.getContext("2d").fillRect(0, 0, 4, 4);
+    const back = new THREE.CanvasTexture(plain); back.encoding = THREE.sRGBEncoding;
+    const bp = new Part("Paneel"), cy = BY + BH / 2, fr = 0.03;
+    bp.add(new THREE.PlaneGeometry(BW, BH), "board", M(0, cy, 0.006), { map: tx, emissiveMap: tx, color: 0x8a8a8a, emissiveIntensity: 0.18, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });   // drawn in front of the card, also from the far opening camera
+    bp.add(new THREE.BoxGeometry(BW, BH, 0.01), "board", M(0, cy, 0), { map: back, emissiveMap: back, color: 0x8a8a8a, emissiveIntensity: 0.18, roughness: 0.95 });   // the card itself: plain on the back and edges
     bp.build(g);
-    const legs = new Part("Voet");
-    for (const s2 of [-1, 1]) { legs.add(new THREE.CylinderGeometry(0.014, 0.018, BY + 0.05, 10), "bronze", M(s2 * (BW / 2 + fr / 2), (BY + 0.05) / 2, -0.01));
-      legs.add(new THREE.BoxGeometry(0.06, 0.02, 0.42), "bronze", M(s2 * (BW / 2 + fr / 2), 0.01, -0.02)); }
-    legs.add(new THREE.CylinderGeometry(0.008, 0.008, BW + fr, 8), "bronze", M(0, 0.12, -0.01, 0, 0, Math.PI / 2));
-    legs.build(g);
+    const iron = new Part("Lijst en poten");
+    for (const [w, h, px, py] of [[BW + 2 * fr, fr, 0, BH / 2 + fr / 2], [BW + 2 * fr, fr, 0, -BH / 2 - fr / 2]])
+      iron.add(new THREE.BoxGeometry(w, h, 0.03), "iron", M(px, cy + py, 0));                                               // top and bottom of the frame
+    for (const s2 of [-1, 1]) {
+      iron.add(new THREE.BoxGeometry(fr, cy + BH / 2 + fr, 0.03), "iron", M(s2 * (BW / 2 + fr / 2), (cy + BH / 2 + fr) / 2, 0));   // the sides run down to the floor as legs
+      iron.add(new THREE.BoxGeometry(0.035, 0.02, 0.4), "iron", M(s2 * (BW / 2 + fr / 2), 0.01, 0)); }                       // a flat foot under each leg
+    iron.build(g);
     return g;
   }
   const bord = makeBoard(group("Bord", RUN), BOARD); bord.userData.count = 1;

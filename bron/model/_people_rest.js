@@ -238,9 +238,9 @@
           diffuseColor.rgb = mix(c, tint * clamp(mx / 0.009, 0.45, 1.5), k); }`); };
     mat.customProgramCacheKey = () => "tint";
   }
-  // audience and rehearsal colours (sRGB): evening wear in muted tones with some garnet and ochre; rehearsal in everyday greys and creams
-  const AUD_MEN = [0x45434a, 0x5a4636, 0x3b4656, 0x6b6660, 0x4a3a30, 0x7a6a58, 0x3e3434];
-  const AUD_WOMEN = [0x6e1a12, 0x9a6a2a, 0x46202f, 0x2b2a2c, 0xcbb89c, 0x7f3518, 0x141416, 0x5c0f07];
+  // audience and rehearsal colours (sRGB): dark evening wear (charcoal, navy, deep brown, black, a little deep garnet); rehearsal in everyday greys and creams
+  const AUD_MEN = [0x1f1e22, 0x2a221c, 0x1c222b, 0x2b2927, 0x241c18, 0x302a24, 0x201a1a];
+  const AUD_WOMEN = [0x3a0e0a, 0x3a2a16, 0x2a1220, 0x18171a, 0x2e2a26, 0x3d1a0e, 0x111113, 0x330906];
   const REH = [0x8a8078, 0xcfc2ae, 0x4d5563, 0xa89a84, 0x5a5040];
   function audiencePose(i, h) {   // seated, watching the stage; some hands clasped, some turned to a neighbour
     const r = k => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };

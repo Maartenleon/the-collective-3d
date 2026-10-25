@@ -94,7 +94,7 @@
       camera.fov += (fly.fov - camera.fov) * k; camera.updateProjectionMatrix();
       if (camera.position.distanceTo(fly.pos) < 0.02) fly = null;
     }
-    controls.update(); film.render(t);
+    controls.update(); film.render();
   });
   window.__scene = { root, isolate, setCam, view: (pos, target) => { fly = null; camera.position.copy(pos); controls.target.copy(target); camera.fov = 40; camera.updateProjectionMatrix(); } };
 })();

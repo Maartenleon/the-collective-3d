@@ -27,7 +27,7 @@ The Collective is a Dutch consultancy (domain thecollective.nu). Its framework i
 
 ## Visual rules (art direction, see `docs/inputs/`)
 
-Wide horizon, small ensemble, only the conductor bright orange-red (long red coat), white plaster stage with texture and shadow in a smooth red earth bowl, low lavender hills, muted sky, film grain. No saturated blue or green, no pure grey or #000, no stock photos, no heavy card borders. Musicians in black concert dress on black chairs; audience in muted evening wear. No grain field in the opening shot.
+Wide horizon, small ensemble, only the conductor bright orange-red (long red coat), white plaster stage with texture and shadow in a smooth red earth bowl, low lavender hills, muted sky. No film grain or lens fringing (Kai removed the "video filter" on 25 Oct 2026); the colour grade of the film pass stays. No saturated blue or green, no pure grey or #000, no stock photos, no heavy card borders. Musicians in black concert dress on black chairs; audience in dark evening wear. No grain field in the opening shot.
 
 ## Files
 
@@ -44,7 +44,7 @@ bron/model/               the 3D scene (shared by both builds)
   tail.js                 model-only UI: isolation, scene tree, click-to-select, cameras
   layout-gen.py           older generator for the seating layout (reference)
 bron/site/                the scroll story (replaces tail.js in the site build)
-  head.html               site CSS (tokens), all text panels, loader with inlined poster photo
+  head.html               all text panels and the loader (plain --color-bg screen with the opening text and a serif percentage); CSS lives in styles.css
   content.js              the words of the problems (cards + left panel) and framework parts (right panel); edit text here
   story.js                STOPS (frames), camera moves, focus/fade, melody lines, glow, tension, input, side panels
 bron/assets/rocketbox/    pre-processed Microsoft Rocketbox avatars (FBX + textures), MIT licence
@@ -69,11 +69,11 @@ Screenshots (headless, software GL):
 cd bron/test && npm install
 PFX=out/a STOPS='["open","t5","c0"]' WAIT=4000 node story10.js ../../site/3d.html     # MOB=1 for a 390x844 phone
 ```
-`story10.js` reads `STOPS` (indices or stop ids) and saves one PNG per stop. `poster.js` makes the loader photo (UI hidden). `ten.js` screenshots the tension stop at given times. Loading takes ~2 minutes under software rendering. `window.__story` exposes `go(i|id)`, `stops`, `pause(bool)`. Without Node, Python Playwright with the installed Chrome works too (`channel="chrome"`, loads in seconds with the GPU).
+`story10.js` reads `STOPS` (indices or stop ids) and saves one PNG per stop. `poster.js` made the old loader photo (no longer used: the loader is a plain dark screen, and the brand, About button, timeline and scroll hint fade in once loading is done, class `is-ready`). `ten.js` screenshots the tension stop at given times. Loading takes ~2 minutes under software rendering. `window.__story` exposes `go(i|id)`, `stops`, `pause(bool)`. Without Node, Python Playwright with the installed Chrome works too (`channel="chrome"`, loads in seconds with the GPU).
 
 ## How the story code works (bron/site/story.js)
 
-- `STOPS` array: one entry per stop. Fields: `id`, `name` (timeline name; on the first stop of each segment, and on `d1` where the label changes mid-segment), `ch` (part index, informational), `cam` (`K(pos,target,fov)` or `frame(box,dir,fov,k,lift)`), `seq`/`bar`/`hold`/`dur` (stops with the same `seq` auto-play as one frame; `bar` groups steps for the fill timing), `beats` (centred texts), `panel` (left panel id), `fw` ("big"/"side"/"coll") + `show` (framework figure), `focus(tags,t)` + `fallen` (what stays lit), `glow`, `chaos`, `off` (tension), `booth`, `late`, `coll` (part 4), `shade`, `top`, `caption`, `labels`, `line`, `problems`.
+- `STOPS` array: one entry per stop. Fields: `id`, `name` (timeline name; on the first stop of each segment, and on `d1` where the label changes mid-segment), `ch` (part index, informational), `cam` (`K(pos,target,fov)` or `frame(box,dir,fov,k,lift)`), `seq`/`bar`/`hold`/`dur` (stops with the same `seq` auto-play as one frame; `bar` groups steps for the fill timing), `beats` (centred texts), `panel` (left panel id), `fw` ("big"/"side"/"coll") + `show` (framework figure), `focus(tags,t)` + `fallen` (what stays lit), `glow`, `chaos`, `off` (tension), `booth`, `late`, `coll` (part 4), `shade`, `fore` (dark, blurred foreground over the audience), `caption`, `labels`, `line`, `problems`.
 - Scrolling during a sequence jumps past the whole sequence; Skip does the same.
 - Body text in panels and on the About page uses the tokens `--text-body`, `--leading-body` and `--color-body` (one place to change size and colour; smaller on phones). Problems view: headings "Problems we see" and "Our framework that helps solve these" share one line at `--problems-top`; the framework (`--problems-fw-size`) sits level with the first problem.
 - Problems stop: a card opens a panel from the left (recognise, where it goes wrong, how the framework solves it with links to the parts, concept pills); a part in the figure (or a link) opens a panel from the right. Both are built from `PROBLEMS`, `PARTS` and `LABELS` in content.js; the figure lights the parts the open panel is about. Esc, the close button, a click elsewhere or leaving the stop closes them; on phones one at a time.

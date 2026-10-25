@@ -2,7 +2,7 @@
 #   python3 bron/build.py          -> site/3d.html            (website met scrollverhaal)
 #   python3 bron/build.py model    -> site/orkest-model.html  (alleen het 3D-model, vrij rondkijken)
 # Muzikanten: Microsoft Rocketbox avatars (MIT-licentie), voorbewerkt in bron/assets.
-import json, base64, glob, os, struct, sys
+import json, base64, glob, hashlib, os, struct, sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(ROOT, "assets")
 M, S = os.path.join(ROOT, "model"), os.path.join(ROOT, "site")
@@ -39,5 +39,7 @@ else:
         assert a in people, a; people = people.replace(a, b)
     s = r(S, "head.html") + cfg + body + r(M, "_dress_src.js") + data + people + r(S, "content.js") + r(S, "story.js")
     out = os.path.join(out_dir, "3d.html")
-    open(os.path.join(out_dir, "styles.css"), "w", encoding="utf-8").write(r(S, "styles.css"))   # 3d.html linkt naar styles.css
+    css = r(S, "styles.css"); open(os.path.join(out_dir, "styles.css"), "w", encoding="utf-8").write(css)   # 3d.html linkt naar styles.css
+    link = '<link rel="stylesheet" href="styles.css">'; assert link in s
+    s = s.replace(link, '<link rel="stylesheet" href="styles.css?v=' + hashlib.md5(css.encode()).hexdigest()[:8] + '">')   # nieuwe versie = nieuwe link, dus de browser haalt nooit een oude stylesheet uit zijn cache
 open(out, "w", encoding="utf-8").write(s); print(out, round(len(s) / 1e6, 2), "MB")

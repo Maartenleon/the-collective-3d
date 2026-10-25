@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&family=Barlow+Condensed:wght@700&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="is-loading">
@@ -17,8 +17,8 @@
   <canvas id="c" role="img" aria-label="An orchestra and its conductor playing in a white plaster pit, in a bowl of red earth with a grain field in front"></canvas>
   <canvas id="fx" aria-hidden="true"></canvas>
   <div class="floor" aria-hidden="true"></div>
-  <div class="top-shade" id="topShade" aria-hidden="true"></div>
   <div class="shade" id="shade" aria-hidden="true"></div>
+  <div class="fore" id="fore" aria-hidden="true"></div>
 
   <div class="labels" id="labels" aria-hidden="true">
     <span class="label" data-label="strings">Strings</span>
@@ -111,6 +111,7 @@
 
   <section class="coll" id="coll" aria-label="The Collective">
     <div class="coll__page glass">
+      <button class="coll__close" type="button" data-coll-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
       <header class="coll__head">
         <p class="coll__kicker">The Collective</p>
         <h2 class="coll__title">More value. Less noise.</h2>
