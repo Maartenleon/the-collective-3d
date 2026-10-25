@@ -155,7 +155,7 @@
   const panels = {}; document.querySelectorAll("[data-panel]").forEach(el => (panels[el.dataset.panel] = el));
   const caption = $("#caption"), capKind = $("#captionKind"), capText = $("#captionText");
   const shade = $("#shade"), fore = $("#fore"), problems = $("#problems"), hint = $("#hint");
-  const tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
+  const tlNav = $("[data-timeline]"), tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
   const collEl = $("#coll"), meetBtn = $("#meet");
   const fwGlass = $("[data-fw-glass]");
   const lineEls = [...document.querySelectorAll("[data-line]")], dimsLate = $("#dimsLate"), fwEl = $("#fw");
@@ -224,7 +224,7 @@
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
       g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o")); });
     shade.style.opacity = S.shade || 0; fore.classList.toggle("is-on", !!S.fore);
-    hint.style.opacity = at === 0 ? 1 : 0;
+    hint.style.opacity = at === 0 ? 1 : 0; tlNav.classList.toggle("is-opening", at === 0);   // the opening shows no separator and play button, as in the reference
     const n = segOf(at);
     segBtns.forEach((b, k) => { b.setAttribute("aria-current", k === n ? "step" : "false"); b.tabIndex = k === n ? 0 : -1; segFills[k].style.transform = `scaleX(${k < n ? 1 : 0})`; });
     if (tlBar.contains(document.activeElement) && document.activeElement !== segBtns[n]) segBtns[n].focus({ preventScroll: true });   // focus follows only if it is already in the bar
@@ -375,9 +375,7 @@
     const [, y] = toScreen(V(0, STAGE.floor + STAGE.wall.high + 0.9, -STAGE.zb));   // above the back wall
     for (const k in beats) { const el = beats[k]; if (!el.dataset.anchor || !el.classList.contains("is-on")) continue;
       const h = el.offsetHeight; el.style.top = clamp(y - h - 26, vh < 600 ? 64 : 84, vh * 0.55).toFixed(0) + "px"; }
-    if (document.body.classList.contains("is-loading") && beats.opening.style.top) loaderOpen.style.top = beats.opening.style.top;   // the loader text sits exactly where the opening text will be
   }
-  const loaderOpen = $("#loader .loader__open");
   function drawMelody(now, dt) {
     const S = STOPS[at], live = !anim || anim.k > 0.6;
     MELODY.forEach((L, li) => {

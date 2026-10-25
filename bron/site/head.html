@@ -153,6 +153,7 @@
   <div class="loading" id="loading" aria-hidden="true">Musicians arriving…</div>
   <div class="loader" id="loader" role="status" aria-live="polite">
     <div class="loader__open"><b>When an organisation plays as one,</b><i>it sounds effortless.</i><span class="loader__pct" id="loaderPct">0%</span></div>
+    <script>(function () { var l = document.getElementById("loader"), go = function () { l.classList.add("is-in"); }; if (!document.fonts) return go(); Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1500); })]).then(function () { requestAnimationFrame(go); }); })();</script>
   </div>
 </main>
 

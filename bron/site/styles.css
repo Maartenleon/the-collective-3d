@@ -154,6 +154,8 @@ p, ul, h1, h2 { margin: 0; }
   font: 400 var(--text-ui)/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
 .timeline__num { width: 2ch; }   /* fixed, so the bar ends where the panels end */
 .timeline__sep { width: 1px; height: var(--text-ui); background: var(--color-line); }
+.timeline__sep, .timeline__play { transition: opacity .6s ease, visibility 0s; }
+.timeline.is-opening .timeline__sep, .timeline.is-opening .timeline__play { opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
 .timeline__play { all: unset; pointer-events: auto; cursor: pointer; display: grid; place-items: center; height: var(--timeline-hit); color: inherit; }
 .timeline__play svg { width: var(--timeline-icon); height: var(--timeline-icon); fill: currentColor; }
 .timeline__bar { pointer-events: auto; display: flex; gap: var(--space-segment); width: var(--timeline-bar-width); }
@@ -180,7 +182,11 @@ p, ul, h1, h2 { margin: 0; }
 .is-ready .brand, .is-ready .meet, .is-ready .timeline, .is-ready .scroll-hint { animation: ui-in 1.4s ease .5s backwards; }   /* once loaded, the interface fades in after the loader */
 @keyframes ui-in { from { opacity: 0; } }
 /* poster: the opening view as a picture, shown at once while the 3D scene loads behind it */
-.loader__open { position: absolute; left: 50%; top: 55%; transform: translate(-50%, 0); width: 100%; max-width: min(var(--beat-width), calc(100% - 2 * var(--gutter))); text-align: center; text-shadow: var(--shadow-text); }   /* where the opening beat sits (story.js keeps them level) */
+.loader__open { position: absolute; left: 50%; top: 55%; transform: translate(-50%, 0); width: 100%; max-width: min(var(--beat-width), calc(100% - 2 * var(--gutter))); text-align: center; text-shadow: var(--shadow-text); }   /* where the opening beat sits */
+.loader__open > * { opacity: 0; transform: translateY(14px); filter: blur(4px); transition: opacity .9s ease, transform 1.1s var(--ease-out), filter .9s ease; }   /* animates in once the fonts are there (script in head.html) */
+.loader.is-in .loader__open > * { opacity: 1; transform: none; filter: none; }
+.loader.is-in .loader__open i { transition-delay: .2s; }
+.loader.is-in .loader__pct { transition-delay: .45s; }
 .loader__open b { display: block; font: 400 var(--text-beat)/1.1 var(--font-serif); letter-spacing: -.005em; text-wrap: balance; color: var(--color-text); }
 .loader__open i { display: block; margin-top: var(--space-3xs); font: italic 400 var(--text-lede)/1.25 var(--font-serif); text-wrap: balance; color: var(--color-text-muted); }
 .loader__pct { display: block; margin-top: var(--space-m); font: 400 var(--text-lede)/1.25 var(--font-serif); font-variant-numeric: lining-nums tabular-nums; color: var(--color-body); }   /* serif numbers, size of the line above it, colour of the panel body text */
@@ -210,6 +216,7 @@ p, ul, h1, h2 { margin: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .is-ready .brand, .is-ready .meet, .is-ready .timeline, .is-ready .scroll-hint { animation: none; }
+  .loader__open > * { transform: none; filter: none; transition: opacity .3s ease; }
   .beat, .beat.is-on, .panel, .panel.is-on, .caption, .problems, .prob, .drawer, .drawer.is-on { transition-duration: .01s !important; transition-delay: 0s !important; }
 }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

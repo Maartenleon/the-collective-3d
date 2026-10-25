@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&family=Barlow+Condensed:wght@700&display=swap">
-<link rel="stylesheet" href="styles.css?v=c8730293">
+<link rel="stylesheet" href="styles.css?v=79775881">
 </head>
 <body class="is-loading">
 <main class="stage" id="stage" aria-label="The Collective: when an organisation plays as one">
@@ -153,6 +153,7 @@
   <div class="loading" id="loading" aria-hidden="true">Musicians arriving…</div>
   <div class="loader" id="loader" role="status" aria-live="polite">
     <div class="loader__open"><b>When an organisation plays as one,</b><i>it sounds effortless.</i><span class="loader__pct" id="loaderPct">0%</span></div>
+    <script>(function () { var l = document.getElementById("loader"), go = function () { l.classList.add("is-in"); }; if (!document.fonts) return go(); Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1500); })]).then(function () { requestAnimationFrame(go); }); })();</script>
   </div>
 </main>
 
@@ -1915,7 +1916,7 @@
   const panels = {}; document.querySelectorAll("[data-panel]").forEach(el => (panels[el.dataset.panel] = el));
   const caption = $("#caption"), capKind = $("#captionKind"), capText = $("#captionText");
   const shade = $("#shade"), fore = $("#fore"), problems = $("#problems"), hint = $("#hint");
-  const tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
+  const tlNav = $("[data-timeline]"), tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
   const collEl = $("#coll"), meetBtn = $("#meet");
   const fwGlass = $("[data-fw-glass]");
   const lineEls = [...document.querySelectorAll("[data-line]")], dimsLate = $("#dimsLate"), fwEl = $("#fw");
@@ -1984,7 +1985,7 @@
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
       g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o")); });
     shade.style.opacity = S.shade || 0; fore.classList.toggle("is-on", !!S.fore);
-    hint.style.opacity = at === 0 ? 1 : 0;
+    hint.style.opacity = at === 0 ? 1 : 0; tlNav.classList.toggle("is-opening", at === 0);   // the opening shows no separator and play button, as in the reference
     const n = segOf(at);
     segBtns.forEach((b, k) => { b.setAttribute("aria-current", k === n ? "step" : "false"); b.tabIndex = k === n ? 0 : -1; segFills[k].style.transform = `scaleX(${k < n ? 1 : 0})`; });
     if (tlBar.contains(document.activeElement) && document.activeElement !== segBtns[n]) segBtns[n].focus({ preventScroll: true });   // focus follows only if it is already in the bar
@@ -2135,9 +2136,7 @@
     const [, y] = toScreen(V(0, STAGE.floor + STAGE.wall.high + 0.9, -STAGE.zb));   // above the back wall
     for (const k in beats) { const el = beats[k]; if (!el.dataset.anchor || !el.classList.contains("is-on")) continue;
       const h = el.offsetHeight; el.style.top = clamp(y - h - 26, vh < 600 ? 64 : 84, vh * 0.55).toFixed(0) + "px"; }
-    if (document.body.classList.contains("is-loading") && beats.opening.style.top) loaderOpen.style.top = beats.opening.style.top;   // the loader text sits exactly where the opening text will be
   }
-  const loaderOpen = $("#loader .loader__open");
   function drawMelody(now, dt) {
     const S = STOPS[at], live = !anim || anim.k > 0.6;
     MELODY.forEach((L, li) => {
