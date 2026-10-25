@@ -109,7 +109,7 @@
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
   ];
   const FW_FLIP = { start: 0.1, end: 0.9 };   // the big diagram shrinks into the panel miniature over this part of the camera move (0 to 1)
-  const STORY = { hold: 5, play: "Play story", pause: "Pause story", goTo: "Go to" };   // Play story: seconds on a stop without its own hold; button and segment labels
+  const STORY = { hold: 5, play: "Play story", pause: "Pause story", goTo: "Go to", next: "Next" };   // Play story: seconds on a stop without its own hold; button and segment labels
   const N = STOPS.length, idx = id => STOPS.findIndex(s => s.id === id);
   const SEQS = {};
   STOPS.forEach((s, i) => { if (!s.seq) return; const q = SEQS[s.seq] || (SEQS[s.seq] = { first: i, last: i, bars: [] }); q.last = i;
@@ -193,10 +193,11 @@
   }
   { // the Orchestration arrow draws itself clockwise along the circle when it appears; the arrowhead comes at the end
     const g = fwEl.querySelector('[data-k="o"]'), arc = g.querySelector(".arc"), head = arc.getAttribute("marker-end");
-    var drawArc = on => {
-      if (on === g.classList.contains("is-shown")) return;
+    var drawArc = (on, loop) => {   // loop: on the framework frame the arrow keeps going round (draws, then its tail follows), a continuous motion
+      loop = on && loop && !reduceMQ.matches; g.classList.toggle("is-loop", loop);
+      if (on === g.classList.contains("is-shown")) { if (loop) arc.setAttribute("marker-end", head); return; }
       g.classList.toggle("is-shown", on);
-      if (on && reduceMQ.matches) arc.setAttribute("marker-end", head); else arc.removeAttribute("marker-end");
+      if (on && (reduceMQ.matches || loop)) arc.setAttribute("marker-end", head); else arc.removeAttribute("marker-end");
     };
     arc.addEventListener("transitionend", e => { if (e.propertyName === "stroke-dashoffset" && g.classList.contains("is-shown")) arc.setAttribute("marker-end", head); });
   }
@@ -255,15 +256,17 @@
     collEl.classList.toggle("is-on", !!S.coll);
     meetBtn.classList.toggle("is-hidden", !!S.coll);
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
-      g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o")); });
+      g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o"), S.fw === "big"); });
     shade.style.opacity = S.shade || 0; fore.classList.toggle("is-on", !!S.fore);
-    hint.style.opacity = at === 0 ? 1 : 0; tlNav.classList.toggle("is-opening", at === 0);   // the opening shows no separator and play button, as in the reference
+    hint.style.opacity = at === 0 ? 1 : 0;
+    const seg = segOf(at), lastSeg = seg === SEGS.length - 1;
+    tlNav.classList.toggle("is-opening", at === 0); tlNav.classList.toggle("is-last", lastSeg);   // the opening and the last part show no separator, play and Next
     const n = segOf(at);
     segBtns.forEach((b, k) => { b.setAttribute("aria-current", k === n ? "step" : "false"); b.tabIndex = k === n ? 0 : -1; segFills[k].style.transform = `scaleX(${k < n ? 1 : 0})`; });
     if (tlBar.contains(document.activeElement) && document.activeElement !== segBtns[n]) segBtns[n].focus({ preventScroll: true });   // focus follows only if it is already in the bar
     segFills[n].parentNode.appendChild(tlDot);
     if (preview < 0) showSeg(n, nameAt(at));
-    tlSkip.classList.toggle("is-on", !!S.seq);
+    tlSkip.classList.toggle("is-on", seg > 0 && !lastSeg);   // Next: from the second part to the one before the last
   }
   function setPaused(v) {
     paused = v;
@@ -274,7 +277,8 @@
     if (advancing()) { story = false; setPaused(true); return; }
     story = true; setPaused(false); if (at === N - 1) goTo(0);
   });
-  tlSkip.addEventListener("click", () => { const q = SEQS[STOPS[at].seq]; if (q) goTo(q.last + 1); });
+  tlSkip.textContent = STORY.next;
+  tlSkip.addEventListener("click", () => { const n = segOf(at); if (n < SEGS.length - 1) goTo(SEGS[n + 1].first); });   // Next: the first step of the next part (a running sequence is passed as a whole)
   function step(d) {   // one gesture = one scene; a running sequence counts as one scene
     if (document.body.classList.contains("is-loading")) return;
     meetFrom = null; story = false;
