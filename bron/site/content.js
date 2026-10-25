@@ -4,6 +4,9 @@
      and the links between them are built from these two lists. Source: docs/SYMPTOMS.md of the 2D site.
      `short` is the card text, `line` the full quote as the panel title. `parts`: where the framework solves it (first = where it starts): p b m o r c.
      ================================================================ */
+  // CONTACT: the address the About page shows, copies and opens in an email (Let's talk)
+  const CONTACT = { email: "soundcheck@thecollective.nu", subject: "Sounds familiar" };
+
   const PROBLEMS = [
     { id: "everything-reports-green", theme: "Everyone is playing", parts: ["o", "p"],
       short: "Every report says green, but the numbers don’t move.",

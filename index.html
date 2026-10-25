@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&family=Barlow+Condensed:wght@700&display=swap">
-<link rel="stylesheet" href="site/styles.css?v=79775881">
+<link rel="stylesheet" href="site/styles.css?v=7c771fed">
 </head>
 <body class="is-loading">
 <main class="stage" id="stage" aria-label="The Collective: when an organisation plays as one">
@@ -93,7 +93,6 @@
 
   <div class="caption" id="caption" aria-live="polite"><span class="caption__kind" id="captionKind"></span><span class="caption__text" id="captionText"></span></div>
   <section class="problems" id="problems" aria-label="Problems companies recognise">
-    <p class="problems__intro">Pick the note that sounds off, or take it from the top.</p>
     <p class="problems__head problems__head--fw">Our framework that helps solve these</p>
     <div class="problems__col" data-problems-list>
       <p class="problems__head">Problems we see</p>
@@ -101,18 +100,18 @@
   </section>
   <!-- side panels: a problem (from the left) and a framework part (from the right); filled from content.js -->
   <aside class="drawer drawer--left glass" id="drawerProblem" data-drawer="problem" aria-label="Problem" tabindex="-1" inert>
-    <button class="drawer__close" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1L11 11M11 1L1 11"/></svg></button>
+    <button class="close close--sticky" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
     <div data-drawer-body></div>
   </aside>
   <aside class="drawer drawer--right glass" id="drawerPart" data-drawer="part" aria-label="Framework part" tabindex="-1" inert>
-    <button class="drawer__close" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1L11 11M11 1L1 11"/></svg></button>
+    <button class="close close--sticky" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
     <div data-drawer-body></div>
   </aside>
 
 
   <section class="coll" id="coll" aria-label="The Collective">
     <div class="coll__page glass">
-      <button class="coll__close" type="button" data-coll-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
+      <button class="close close--corner" type="button" data-coll-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
       <header class="coll__head">
         <p class="coll__kicker">The Collective</p>
         <h2 class="coll__title">More value. Less noise.</h2>
@@ -123,10 +122,10 @@
           <h3>We listen to the whole orchestra.</h3>
           <p>Not just the loudest section. We find where value is made, where it gets stuck, and who is quietly playing a different song.</p>
         </div>
-        <div class="coll__col coll__col--score">
+        <div class="coll__col">
           <h3>We bring our score.</h3>
           <p>Proven theory and hard-won experience in one framework. Not another 200-slide deck.</p>
-          <svg class="coll__fw" id="collFw" viewBox="0 0 640 560" role="img" aria-label="The framework; select a part to go to it"></svg>
+          <p class="coll__links"><button class="link-pill" type="button" data-coll-go="f0">Our framework</button><button class="link-pill" type="button" data-coll-go="problems">Problems we see</button></p>
         </div>
         <div class="coll__col">
           <h3>We stay for the performance.</h3>
@@ -135,8 +134,8 @@
       </div>
       <footer class="coll__cta">
         <p class="coll__ask">Sounds familiar?</p>
-        <button class="coll__btn" type="button">Let&rsquo;s talk</button>
-        <p class="coll__baton">We won&rsquo;t steal the baton. <span class="coll__mail">soundcheck@thecollective.nu</span></p>
+        <a class="coll__btn" data-mailto href="#">Let&rsquo;s talk</a>
+        <p class="coll__baton">We won&rsquo;t steal the baton. <button class="coll__mail" type="button" data-copy-email><span data-email></span><span class="coll__copy" data-copy-label aria-live="polite">Copy</span></button></p>
       </footer>
     </div>
   </section>
@@ -202,7 +201,7 @@
   ];
   const STAND_SHARE = 4;   // one shared music stand per four musicians
   const AUDIENCE = { rows: 4, perRow: 12, firstZ: 38, rowGap: 1.15, seatGap: 0.9 };
-  const BOARD = { x: 9.4, y: 0.6, rotY: -0.3, title: "TONIGHT'S SYMPHONY", lines: ["The Show", "Must Go On"], foot: "· THE ORCHESTRA ·" };   // programme board on the stage, right of the orchestra
+  const BOARD = { x: 8.6, y: -1.6, rotY: -0.3, title: "TONIGHT'S SYMPHONY", lines: ["The Show", "Must Go On"], foot: "· THE ORCHESTRA ·" };   // programme board on the stage, right of the orchestra
   // CHANGE · tomorrow: a flat terrace on the left rim of the bowl, out of the opening shot: next season's board and a small rehearsal
   const NEXT = { x: -37, z: 1, r: 6.5, rehearsal: [-36.4, 0.4], ring: 2.0,
     board: { at: [-39.8, -1.4], rotY: 0.96, title: "NEXT SEASON'S SYMPHONY", lines: ["The Next", "Episode"], foot: "· IN REHEARSAL ·" },
@@ -900,7 +899,7 @@
     const W = STAGE.wall, wall = new Part("Achterwand");
     const band = (k0, k1, t0, low, high, key) => {
       const t1 = Math.PI - t0, N = 160, R = 2, C = R + 3, pos = [], uv = [], idx = [];
-      const hAt = t => { const u = ((t - t0) / (t1 - t0)) * 2 - 1, end = sstep(1, 0.86, Math.abs(u)); return (low + (high - low) * u * u) * Math.sqrt(end); };
+      const hAt = t => { const u = ((t - t0) / (t1 - t0)) * 2 - 1, end = sstep(1, 0.5, Math.abs(u)); return (low + (high - low) * u * u) * end; };   // the ends taper off gradually over the outer quarter
       const P = (k, t, y) => { const x = STAGE.rx * k * Math.cos(t), z = -STAGE.zb * k * Math.sin(t); pos.push(x, y, z); uv.push(t * STAGE.rx * k, y + (k - k0) * STAGE.zb); };
       for (let i = 0; i <= N; i++) { const t = t0 + (t1 - t0) * i / N, h = Math.max(0.02, hAt(t)), r = Math.min(0.035, h * 0.5);
         P(k0, t, STAGE.floor);
@@ -1485,6 +1484,9 @@
      and the links between them are built from these two lists. Source: docs/SYMPTOMS.md of the 2D site.
      `short` is the card text, `line` the full quote as the panel title. `parts`: where the framework solves it (first = where it starts): p b m o r c.
      ================================================================ */
+  // CONTACT: the address the About page shows, copies and opens in an email (Let's talk)
+  const CONTACT = { email: "soundcheck@thecollective.nu", subject: "Sounds familiar" };
+
   const PROBLEMS = [
     { id: "everything-reports-green", theme: "Everyone is playing", parts: ["o", "p"],
       short: "Every report says green, but the numbers don’t move.",
@@ -1643,9 +1645,10 @@
   const CAMC = sideOrUp(frame(BOWL, V(0.1, 0.75, 1), 40, NARROW ? 0.9 : 0.75, -1));            // high over the bowl: both stages
   const ALL4 = ["strings", "woodwinds", "brass", "percussion"];
   const SECT = ["Strijkers", "Houtblazers", "Koper", "Slagwerk"];
-  const CAM2 = K([0, 3.2, 25], [0, 2.4, -4], 38);   // the closer view of frame 2, reused by Blueprint, Means and the dimensions
+  const CAM2 = NARROW ? frame(orchBox, V(0, 0.62, 1), 40, 0.84) : K([0, 3.2, 25], [0, 2.4, -4], 38);   // the closer view of frame 2, reused by Blueprint, Means and the dimensions; phones look down a little more, so the orchestra fills the width instead of a thin strip
   const oneByOne = (t, s, t0 = 0.3, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || (i >= 0 && i <= 3 && (t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")))); };
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
+  const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: K([0, 3.2, 90], [0, 5.95, -20], NARROW ? 19 : 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills (a little wider on phones so the orchestra fits)
     // Frame 2: It isn't. Roles, skills, views, one performance
@@ -1656,12 +1659,13 @@
     { id: "t4", ch: 0, seq: "twist", bar: 4, hold: 1.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4 },
     { id: "t5", ch: 0, seq: "twist", bar: 5, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
-    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: 0.4, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },
-    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: 0.15, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
-    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: 0.15, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
-    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: 0.15, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
-    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: 0.25, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
-    { id: "f5", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
+    { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: FW_STEP, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },   // one part every FW_STEP seconds
+    { id: "f1", ch: 1, seq: "fw", bar: 1, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
+    { id: "f2", ch: 1, seq: "fw", bar: 1, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pb", shade: 0.3 },
+    { id: "f3", ch: 1, seq: "fw", bar: 1, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbm", shade: 0.3 },
+    { id: "f4", ch: 1, seq: "fw", bar: 2, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmo", shade: 0.3 },
+    { id: "f5", ch: 1, seq: "fw", bar: 2, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmor", shade: 0.3 },
+    { id: "f6", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
     // Frame 4: Plan
     { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, boardFront.clone().add(V(0.35, 0, 0)), 40, 1.5), panel: "plan" },
     // Frame 5: Blueprint
@@ -1751,19 +1755,19 @@
   const fwGlass = $("[data-fw-glass]");
   const lineEls = [...document.querySelectorAll("[data-line]")], dimsLate = $("#dimsLate"), fwEl = $("#fw");
   { // the framework figure, B2: floating rounded bands inside a circle, two columns, the Orchestration ring with its arrow
-    const CX = 320, CY = 262, R = 192, W = "rgba(250,248,246,.14)", WS = "rgba(250,248,246,.8)", O = "rgba(241,64,11,.2)", VER = "#F1400B";
-    const pill = (x, y, w, h, fill, stroke) => `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${(Math.min(w, h) / 2).toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
+    const CX = 320, CY = 262, R = 192;   // all colours and the text sizes come from styles.css (.fw .part, .fw .ring, .fw .arc, .fw .sub): the parts look like the panels
+    const pill = (x, y, w, h) => `<rect class="part" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${(Math.min(w, h) / 2).toFixed(1)}"/>`;
     const band = (d, k, l, sub) => { const hw = Math.sqrt(R * R - (Math.abs(d) + 32) ** 2);
-      return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60, W, WS)}<text class="lab band" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 2}">${l.toUpperCase()}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 20}" font-size="13" font-style="italic" opacity=".75">${sub}</text></g>`; };
+      return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60)}<text class="lab band" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 2}">${l.toUpperCase()}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 20}">${sub}</text></g>`; };
     const SPAN = 104 + 30;   // Run and Change reach from the top of Plan to the bottom of Means, so their labels line up
     const col = (dx, k, l, sub) => { const hh = SPAN;
-      return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh, O, VER)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text><text class="sub" transform="translate(${CX + dx + 5} ${CY}) rotate(-90)" text-anchor="middle" font-size="13" font-style="italic" opacity=".85">${sub}</text></g>`; };
+      return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text><text class="sub" transform="translate(${CX + dx + 5} ${CY}) rotate(-90)" text-anchor="middle">${sub}</text></g>`; };
     const RO = 228, a = 0.62;
-    fwEl.innerHTML = `<defs><marker id="fwArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#FAF8F6"/></marker></defs>
-      <circle cx="${CX}" cy="${CY}" r="205" fill="rgba(26,14,10,.18)" stroke="rgba(250,248,246,.4)"/>`
+    fwEl.innerHTML = `<defs><marker id="fwArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="tip" d="M0 0L10 5L0 10z"/></marker></defs>
+      <circle class="ring" cx="${CX}" cy="${CY}" r="205"/>`
       + band(-104, "p", "Plan", "the piece") + band(0, "b", "Blueprint", "the score") + band(104, "m", "Means", "the orchestra") + col(40, "r", "Run", "tonight\u2019s concert") + col(110, "c", "Change", "next season\u2019s symphony")
-      + `<g class="k" data-k="o"><path d="M ${CX} ${CY - RO} A ${RO} ${RO} 0 1 1 ${(CX - RO * Math.sin(a)).toFixed(1)} ${(CY - RO * Math.cos(a)).toFixed(1)}" class="arc" pathLength="1" fill="none" stroke="#FAF8F6" stroke-width="2.4" marker-end="url(#fwArrow)"/>
-        <text class="lab" x="${CX}" y="${CY + RO + 30}" text-anchor="middle" font-size="16">ORCHESTRATION</text><text class="sub" x="${CX}" y="${CY + RO + 50}" text-anchor="middle" font-size="13" font-style="italic" opacity=".75">the conductor</text></g>`;
+      + `<g class="k" data-k="o"><path d="M ${CX} ${CY - RO} A ${RO} ${RO} 0 1 1 ${(CX - RO * Math.sin(a)).toFixed(1)} ${(CY - RO * Math.cos(a)).toFixed(1)}" class="arc" pathLength="1" marker-end="url(#fwArrow)"/>
+        <text class="lab lab--big" x="${CX}" y="${CY + RO + 30}" text-anchor="middle">ORCHESTRATION</text><text class="sub" x="${CX}" y="${CY + RO + 50}" text-anchor="middle">the conductor</text></g>`;
   }
   { // the Orchestration arrow draws itself clockwise along the circle when it appears; the arrowhead comes at the end
     const g = fwEl.querySelector('[data-k="o"]'), arc = g.querySelector(".arc"), head = arc.getAttribute("marker-end");
@@ -1787,6 +1791,9 @@
   // the camera leaves once the audience has arrived (it then fades in during the move), or after AUDIENCE_WAIT seconds if it cannot load.
   const AUDIENCE_WAIT = 8, pubBox = box(pub), seeCam = new THREE.PerspectiveCamera(), seeFrustum = new THREE.Frustum(), seeM = new THREE.Matrix4();
   let waitGo = null;
+  const grassBox = new THREE.Box3(); { const M4 = new THREE.Matrix4(), P = V(0, 0, 0);   // the grain field's extent, from its instances (Box3 ignores instances)
+    graan.updateMatrixWorld(true); graan.traverse(o => { if (!o.isInstancedMesh) return; if (!o.geometry.boundingBox) o.geometry.computeBoundingBox(); const top = o.geometry.boundingBox.max.y;
+      for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, M4); M4.premultiply(o.matrixWorld); P.setFromMatrixPosition(M4); grassBox.expandByPoint(P); grassBox.expandByPoint(P.clone().setY(P.y + top * 1.5)); } }); }
   function showsAudience(S) {
     if (litOf(S, { audience: true }, 99) < 0.5) return false;   // hidden or faded there
     Object.assign(seeCam, { fov: S.cam.fov, aspect: camera.aspect, zoom: camera.zoom, near: camera.near, far: camera.far }); seeCam.position.copy(S.cam.pos); seeCam.lookAt(S.cam.target);
@@ -1896,10 +1903,6 @@
     segBtns.forEach((b, j) => (b.tabIndex = j === k ? 0 : -1)); segBtns[k].focus();
   });
   if (matchMedia("(pointer: coarse)").matches) hint.textContent = "Swipe";
-  // the framework figure is a table of contents: a part of it jumps to its frame
-  const FW_TO = { p: "plan", b: "b1", m: "m1", o: "orch", r: "d1", c: "d2" };
-  { const cf = $("#collFw"); cf.innerHTML = fwEl.innerHTML.replace(/id="fwArrow"/, 'id="collArrow"').replace(/url\(#fwArrow\)/g, "url(#collArrow)");
-    cf.addEventListener("click", e => { const g = e.target.closest(".k"); if (g) goTo(idx(FW_TO[g.dataset.k])); }); }
   const panelFw = {};   // panel name -> its miniature: a copy of the big diagram with the panel's part lit
   document.querySelectorAll("[data-panel-fw]").forEach(svg => { const k = svg.dataset.panelFw, id = "fwArrow-" + k;
     svg.innerHTML = fwEl.innerHTML.replace(/id="fwArrow"/, `id="${id}"`).replace(/url\(#fwArrow\)/g, `url(#${id})`);
@@ -1973,6 +1976,16 @@
     leaveColl();
   });
   $("[data-coll-close]").addEventListener("click", () => { if (STOPS[at].coll) leaveColl(); });   // the small cross does the same as a click beside the page
+  document.querySelectorAll("[data-coll-go]").forEach(b => b.addEventListener("click", () => { meetFrom = null; story = false; goTo(idx(b.dataset.collGo)); }));   // About page: to the framework or the problems
+  { // contact: one address (CONTACT in content.js) for the text, the copy button and Let's talk
+    const mail = $("[data-mailto]"), copyBtn = $("[data-copy-email]"), label = $("[data-copy-label]"), COPY = { idle: "Copy", done: "Copied" };
+    $("[data-email]").textContent = CONTACT.email; mail.href = "mailto:" + CONTACT.email + (CONTACT.subject ? "?subject=" + encodeURIComponent(CONTACT.subject) : "");
+    let reset = 0;
+    copyBtn.addEventListener("click", () => {
+      const done = () => { label.textContent = COPY.done; copyBtn.classList.add("is-copied"); clearTimeout(reset); reset = setTimeout(() => { label.textContent = COPY.idle; copyBtn.classList.remove("is-copied"); }, 1800); };
+      (navigator.clipboard ? navigator.clipboard.writeText(CONTACT.email) : Promise.reject()).then(done, () => {   // older browsers: select and copy
+        const t = document.createElement("textarea"); t.value = CONTACT.email; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); done(); } catch (_) {} t.remove(); }); });
+  }
 
   /* ---------- per frame ---------- */
   function placeBeats() {   // beats marked data-anchor sit centred above the conductor, as on the site
@@ -2005,17 +2018,11 @@
     });
   }
   /* ---------- frame 2 and Means: the instruments glow while the musicians go grey ---------- */
-  const GLOW = new THREE.Color(0xff7420), GREY = { value: 0 }; let greyDone = false; let glowK = 0; const glowMats = new Set();
+  const GLOW = new THREE.Color(0xff7420); let glowK = 0; const glowMats = new Set();   // the instruments glow; the musicians keep their own colours (no grey step: Kai)
   function glowTick(dt) {
     const want = STOPS[at].glow && (!anim || anim.k > 0.4) ? 1 : 0; glowK += (want - glowK) * (1 - Math.exp(-dt * 4));
     if (!glowMats.size || (window.__people && !glowMats.people && (glowMats.people = true))) for (const m of meshes) { const t = m.userData.tags || (m.userData.tags = tagsOf(m)); if (t.instrument && m.material && m.material.emissive) { if (!m.userData.ownMat) { m.material = m.material.clone(); m.userData.ownMat = true; m.material.userData.e0 = m.material.emissive.clone(); m.material.userData.i0 = m.material.emissiveIntensity; } glowMats.add(m.material); } }
     for (const mt of glowMats) { mt.emissive.copy(mt.userData.e0).lerp(GLOW, glowK); mt.emissiveIntensity = mt.userData.i0 + glowK * 0.4; if (mt.color) { if (!mt.userData.c0) mt.userData.c0 = mt.color.clone(); mt.color.copy(mt.userData.c0).lerp(GLOW, glowK * 0.6); } }
-    GREY.value = glowK;
-    if (want && !greyDone && window.__people) { greyDone = true; // the musicians lose their colour: a desaturate step in their shaders
-      for (const m of meshes) { const t = m.userData.tags || (m.userData.tags = tagsOf(m)); if (!(t.person || t.chair) || t.instrument || t.conductor) continue;
-        for (const mt of [].concat(m.material)) { if (mt.userData.grey || mt.userData.tint) continue; mt.userData.grey = true;   // tinted clothes (audience, rehearsal) keep their tint: replacing their shader hook dropped the tint, and before only a shared program cache hid that
-          mt.onBeforeCompile = sh => { sh.uniforms.uGrey = GREY; sh.fragmentShader = "uniform float uGrey;\n" + sh.fragmentShader.replace("#include <map_fragment>", "#include <map_fragment>\n  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(dot(diffuseColor.rgb, vec3(.299, .587, .114)) * 0.45 + 0.16), uGrey);"); };
-          mt.needsUpdate = true; } } }
   }
   /* ---------- frame 2: different views, as loose lines in many colours crossing over the orchestra ---------- */
   const CHAOS_RGB = ["241, 64, 11", "222, 170, 72", "252, 232, 216", "196, 160, 214", "232, 132, 96", "176, 196, 214", "240, 200, 150"];
@@ -2057,6 +2064,65 @@
       if (k > 0.001) poseArms(conductor, dir, { l: V(lerp(0.32, 0.24, k), lerp(1.32 + Math.sin(now * 2.2 + 1) * 0.05, 0.9, k), lerp(0.36, 0.1, k)), r: V(lerp(-0.34 + sway * 0.06, -0.24, k), lerp(1.36 + beat * 0.1, 0.92, k), lerp(0.4, 0.14, k)) }, beat, { l: 0.25, r: 0.75 }, V(0.25 * k, 1, 0.1 + 0.15 * k));
     }
   }
+  /* ---------- fewer draw calls: meshes that always fade together are merged per material (site only; the model page keeps every part clickable) ---------- */
+  // Units (what fades or moves as one; docs/perf.md, phase 4): each brass player and each melody player on its own, every other section as a whole,
+  // the stands without the conductor's, his stand, the audience, the rehearsal (without its live conductor), the box office and the stage.
+  // Inside a unit, meshes merge per kind (body, instrument, chair: glow and grey work per kind) and per identical material. The first material of
+  // each group is kept as it is (a copy would lose its shader hooks); tinted clothes move their tint from the material to the vertices.
+  const merged = { orch: false, aud: false }, KIND = { Instrument: "Instrument", Stoel: "Stoel", Lichaam: "Lichaam", Persoon: "Lichaam" };
+  const matKey = o => { const x = o.material; return [x.type, x.map && x.map.uuid, x.alphaMap && x.alphaMap.uuid, x.color && x.color.getHexString(), x.emissive && x.emissive.getHexString(), x.emissiveIntensity,
+    x.roughness, x.metalness, x.side, x.alphaTest, x.envMapIntensity, !!x.userData.tint, x.onBeforeCompile.toString(), o.castShadow, o.renderOrder, !!o.geometry.attributes.uv].join("|"); };
+  function tintPerVertex(mat) {   // the tintBody recolouring, with the tint read from the vertices (one material for many people)
+    mat.onBeforeCompile = sh => {
+      sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\n attribute vec3 tintC; varying vec3 vTint;").replace("#include <begin_vertex>", "#include <begin_vertex>\n vTint = tintC;");
+      sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\n varying vec3 vTint;").replace("#include <map_fragment>", `#include <map_fragment>
+        { vec3 c = diffuseColor.rgb; float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b)), sat = (mx - mn) / max(mx, 1e-4);
+          float k = (1.0 - smoothstep(0.03, 0.06, mx)) * (1.0 - smoothstep(0.3, 0.5, sat));
+          diffuseColor.rgb = mix(c, vTint * clamp(mx / 0.009, 0.45, 1.5), k); }`); };
+    mat.customProgramCacheKey = () => "tintv"; mat.needsUpdate = true;
+  }
+  function flatGeometry(o, M, tint) {   // float copy of position, normal and uv in the unit's space; mirrored parts get their triangles turned back
+    const g = o.geometry, out = new THREE.BufferGeometry(), n = g.attributes.position.count;
+    for (const k of ["position", "normal", "uv"]) { const a = g.attributes[k]; if (!a) continue; const f = new Float32Array(n * a.itemSize);
+      for (let i = 0; i < n; i++) { f[i * a.itemSize] = a.getX(i); f[i * a.itemSize + 1] = a.getY(i); if (a.itemSize > 2) f[i * a.itemSize + 2] = a.getZ(i); }
+      out.setAttribute(k, new THREE.BufferAttribute(f, a.itemSize)); }
+    if (tint) { const c = new Float32Array(n * 3); for (let i = 0; i < n; i++) c.set([tint.r, tint.g, tint.b], i * 3); out.setAttribute("tintC", new THREE.BufferAttribute(c, 3)); }
+    const idx = g.index ? Array.from(g.index.array) : Array.from({ length: n }, (_, i) => i);
+    if (M.determinant() < 0) for (let i = 0; i < idx.length; i += 3) { const t = idx[i + 1]; idx[i + 1] = idx[i + 2]; idx[i + 2] = t; }
+    out.setIndex(idx); out.applyMatrix4(M); return out;
+  }
+  function mergeUnit(root, skip) {
+    root.updateMatrixWorld(true); const inMeshes = new Set(meshes), groups = new Map(), toRoot = root.matrixWorld.clone().invert();
+    root.traverse(o => { if (!o.isMesh || o.isSkinnedMesh || o.isInstancedMesh || Array.isArray(o.material) || !inMeshes.has(o) || (skip && skip(o))) return;
+      let kind = ""; for (let n = o.parent; n && n !== root && !kind; n = n.parent) kind = KIND[n.name] || "";
+      const key = kind + "|" + matKey(o); if (!groups.has(key)) groups.set(key, { kind, list: [] }); groups.get(key).list.push(o); });
+    const gone = new Set();
+    for (const { kind, list } of groups.values()) {
+      if (list.length < 2) continue;
+      const mat = list[0].material, tinted = !!mat.userData.tint;
+      const geo = THREE.BufferGeometryUtils.mergeBufferGeometries(list.map(o => flatGeometry(o, toRoot.clone().multiply(o.matrixWorld), tinted && o.material.userData.tint)), false);
+      if (!geo) continue;
+      if (tinted) tintPerVertex(mat);
+      const c = V(0, 0, 0); list.forEach(o => c.add(V(0, 0, 0).setFromMatrixPosition(o.matrixWorld))); c.divideScalar(list.length).applyMatrix4(toRoot);   // transparent meshes are sorted by their position: keep the parts' average,
+      geo.translate(-c.x, -c.y, -c.z);                                                                                                                       // so the merged mesh is drawn in the same order (faded players behind the floor)
+      const me = new THREE.Mesh(geo, mat); me.position.copy(c); me.name = (kind || root.name) + " · samengevoegd"; me.castShadow = list[0].castShadow; me.receiveShadow = true; me.renderOrder = list[0].renderOrder; me.visible = list[0].visible;
+      let holder = root; if (kind) { holder = root.children.find(c => c.name === kind && c.userData.merged) || Object.assign(new THREE.Group(), { name: kind }); holder.userData.merged = true; if (!holder.parent) root.add(holder); }
+      holder.add(me); meshes.push(me); if (list[0].userData.ownMat) me.userData.ownMat = true;   // the glow already keeps this material's own colours (glowMats)
+      list.forEach(o => { gone.add(o); o.removeFromParent(); if (o.geometry !== BLOB_GEO) o.geometry.dispose(); if (o.material !== mat) { glowMats.delete(o.material); o.material.dispose(); } });
+    }
+    for (let i = meshes.length - 1; i >= 0; i--) if (gone.has(meshes[i])) meshes.splice(i, 1);
+  }
+  function mergeTick() {
+    if (!merged.orch && window.__people && window.__people.MUS) {
+      merged.orch = true;
+      const solo = new Set(); orkest.traverse(n => { if (/^Muzikant · /.test(n.name)) { const name = n.name.slice(11); if (inSect(n, "Koper") || LINE1.has(name) || LINE2.has(name)) solo.add(n); } });
+      const inside = (o, set) => { for (let n = o; n; n = n.parent) if (set.has(n)) return true; return false; };
+      solo.forEach(n => mergeUnit(n)); orkest.children.forEach(sec => mergeUnit(sec, o => inside(o, solo)));
+      const condStand = lessen.getObjectByName("Dirigent (partituur)"); mergeUnit(condStand); mergeUnit(lessen, o => inside(o, new Set([condStand])));
+      mergeUnit(CHG, o => inside(o, new Set([dir2]))); mergeUnit(kassa); mergeUnit(pod);
+    }
+    if (!merged.aud && window.__audience && !window.__audience.failed) { merged.aud = true; mergeUnit(pub); }
+  }
   function frameLoop() {
     const now = clock.getElapsedTime(), dt = Math.min(0.1, now - (frameLoop.last || now)); frameLoop.last = now;
     let kk = 1;
@@ -2071,7 +2137,7 @@
     if (waitGo && (window.__audience || now - waitGo.since >= AUDIENCE_WAIT)) goTo(waitGo.i, waitGo.instant);   // the audience is in (or will not come): go now
     // auto-advance inside a sequence
     const Q = S.seq && SEQS[S.seq];
-    if (Q && !paused && at < Q.last && (anim ? sameCam(STOPS[at + 1].cam, STOPS[anim.to].cam) && now - started >= S.hold : now - arrived >= S.hold)) goTo(at + 1);   // steps with the same view don't wait for the camera
+    if (Q && !paused && at < Q.last && (anim ? S.fw && sameCam(STOPS[at + 1].cam, STOPS[anim.to].cam) && now - started >= S.hold : now - arrived >= S.hold)) goTo(at + 1);   // the framework's steps don't wait for the camera; every other sequence goes on once it has arrived ("It isn't" dimmed the orchestra mid-flight)
     else if (story && !anim && !paused && (!Q || at === Q.last) && now - arrived >= (S.hold || STORY.hold)) { if (at < N - 1) goTo(at + 1); else story = false; }
     if (paused && Q) barStart += dt;
     { // FLIP: the big diagram shrinks into the panel miniature (and grows back) with the progress of the camera move
@@ -2103,23 +2169,34 @@
                                : '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0 L10 5 L1 10 Z"/></svg>'; } }
     // focus
     const ease = 1 - Math.exp(-dt * 7);
+    // the audience and the grass (hidden in the opening) change only where nobody sees it: while the camera still sees their place during a move
+    // they keep their opacity; out of view they switch at once; in view after arriving they fade
+    seeFrustum.setFromProjectionMatrix(seeM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    const inView = { audience: seeFrustum.intersectsBox(pubBox), grass: seeFrustum.intersectsBox(grassBox) };
     for (const m of meshes) {
       const t = m.userData.tags || (m.userData.tags = tagsOf(m));
       const lit = lerp(litOf(F, t, since), litOf(S, t, since), mix);
       const fresh = m.userData.fadeIn, goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim && !fresh ? 1 : ease);   // the late audience fades in, also during a camera move
+      if (t.audience || t.grass) { const seen = t.audience ? inView.audience : inView.grass; if (!seen) op = goal; else if (anim) op = m.material.opacity; }
       if (Math.abs(goal - op) < 0.002) { op = goal; m.userData.fadeIn = false; }   // land exactly on the goal; the old "skip steps under 0.0005" could stall a fade at 0.054, just above the cut-off, leaving people "visible" at 5 % and casting full shadows
       if (op !== m.material.opacity || fresh) { const was = m.visible; m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env;
         if (m.visible !== was && m.castShadow) shadows.dirty = true; }   // late arrivals (fresh) always get their visibility set once: at opacity 0 with a goal of 0 nothing else would
     }
     // labels
-    for (const k in labelEls) { const L = labelEls[k], want = (S.labels || []).includes(k) && (!anim || anim.k > 0.5) ? 1 : 0;
-      L.a += (want - L.a) * (1 - Math.exp(-dt * 5)); const [x, y] = toScreen(labelPos[k]);
-      L.el.style.opacity = L.a.toFixed(3); L.el.style.transform = `translate3d(${(x - L.el.offsetWidth / 2).toFixed(1)}px, ${(y - 30 + (1 - L.a) * 8).toFixed(1)}px, 0)`; }
+    { const shown = [];   // the section names; a label that would touch a nearer one moves up a line, so each stays above its own section
+      for (const k in labelEls) { const L = labelEls[k], want = (S.labels || []).includes(k) && (!anim || anim.k > 0.5) ? 1 : 0;
+        L.a += (want - L.a) * (1 - Math.exp(-dt * 5)); if (L.a < 0.002 && !want) { if (L.el.style.opacity !== "0") L.el.style.opacity = "0"; continue; }
+        const [x, y] = toScreen(labelPos[k]); L.w = L.w || L.el.offsetWidth; shown.push({ L, x, y, d: camera.position.distanceTo(labelPos[k]) }); }
+      shown.sort((p, q) => p.d - q.d);
+      for (let i = 0; i < shown.length; i++) { const q = shown[i];
+        for (let moved = true; moved;) { moved = false;
+          for (let j = 0; j < i; j++) { const p = shown[j]; if (Math.abs(q.x - p.x) < (p.L.w + q.L.w) / 2 + 14 && Math.abs(q.y - p.y) < 24) { q.y = p.y - 24; moved = true; } } } }
+      for (const { L, x, y } of shown) { L.el.style.opacity = L.a.toFixed(3); L.el.style.transform = `translate3d(${(x - L.w / 2).toFixed(1)}px, ${(y - 30 + (1 - L.a) * 8).toFixed(1)}px, 0)`; } }
     fctx.setTransform(dpr, 0, 0, dpr, 0, 0); fctx.clearRect(0, 0, vw, vh);
     drawMelody(now, dt); drawChaos(now, dt); glowTick(dt); placeBeats();
     windU.value = now; tickPeople(now); tension(now, dt);
     if (document.body.classList.contains("is-loading") && now - (frameLoop.drawn || -1) < 0.25) return;   // behind the loader nobody sees the scene: draw it 4 times a second, so slow devices load sooner
-    frameLoop.drawn = now; shadowTick(now); film.render();
+    mergeTick(); frameLoop.drawn = now; shadowTick(now); film.render();
   }
 
   function resize() {

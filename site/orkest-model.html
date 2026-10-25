@@ -122,7 +122,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
   ];
   const STAND_SHARE = 4;   // one shared music stand per four musicians
   const AUDIENCE = { rows: 4, perRow: 12, firstZ: 38, rowGap: 1.15, seatGap: 0.9 };
-  const BOARD = { x: 9.4, y: 0.6, rotY: -0.3, title: "TONIGHT'S SYMPHONY", lines: ["The Show", "Must Go On"], foot: "· THE ORCHESTRA ·" };   // programme board on the stage, right of the orchestra
+  const BOARD = { x: 8.6, y: -1.6, rotY: -0.3, title: "TONIGHT'S SYMPHONY", lines: ["The Show", "Must Go On"], foot: "· THE ORCHESTRA ·" };   // programme board on the stage, right of the orchestra
   // CHANGE · tomorrow: a flat terrace on the left rim of the bowl, out of the opening shot: next season's board and a small rehearsal
   const NEXT = { x: -37, z: 1, r: 6.5, rehearsal: [-36.4, 0.4], ring: 2.0,
     board: { at: [-39.8, -1.4], rotY: 0.96, title: "NEXT SEASON'S SYMPHONY", lines: ["The Next", "Episode"], foot: "· IN REHEARSAL ·" },
@@ -822,7 +822,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
     const W = STAGE.wall, wall = new Part("Achterwand");
     const band = (k0, k1, t0, low, high, key) => {
       const t1 = Math.PI - t0, N = 160, R = 2, C = R + 3, pos = [], uv = [], idx = [];
-      const hAt = t => { const u = ((t - t0) / (t1 - t0)) * 2 - 1, end = sstep(1, 0.86, Math.abs(u)); return (low + (high - low) * u * u) * Math.sqrt(end); };
+      const hAt = t => { const u = ((t - t0) / (t1 - t0)) * 2 - 1, end = sstep(1, 0.5, Math.abs(u)); return (low + (high - low) * u * u) * end; };   // the ends taper off gradually over the outer quarter
       const P = (k, t, y) => { const x = STAGE.rx * k * Math.cos(t), z = -STAGE.zb * k * Math.sin(t); pos.push(x, y, z); uv.push(t * STAGE.rx * k, y + (k - k0) * STAGE.zb); };
       for (let i = 0; i <= N; i++) { const t = t0 + (t1 - t0) * i / N, h = Math.max(0.02, hAt(t)), r = Math.min(0.035, h * 0.5);
         P(k0, t, STAGE.floor);

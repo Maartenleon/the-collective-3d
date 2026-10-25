@@ -92,7 +92,6 @@
 
   <div class="caption" id="caption" aria-live="polite"><span class="caption__kind" id="captionKind"></span><span class="caption__text" id="captionText"></span></div>
   <section class="problems" id="problems" aria-label="Problems companies recognise">
-    <p class="problems__intro">Pick the note that sounds off, or take it from the top.</p>
     <p class="problems__head problems__head--fw">Our framework that helps solve these</p>
     <div class="problems__col" data-problems-list>
       <p class="problems__head">Problems we see</p>
@@ -100,18 +99,18 @@
   </section>
   <!-- side panels: a problem (from the left) and a framework part (from the right); filled from content.js -->
   <aside class="drawer drawer--left glass" id="drawerProblem" data-drawer="problem" aria-label="Problem" tabindex="-1" inert>
-    <button class="drawer__close" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1L11 11M11 1L1 11"/></svg></button>
+    <button class="close close--sticky" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
     <div data-drawer-body></div>
   </aside>
   <aside class="drawer drawer--right glass" id="drawerPart" data-drawer="part" aria-label="Framework part" tabindex="-1" inert>
-    <button class="drawer__close" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1L11 11M11 1L1 11"/></svg></button>
+    <button class="close close--sticky" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
     <div data-drawer-body></div>
   </aside>
 
 
   <section class="coll" id="coll" aria-label="The Collective">
     <div class="coll__page glass">
-      <button class="coll__close" type="button" data-coll-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
+      <button class="close close--corner" type="button" data-coll-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
       <header class="coll__head">
         <p class="coll__kicker">The Collective</p>
         <h2 class="coll__title">More value. Less noise.</h2>
@@ -122,10 +121,10 @@
           <h3>We listen to the whole orchestra.</h3>
           <p>Not just the loudest section. We find where value is made, where it gets stuck, and who is quietly playing a different song.</p>
         </div>
-        <div class="coll__col coll__col--score">
+        <div class="coll__col">
           <h3>We bring our score.</h3>
           <p>Proven theory and hard-won experience in one framework. Not another 200-slide deck.</p>
-          <svg class="coll__fw" id="collFw" viewBox="0 0 640 560" role="img" aria-label="The framework; select a part to go to it"></svg>
+          <p class="coll__links"><button class="link-pill" type="button" data-coll-go="f0">Our framework</button><button class="link-pill" type="button" data-coll-go="problems">Problems we see</button></p>
         </div>
         <div class="coll__col">
           <h3>We stay for the performance.</h3>
@@ -134,8 +133,8 @@
       </div>
       <footer class="coll__cta">
         <p class="coll__ask">Sounds familiar?</p>
-        <button class="coll__btn" type="button">Let&rsquo;s talk</button>
-        <p class="coll__baton">We won&rsquo;t steal the baton. <span class="coll__mail">soundcheck@thecollective.nu</span></p>
+        <a class="coll__btn" data-mailto href="#">Let&rsquo;s talk</a>
+        <p class="coll__baton">We won&rsquo;t steal the baton. <button class="coll__mail" type="button" data-copy-email><span data-email></span><span class="coll__copy" data-copy-label aria-live="polite">Copy</span></button></p>
       </footer>
     </div>
   </section>

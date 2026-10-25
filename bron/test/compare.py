@@ -33,7 +33,7 @@ def shoot(out):
             for i, sid in enumerate(ids):
                 pg.evaluate("i => __story.go(i)", i); pg.wait_for_timeout(SETTLE_MS)
                 pg.evaluate(STILL_JS)   # and until nothing fades any more (a slow frame once caught musicians still casting shadows)
-                pg.screenshot(path=os.path.join(out, "%s-%02d-%s.png" % (vname, i, sid)))
+                pg.screenshot(path=os.path.join(out, "%s-%s.png" % (vname, sid)))   # by stop id, so adding a stop does not shift the names
             print(vname, len(ids), "stops", "errors:", errs or "none"); pg.close()
         b.close()
 

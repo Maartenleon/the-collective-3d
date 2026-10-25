@@ -223,3 +223,42 @@ Local loads (no download time), same session, median of 3 cold loads:
 Locally the people are placed sooner, but the loader disappears at the same moment: after "ready" the percentage still counts up to 100 % (about 0.5 s) and waits 250 ms. Online the gain is the 2 MB (gzip) the visitor no longer waits for: about 1.4 s at 1.5 MB/s.
 
 fps, interleaved (3 rounds, fresh browser each, uncapped), median: desktop open 121 -> 124, t5 164 -> 162, problems 120 -> 121; phone open 207 -> 210, t5 169 -> 172, problems 151 -> 152. Unchanged, as expected (the same is drawn; antialias only affected the final quad).
+
+## Phase 4: fewer draw calls (done after phase 6, on Kai's go-ahead)
+
+### What changed (bron/site/story.js, `mergeUnit`, site only)
+
+After the people are in, meshes that always fade and move together are merged per material: each brass player and each melody player (LINE1/LINE2) on its own, every other section as a whole, the stands without the conductor's, the conductor's stand, the rehearsal (without its live conductor), the box office, the stage, and the audience once it is in. Inside a unit, meshes merge per kind (person, instrument, chair) and per identical material. Tinted clothes move their tint from the material to the vertices (`tintC`, one material for many people). The model page keeps every part separate (clicking still picks a person or a part).
+
+Two problems found by the comparison test and fixed before measuring: the glow's saved colours were lost when its materials were cloned again (instruments turned black), and merged meshes sorted differently as transparent objects (faded players in b3/b4 showed through the floor); a merged mesh now sits at the average position of its parts.
+
+### Result
+
+| | Phase 6 | Phase 4 |
+|---|---|---|
+| Meshes / materials | 888 / 888 | 418 / 418 |
+| Draw calls per frame (incl. shadow pass) | 1,307-1,467 | 667-791 |
+| GPU geometries | 1,148 | 687 |
+
+fps, interleaved (3 rounds, fresh browser each, uncapped), median:
+
+| | Stop | Phase 6 | Phase 4 |
+|---|---|---|---|
+| desktop | open | 52 | 53 |
+| desktop | t5 | 93 | 93 |
+| desktop | b3 | 64 | 75 |
+| desktop | problems | 60 | 75 |
+| phone | open | 130 | 156 |
+| phone | t5 | 126 | 134 |
+| phone | b3 | 90 | 118 |
+| phone | problems | 102 | 136 |
+
+Up to a third faster on the phone size, 15-25 % on the busy desktop views. Cost: merging takes about 0.45 s on the main thread while the loader is up (local "loader gone" 1.75 -> 2.21 s); a later step could bake the merged units.
+
+All 54 comparison shots at the noise floor; the moving effects (one-by-one sections, tension, glow) follow the same course over time.
+
+## After phase 4: Kai's round of changes (same branch)
+
+Visual changes by request, so the comparison reference was renewed afterwards: no grey step at the glow stops, the framework one part per 0.4 s without coloured parts, panel tokens for borders, hovers and diagram parts, one close cross, the About page (no dividers, links instead of the diagram, narrower, copy e-mail, Let's talk mailto, contact in one place), no lines under the section names, the board moved onto the stage, a back wall that tapers gradually, a closer camera for frame 2 and friends on phones, the problems list on a panel on phones.
+
+Two causes of the "glitch" from the opening to "It isn't" were found: the audience and grass faded in during the flight and were hidden again a moment later, and the sequence started its next step (sections one by one, the rest dimmed) while the camera was still flying. Now the audience and grass change visibility only out of view, and only the framework's steps run during a camera move.

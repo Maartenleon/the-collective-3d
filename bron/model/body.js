@@ -685,7 +685,7 @@
     const W = STAGE.wall, wall = new Part("Achterwand");
     const band = (k0, k1, t0, low, high, key) => {
       const t1 = Math.PI - t0, N = 160, R = 2, C = R + 3, pos = [], uv = [], idx = [];
-      const hAt = t => { const u = ((t - t0) / (t1 - t0)) * 2 - 1, end = sstep(1, 0.86, Math.abs(u)); return (low + (high - low) * u * u) * Math.sqrt(end); };
+      const hAt = t => { const u = ((t - t0) / (t1 - t0)) * 2 - 1, end = sstep(1, 0.5, Math.abs(u)); return (low + (high - low) * u * u) * end; };   // the ends taper off gradually over the outer quarter
       const P = (k, t, y) => { const x = STAGE.rx * k * Math.cos(t), z = -STAGE.zb * k * Math.sin(t); pos.push(x, y, z); uv.push(t * STAGE.rx * k, y + (k - k0) * STAGE.zb); };
       for (let i = 0; i <= N; i++) { const t = t0 + (t1 - t0) * i / N, h = Math.max(0.02, hAt(t)), r = Math.min(0.035, h * 0.5);
         P(k0, t, STAGE.floor);
