@@ -241,7 +241,7 @@ p, ul, h1, h2 { margin: 0; }
 .pill { padding: 5px 10px; border: 1px solid var(--color-line-soft); border-radius: var(--radius-pill); font: 400 .7rem/1 var(--font-sans); color: var(--color-text-muted); }
 .fw.has-focus .k:not(.is-lit):not(:hover) { opacity: .2 !important; }   /* the parts the open panel is about stay lit */
 @media (max-width: 720px) {
-  .drawer { --drawer-width: auto; left: var(--gutter); right: var(--gutter); top: 64px; max-height: calc(100% - 64px - var(--timeline-offset) - 40px); padding: var(--space-m); }
+  .drawer { --drawer-width: auto; left: var(--gutter); right: var(--gutter); top: 50%; translate: 0 -50%; max-height: calc(100% - 2 * (var(--timeline-offset) + 40px)); padding: var(--space-m); }   /* phones: centred on the screen both ways (equal gutters; translate leaves the slide-in transform alone) */
 }
 .problems__head--fw { position: absolute; left: 72%; top: var(--problems-top); transform: translateX(-50%); white-space: nowrap; }
 @media (max-height: 800px) and (min-width: 721px) {   /* low laptop screens: tighter cards, so the list ends above the timeline */
