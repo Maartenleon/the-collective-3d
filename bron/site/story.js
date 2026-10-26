@@ -104,7 +104,7 @@
     { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
     // Frame 9 and 10: your organisation
     { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
-    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },
+    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: NARROW ? K([0, 13, 33], [0, 0.6, -3]) : shiftCam(K([0, 13, 33], [0, 0.6, -3]), 0.25, 0), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },   // desktop: the stage moves left, under the framework, so the list on the right lies on the dark ground
     // Part 4: The Collective. The camera rises over the bowl: tonight's concert and next season's rehearsal in one view
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
   ];
@@ -329,7 +329,7 @@
   let touchY = null;
   stage.addEventListener("touchstart", e => { touchY = e.touches[0].clientY; }, { passive: true });
   stage.addEventListener("touchmove", e => { if (!e.target.closest(".problems, .coll__page, [data-drawer]")) e.preventDefault(); }, { passive: false });
-  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } if (e.target.closest(".coll__page") && $(".coll__page").scrollHeight > $(".coll__page").clientHeight + 4) { touchY = null; return; } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });
+  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } for (const sel of [".coll__page", ".problems"]) { const el = e.target.closest(sel); if (el && el.scrollHeight > el.clientHeight + 4) { touchY = null; return; } } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });   // a list that scrolls (About, problems on phones) is scrolled, not swiped away
   const segBtns = SEGS.map((g, n) => { const b = document.createElement("button");
     b.type = "button"; b.className = "timeline__seg"; b.dataset.timelineSeg = n; b.tabIndex = -1;
     b.setAttribute("aria-label", `${STORY.goTo} ${pad(n)} ${STOPS[g.first].name}`);
