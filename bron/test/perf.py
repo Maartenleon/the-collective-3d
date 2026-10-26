@@ -44,7 +44,7 @@ SCENE_JS = """() => {
     let vis = true; for (let n = m; n; n = n.parent) if (!n.visible) { vis = false; break; }
     if (vis) { visible++; if (m.castShadow) casters++; } }
   const owner = m => { for (let n = m; n; n = n.parent) { for (const [k, g] of Object.entries(P.groups)) if (n === g && k !== 'omg') return k; } return 'other'; };
-  const by = {}; for (const m of meshes) { let k = owner(m); if (k === 'heuvels') k = /^Bergketen/.test(m.name) ? 'hills (far ranges)' : 'bowl terrain';
+  const by = {}; for (const m of meshes) { let k = owner(m); if (k === 'heuvels') k = /^Berg/.test(m.name) ? 'hills (far land)' : 'bowl terrain';
     by[k] = by[k] || { meshes: 0, triangles: 0 }; by[k].meshes++; by[k].triangles += tris(m); }
   const frame = shadow => { R.info.autoReset = false; R.shadowMap.autoUpdate = shadow; R.shadowMap.needsUpdate = shadow; R.info.reset(); P.film.render(); const r = { calls: R.info.render.calls, triangles: R.info.render.triangles }; R.shadowMap.autoUpdate = true; R.info.autoReset = true; return r; };
   const withShadow = frame(true), noShadow = frame(false);

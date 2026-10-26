@@ -42,7 +42,7 @@ site/icons/               favicon (same as the 2D site: dark square, vermilion d
 bron/build.py             builds both pages from the sources below
 bron/model/               the 3D scene (shared by both builds)
   head.html               page shell + scene config (STAGE, BOARD, colours, camera presets)
-  body.js                 renderer, film-look post pass, materials, stage/bowl/hills/board/rehearsal geometry, hierarchy
+  body.js                 renderer, film-look post pass, materials, stage/bowl/board/rehearsal geometry, the land beyond the bowl (one procedural terrain, settings in LAND in head.html), hierarchy
   _dress_src.js           concert dress helpers
   _people_common.js       shared by site, model page and bake: Rocketbox materials (rbMaterial, tintBody), register/unregister, the live conductor
   _people_bake.js         the people pipeline (seated poses by IK, head swaps, baking skinned meshes, dress, audience) and the export; only in the bake page

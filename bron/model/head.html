@@ -132,5 +132,12 @@ details[open] > summary .tw { transform: rotate(90deg); }
   };
   // Art direction v3 image palette
   const AD = { shadow: 0x1A0E0A, earth: 0x5C2414, conductor: 0xD9452B, grain: 0xA9824F, sky: 0x8A9CB0, stage: 0xF6F2EC, garnet: 0x5C0F07 };
+  // the land beyond the bowl (body.js): one continuous procedural terrain to the horizon
+  const LAND = { r0: 185, r1: 1900, rings: 320, segs: 1000, ringsPhone: 200, segsPhone: 640, seed: 7,
+    wavelength: 120, octaves: 5, gain: 0.38, lacunarity: 2.0, warp: 0.6,          // fBm simplex with domain warping: many soft, rounded, eroded hills
+    base: 6, slope: 0.11, rise: 650, ampNear: 4, ampFar: 13, crest: 1500, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away
+    color: 0x14161a, shade: 0x34548a, shadeAmount: 0.62, rose: "0.26, 0.15, 0.17", roseAmount: 0.85, sunFrom: 0.3, sunTo: 0.75,   // slate blue in the shade, rose where the low sun reaches
+    relief: 0.04, reliefScale: 0.12,                                               // fine folds in the light
+    haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.3 };   // linear colour: after the film look it meets the sky
   const SUN = { color: 0xff9650, intensity: 3.4, pos: [70, 21, 26], target: [0, 0, -6] };   // golden hour: very low, warm, raking from the right
   const GHOST = 0.07;

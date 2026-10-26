@@ -264,3 +264,9 @@ Visual changes by request, so the comparison reference was renewed afterwards: n
 Two causes of the "glitch" from the opening to "It isn't" were found: the audience and grass faded in during the flight and were hidden again a moment later, and the sequence started its next step (sections one by one, the rest dimmed) while the camera was still flying. Now the audience and grass change visibility only out of view, and only the framework's steps run during a camera move.
 
 Next round (Kai): faded figures cast no shadow any more (b3/b4: only the lit players' shadows), the glow lights the instruments in their own colour, the audience appears from "question" on (one fewer group drawn in the earlier stops), the programme board stands beside the stage out of the opening shot, the box office sign is white, the question's foreground is dark instead of blurred, the problems headings sit higher ("Our framework"). Comparison reference renewed; no change in draw calls or fps expected beyond fewer shadow casters while players are faded.
+
+## The land beyond the bowl (Kai's request)
+
+The four stacked hill rings were replaced by ONE continuous procedural terrain: a polar grid (dense at the rim, coarser far out; 320 x 1000 on desktop, 200 x 640 on phones) displaced by 5-octave fBm simplex noise with domain warping, softened for rounded, eroded hills; the ground rises slowly with distance so row after row shows above the rim, and falls away beyond a crest. Normals from the heightfield, a little fine relief, rose on the sun side, slate blue in the shade, a touch of haze. Settings in `LAND` (head.html).
+
+More triangles than before (640k vs 253k on desktop), but faster: the old rings ran ridged noise per pixel. Interleaved fps, median: desktop open 88 -> 142, t1 145 -> 218, problems 118 -> 127; phone open 188 -> 207, t1 237 -> 259, problems 158 -> 159.

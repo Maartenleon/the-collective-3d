@@ -133,6 +133,13 @@ details[open] > summary .tw { transform: rotate(90deg); }
   };
   // Art direction v3 image palette
   const AD = { shadow: 0x1A0E0A, earth: 0x5C2414, conductor: 0xD9452B, grain: 0xA9824F, sky: 0x8A9CB0, stage: 0xF6F2EC, garnet: 0x5C0F07 };
+  // the land beyond the bowl (body.js): one continuous procedural terrain to the horizon
+  const LAND = { r0: 185, r1: 1900, rings: 320, segs: 1000, ringsPhone: 200, segsPhone: 640, seed: 7,
+    wavelength: 120, octaves: 5, gain: 0.38, lacunarity: 2.0, warp: 0.6,          // fBm simplex with domain warping: many soft, rounded, eroded hills
+    base: 6, slope: 0.11, rise: 650, ampNear: 4, ampFar: 13, crest: 1500, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away
+    color: 0x14161a, shade: 0x34548a, shadeAmount: 0.62, rose: "0.26, 0.15, 0.17", roseAmount: 0.85, sunFrom: 0.3, sunTo: 0.75,   // slate blue in the shade, rose where the low sun reaches
+    relief: 0.04, reliefScale: 0.12,                                               // fine folds in the light
+    haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.3 };   // linear colour: after the film look it meets the sky
   const SUN = { color: 0xff9650, intensity: 3.4, pos: [70, 21, 26], target: [0, 0, -6] };   // golden hour: very low, warm, raking from the right
   const GHOST = 0.07;
 
@@ -148,7 +155,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
   renderer.toneMappingExposure = 0.9;
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x4a2a24, 90, 420);   // warm dark haze inside the bowl; the far ranges carry their own haze   // pale haze, no beige: distant land fades into the AD sky
-  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 600);
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 2600);   // far enough for the land to run to the horizon
   const controls = new THREE.OrbitControls(camera, canvas);
   /* ---------- film look: the scene renders into an HDR buffer, then one pass gives it the aged, warm photo feel of
      the reference (soft halation around bright parts, lifted warm blacks, softer contrast, slight fade, a vignette low in the frame). No grain or lens fringing: a clean image.
@@ -640,7 +647,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
     const gnd = new THREE.Mesh(new THREE.CircleGeometry(9.9, 32), new THREE.MeshBasicMaterial({ color: 0x6a4026 })); gnd.rotation.x = -Math.PI / 2; gnd.position.y = -0.4; env.add(gnd);
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(8, 3), new THREE.MeshBasicMaterial({ color: 0xfff1de })); glow.position.set(0, 0.6, -9); env.add(glow);
     const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(env, 0.04).texture; pm.dispose(); }
-  const luchtG = group("Lucht", omg); const skyMesh = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 16), skyMat); skyMesh.name = "Lucht"; luchtG.add(skyMesh);
+  const luchtG = group("Lucht", omg); const skyMesh = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 16), skyMat); skyMesh.name = "Lucht"; skyMesh.renderOrder = -10; luchtG.add(skyMesh);   // the sky is drawn first, without depth: the land behind it still covers it
   const heuvels = group("Heuvels", omg);
   // Landscape: the stage sits low in a bowl of earth (art direction); hill ridges layer around it like on the site.
   const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -706,40 +713,47 @@ details[open] > summary .tw { transform: rotate(90deg); }
           roughnessFactor = mix(roughnessFactor, 0.55, front * 0.35 * smoothstep(0.4, 0.7, fbm(vW.xz * 6.0))); }   // soft sheen on the clod tops in front of the stage`);
     };
     const m = new THREE.Mesh(g, mat); m.name = "Aarde"; m.receiveShadow = true; m.castShadow = true; heuvels.add(m); }
-  { // far ranges: four layers of low rolling hills, each a little higher and hazier, lit from the side so the round flanks read
-    const LAYERS = [[255, 34, 0x3b527a, 2.6], [300, 40, 0x40577f, 3.9], [345, 46, 0x465c84, 5.2], [390, 52, 0x4c6289, 6.5]];   // from the opening camera a low band just above the rim; the first one barely clears it
-    const roll = (a, s) => 0.55 * Math.sin(a * 21 + s) + 0.3 * Math.sin(a * 47 + s * 2.1 + Math.sin(a * 9 + s)) + 0.15 * Math.sin(a * 97 + s * 3.7);   // low, subtle swells, no peaks
-    LAYERS.forEach(([R, H, col, seed], li) => {
-      const seg = small ? 720 : 1440, rows = 22, g = new THREE.CylinderGeometry(1, 1, 1, seg, rows, true);
-      const p = g.attributes.position, cols = new Float32Array(p.count * 3), c0 = new THREE.Color(col), c1 = new THREE.Color(0x6f86ad), c = new THREE.Color();
-      for (let i = 0; i < p.count; i++) { const a = Math.atan2(p.getZ(i), p.getX(i)), t = p.getY(i) + 0.5;
-        const k = roll(a, seed), top = H + 0.5 * k;
-        const RR = R - (25 + 2 * k) * t;   // a higher hill also reaches further forward: round flanks that catch the light
-        p.setXYZ(i, Math.cos(a) * RR, -6 + top * Math.pow(t, 0.8), Math.sin(a) * RR);
-        c.copy(c0).lerp(c1, 0.15 + 0.35 * (1 - t)).convertSRGBToLinear(); cols.set([c.r, c.g, c.b], i * 3); }
-      g.setAttribute("color", new THREE.BufferAttribute(cols, 3)); g.computeVertexNormals();
-      const fm = material("far", { side: THREE.BackSide, fog: false, color: 0x8a7470, emissive: col, emissiveIntensity: 0.26 + li * 0.04 });   // warm rose where the sun reaches, slate blue in the shade
-      fm.onBeforeCompile = sh => {   // sculpted flanks: erosion gullies running downhill, gold where the sun hits, lilac in the folds
-        sh.uniforms.depth = { value: li / 5 };
-        sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\n varying vec3 vW;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\n vW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
-        sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\n uniform float depth; varying vec3 vW;\n" + NOISE_GLSL).replace("#include <map_fragment>", `#include <map_fragment>
-          float ang = atan(vW.z, vW.x), R = length(vW.xz);
-          vec2 q = vec2(ang * R * 0.06, vW.y * 0.03);
-          float gl = ridged(q) * 0.75, tone = fbm(q * 0.35 + 7.0);
-          diffuseColor.rgb *= 0.9 + 0.15 * gl;
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.74, 0.55, 0.54), smoothstep(0.4, 0.85, tone) * 0.6 * (1.0 - depth * 0.35));   // peach where the grass catches the sun
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.52, 0.50, 0.66), smoothstep(0.45, 0.2, gl) * 0.3);                            // lilac in the gullies
-        `).replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
-          { vec3 nW = normalize((vec4(normal, 0.0) * viewMatrix).xyz); float sunK = smoothstep(0.0, 0.45, dot(nW, normalize(vec3(0.88, 0.26, 0.40))));
-            totalEmissiveRadiance = mix(totalEmissiveRadiance, vec3(0.17, 0.105, 0.105), sunK * 0.7 * (1.0 - depth * 0.3)); }   // flanks turned to the low sun glow rose, as in the reference
-        `).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
-          { float ang = atan(vW.z, vW.x), R = length(vW.xz); vec2 q = vec2(ang * R * 0.06, vW.y * 0.03), e = vec2(0.03, 0.0);
-            float c0 = ridged(q), cu = ridged(q + e.xy), cv = ridged(q + e.yx); c0 *= 0.75; cu *= 0.75; cv *= 0.75;
-            vec3 T = vec3(-sin(ang), 0.0, cos(ang));
-            vec3 dW = -(T * (cu - c0) / 0.03 + vec3(0.0, 1.0, 0.0) * (cv - c0) / 0.03) * (0.05 - depth * 0.02);
-            normal = normalize(normal + mat3(viewMatrix) * dW); }`);
-      };
-      const m = new THREE.Mesh(g, fm); m.name = "Bergketen " + (li + 1); m.renderOrder = -1; heuvels.add(m); });
+  { // the land beyond the bowl: ONE continuous procedural terrain to the horizon (no layers or bands). A polar grid, dense near the rim and
+    // coarser far out, displaced by a heightfield: 6-octave fBm simplex noise with domain warping, shaped for soft, rounded, eroded hills
+    // (Palouse, wind-shaped sand hills), many small and medium swells; the ground rises slowly with distance so it reads above the rim.
+    const T = Object.assign({}, LAND, window.__landTune || {}), rings = small ? T.ringsPhone : T.rings, segs = small ? T.segsPhone : T.segs;   // __landTune: only set by the tuning script
+    const simplex = (() => {   // 2D simplex noise (Gustavson), seeded, range about -1..1
+      const perm = new Uint8Array(512), G = [[1, 1], [-1, 1], [1, -1], [-1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]];
+      { let a = T.seed; const p = [...Array(256).keys()]; for (let k = 255; k > 0; k--) { a = (a * 16807) % 2147483647; const r = a % (k + 1); [p[k], p[r]] = [p[r], p[k]]; } for (let k = 0; k < 512; k++) perm[k] = p[k & 255]; }
+      const F2 = 0.5 * (Math.sqrt(3) - 1), G2 = (3 - Math.sqrt(3)) / 6;
+      return (x, y) => { const s0 = (x + y) * F2, i0 = Math.floor(x + s0), j0 = Math.floor(y + s0), t0 = (i0 + j0) * G2, x0 = x - i0 + t0, y0 = y - j0 + t0;
+        const i1 = x0 > y0 ? 1 : 0, j1 = 1 - i1, x1 = x0 - i1 + G2, y1 = y0 - j1 + G2, x2 = x0 - 1 + 2 * G2, y2 = y0 - 1 + 2 * G2, ii = i0 & 255, jj = j0 & 255;
+        const c = (gx, gy, dx, dy) => { let t = 0.5 - dx * dx - dy * dy; if (t < 0) return 0; t *= t; const g = G[gx & 7]; return t * t * (g[0] * dx + g[1] * dy); };
+        return 70 * (c(perm[ii + perm[jj]], 0, x0, y0) + c(perm[ii + i1 + perm[jj + j1]], 0, x1, y1) + c(perm[ii + 1 + perm[jj + 1]], 0, x2, y2)); }; })();
+    const fbm = (x, y, oct) => { let a = 1, f = 1, sum = 0, n = 0; for (let k = 0; k < oct; k++) { sum += a * simplex(x * f + k * 31.7, y * f - k * 17.3); n += a; a *= T.gain; f *= T.lacunarity; } return sum / n; };
+    const hills = (x, z) => {   // warped fBm, softened: no sharp crests, rounded tops and smooth valleys
+      const px = x / T.wavelength, pz = z / T.wavelength;
+      const qx = fbm(px * 0.55 + 3.1, pz * 0.55 - 1.7, 4), qz = fbm(px * 0.55 - 8.3, pz * 0.55 + 4.4, 4);
+      const n = fbm(px + T.warp * qx, pz + T.warp * qz, T.octaves) * 1.6;
+      return n - 0.33 * n * n * n;   // rounds the tops off (an eroded, wind-worn profile)
+    };
+    const heightAt = (x, z) => { const d = Math.hypot(x, z), k = sstep(T.r0, T.rise, d);
+      return T.base + T.slope * Math.max(0, Math.min(d, T.crest) - T.r0) * k - T.fall * Math.max(0, d - T.crest) + (T.ampNear + (T.ampFar - T.ampNear) * k) * hills(x, z); };
+    const pos = new Float32Array(rings * (segs + 1) * 3), idx = [];
+    for (let r = 0; r < rings; r++) { const rad = T.r0 * Math.pow(T.r1 / T.r0, r / (rings - 1));
+      for (let a = 0; a <= segs; a++) { const ang = a / segs * Math.PI * 2, x = Math.cos(ang) * rad, z = Math.sin(ang) * rad; pos.set([x, heightAt(x, z), z], (r * (segs + 1) + a) * 3); } }
+    for (let r = 0; r < rings - 1; r++) for (let a = 0; a < segs; a++) { const p0 = r * (segs + 1) + a, p1 = p0 + segs + 1; idx.push(p0, p0 + 1, p1, p0 + 1, p1 + 1, p1); }
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();   // normals from the heightfield
+    const fm = material("far", { fog: false, color: T.color, emissive: T.shade, emissiveIntensity: T.shadeAmount, roughness: 1 });
+    const f = v => (+v).toFixed(4);   // numbers into GLSL always as floats (an integer such as 0 would not compile)
+    fm.onBeforeCompile = sh => {   // rose where the low sun reaches, slate blue in the shade, fine relief in the light, haze toward the horizon
+      sh.uniforms.uHaze = { value: new THREE.Color(T.haze) }; sh.uniforms.uSun = { value: new THREE.Vector3(...SUN.pos).sub(new THREE.Vector3(...SUN.target)).normalize() };
+      sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\n varying vec3 vW;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\n vW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
+      sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\n uniform vec3 uHaze, uSun; varying vec3 vW;\n" + NOISE_GLSL).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+          { vec2 q = vW.xz * ${f(T.reliefScale)}; float e = 0.04, c0 = fbm(q), cx = fbm(q + vec2(e, 0.0)), cz = fbm(q + vec2(0.0, e));   // micro-relief: small folds on the slopes
+            normal = normalize(normal + mat3(viewMatrix) * vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * ${f(T.relief)}); }`)
+        .replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+          { vec3 nW = normalize((vec4(normal, 0.0) * viewMatrix).xyz); float sunK = smoothstep(${f(T.sunFrom)}, ${f(T.sunTo)}, dot(nW, uSun));
+            totalEmissiveRadiance = mix(totalEmissiveRadiance, vec3(${T.rose}), sunK * ${f(T.roseAmount)}); }`)
+        .replace("#include <fog_fragment>", `#include <fog_fragment>
+          { float d = distance(vW, cameraPosition); gl_FragColor.rgb = mix(gl_FragColor.rgb, uHaze, smoothstep(${f(T.hazeFrom)}, ${f(T.hazeTo)}, d) * ${f(T.hazeMax)}); }`);
+    };
+    const m = new THREE.Mesh(g, fm); m.name = "Bergland"; heuvels.add(m);
   }
   const graan = group("Graan", omg);
   // Where the field turns green: soft patches and a few streaks, like the art direction foreground
@@ -964,7 +978,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
     return g;
   }
   const bord = makeBoard(group("Bord", RUN), BOARD); bord.userData.count = 1;
-  const [bxx, bzz] = toThree(BOARD.x, BOARD.y); bord.position.set(bxx, terrainH(bxx, bzz), bzz);   // on the ground beside the stage bord.rotation.y = BOARD.rotY;
+  const [bxx, bzz] = toThree(BOARD.x, BOARD.y); bord.position.set(bxx, terrainH(bxx, bzz), bzz); bord.rotation.y = BOARD.rotY;   // on the ground beside the stage
 
   // CHANGE · morgen: next season's board and a small mixed team rehearsing the next piece, on the terrace at the rim
   const CHG = group("CHANGE · morgen", root);
