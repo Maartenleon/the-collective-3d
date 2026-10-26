@@ -583,7 +583,7 @@
         return 70 * (c(perm[ii + perm[jj]], 0, x0, y0) + c(perm[ii + i1 + perm[jj + j1]], 0, x1, y1) + c(perm[ii + 1 + perm[jj + 1]], 0, x2, y2)); }; })();
     const fbm = (x, y, oct) => { let a = 1, f = 1, sum = 0, n = 0; for (let k = 0; k < oct; k++) { sum += a * simplex(x * f + k * 31.7, y * f - k * 17.3); n += a; a *= T.gain; f *= T.lacunarity; } return sum / n; };
     const hills = (x, z) => {   // warped fBm, softened: no sharp crests, rounded tops and smooth valleys
-      const px = x / T.wavelength, pz = z / T.wavelength;
+      const px = x / (T.wavelength * (T.stretch || 1)), pz = z / T.wavelength;   // stretch > 1: longer along x, so the hills line up in long ridges across the view
       const qx = fbm(px * 0.55 + 3.1, pz * 0.55 - 1.7, 4), qz = fbm(px * 0.55 - 8.3, pz * 0.55 + 4.4, 4);
       const n = fbm(px + T.warp * qx, pz + T.warp * qz, T.octaves) * 1.6;
       return n - (T.round ?? 0.33) * n * n * n;   // rounds the tops off (an eroded, wind-worn profile)

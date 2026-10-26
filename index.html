@@ -213,8 +213,8 @@
   const AD = { shadow: 0x1A0E0A, earth: 0x5C2414, conductor: 0xD9452B, grain: 0xA9824F, sky: 0x8A9CB0, stage: 0xF6F2EC, garnet: 0x5C0F07 };
   // the land beyond the bowl (body.js): one continuous procedural terrain to the horizon
   const LAND = { r0: 185, r1: 1900, rings: 420, segs: 1300, ringsPhone: 240, segsPhone: 760, seed: 7,
-    wavelength: 90, octaves: 4, gain: 0.33, lacunarity: 2.0, warp: 0.3, round: 0.15,   // fBm simplex with domain warping: many small, low, rounded hills (few fine octaves, little warp, tops only slightly flattened: no steep, angular steps)
-    base: 6, slope: 0.11, rise: 650, ampNear: 4, ampFar: 11, crest: 1700, crestSoft: 150, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away, rounded over crestSoft metres
+    wavelength: 85, stretch: 1.6, octaves: 6, gain: 0.4, lacunarity: 2.0, warp: 0.4,   // fBm simplex with domain warping: many small, low, rounded hills, stretched sideways into long, soft ridges (fewer separate tops)
+    base: 6, slope: 0.11, rise: 650, ampNear: 3, ampFar: 8, crest: 1700, crestSoft: 150, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away, rounded over crestSoft metres (a calm horizon line)
     color: 0x090a10, shade: 0x34548a, shadeAmount: 0.52, rose: "0.30, 0.16, 0.16", roseAmount: 0.5, sunFrom: 0.1, sunTo: 0.9,   // soft contrast: slate blue, a gentle rose toward the low sun
     relief: 0.18, reliefScale: 0.05,                                              // fine folds on every slope
     haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.28 };   // linear colour: after the film look it meets the sky
@@ -803,7 +803,7 @@
         return 70 * (c(perm[ii + perm[jj]], 0, x0, y0) + c(perm[ii + i1 + perm[jj + j1]], 0, x1, y1) + c(perm[ii + 1 + perm[jj + 1]], 0, x2, y2)); }; })();
     const fbm = (x, y, oct) => { let a = 1, f = 1, sum = 0, n = 0; for (let k = 0; k < oct; k++) { sum += a * simplex(x * f + k * 31.7, y * f - k * 17.3); n += a; a *= T.gain; f *= T.lacunarity; } return sum / n; };
     const hills = (x, z) => {   // warped fBm, softened: no sharp crests, rounded tops and smooth valleys
-      const px = x / T.wavelength, pz = z / T.wavelength;
+      const px = x / (T.wavelength * (T.stretch || 1)), pz = z / T.wavelength;   // stretch > 1: longer along x, so the hills line up in long ridges across the view
       const qx = fbm(px * 0.55 + 3.1, pz * 0.55 - 1.7, 4), qz = fbm(px * 0.55 - 8.3, pz * 0.55 + 4.4, 4);
       const n = fbm(px + T.warp * qx, pz + T.warp * qz, T.octaves) * 1.6;
       return n - (T.round ?? 0.33) * n * n * n;   // rounds the tops off (an eroded, wind-worn profile)
