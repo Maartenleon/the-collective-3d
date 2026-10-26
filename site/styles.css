@@ -8,6 +8,7 @@
   --color-text-muted: rgb(var(--rgb-paper) / .72); --color-body: var(--color-text-muted); --color-highlight: var(--palette-cream); --color-accent: var(--palette-vermilion);
   --color-line: rgb(var(--rgb-paper) / .36); --color-line-soft: rgb(var(--rgb-paper) / .22); --color-line-faint: rgb(var(--rgb-paper) / .12);
   --color-glass: rgb(var(--rgb-shadow) / .34); --color-glass-strong: rgb(var(--rgb-shadow) / .55);
+  --color-ground-deep: #100a07;   /* the darkest point of the red bowl's shadow (measured in the opening shot) */
   --panel-fill: var(--color-glass); --panel-border: var(--color-line-faint);   /* the story panels: every panel border, hover and diagram part uses these */
   --close-size: 32px; --close-icon: 13px; --close-stroke: 1.6;
   --font-serif: "EB Garamond", Garamond, Georgia, serif; --font-sans: "Restart Soft", "Figtree", ui-sans-serif, system-ui, sans-serif;
@@ -31,7 +32,7 @@ p, ul, h1, h2 { margin: 0; }
 .shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--dur-slow) ease; background: rgb(var(--rgb-shadow) / .55); }
 .shade.is-on { opacity: 1; }
 .fore { position: absolute; inset: auto 0 0 0; height: 55vh; pointer-events: none; opacity: 0; transition: opacity var(--dur-slow) ease;   /* a dark foreground: the audience recedes */
-  background: linear-gradient(to top, rgb(var(--rgb-shadow) / .94), rgb(var(--rgb-shadow) / .72) 45%, rgb(var(--rgb-shadow) / 0));   /* dark, not blurred */
+  background: linear-gradient(to top, var(--color-ground-deep), rgb(16 10 7 / .78) 45%, rgb(16 10 7 / 0));   /* as dark as the deepest shadow on the red bowl, not blurred */
   -webkit-mask-image: linear-gradient(to top, #000 40%, transparent); mask-image: linear-gradient(to top, #000 40%, transparent); }
 .fore.is-on { opacity: 1; }
 
@@ -283,9 +284,10 @@ p, ul, h1, h2 { margin: 0; }
 .panel.is-on .panel__extra.is-late { opacity: 1; }
 @media (max-width: 720px) {
   .fw { top: 52%; width: min(86vw, 50vh); }
-  .fw.is-side { left: 50%; transform: translate(-50%, -50%); }
+  .fw.is-side { left: 50%; transform: translate(-50%, calc(-50% - var(--problems-scroll, 0px))); }   /* phones: the framework scrolls with the list below it */
+  .fw.is-side.is-scrolling { transition: opacity .7s ease, visibility 0s; }   /* follows the finger directly while scrolling */
   .problems__head { font-size: var(--text-h3-sm); }
-  .problems__head--fw { left: 50%; }
+  .problems__head--fw { left: 50%; transform: translate(-50%, calc(-1 * var(--problems-scroll, 0px))); }
   .problems { grid-template-columns: 1fr; padding-top: calc(var(--problems-top) + 2.3rem + var(--problems-fw-size) * .875 + 44px); }   /* below the framework */
   .problems { bottom: calc(var(--timeline-offset) + 52px); padding-bottom: var(--space-m);   /* the list scrolls above the timeline, not behind it */
     -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); }
@@ -339,6 +341,7 @@ p, ul, h1, h2 { margin: 0; }
 @media (max-width: 720px) {
   .coll__page { max-height: 66vh; padding: 20px 18px; }
   .close--corner { top: 9px; right: 9px; }
+  .panel__fw { top: calc(10px - var(--space-s)); right: calc(10px - var(--space-m)); }   /* phones: the panel's top padding is smaller, so the same 10px above and to the right */
   .coll__cols { grid-template-columns: 1fr; gap: 16px; margin: 16px 0; }
   .coll__cta { position: sticky; bottom: -20px; margin: 0 -18px -20px; padding: 14px 18px 16px; gap: 8px 14px; background: var(--color-bg); border-top: 1px solid var(--panel-border); }   /* phones: the only divider, above the sticky contact row */
   .coll__ask { font-size: 1.2rem; } .coll__baton { font-size: .9rem; flex-basis: 100%; }
