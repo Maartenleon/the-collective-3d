@@ -291,6 +291,7 @@ p, ul, h1, h2 { margin: 0; }
   .problems { bottom: calc(var(--timeline-offset) + 52px); padding-bottom: var(--space-m);   /* the list scrolls above the timeline, not behind it */
     -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent); }
   .problems__col { display: grid; }
+  .problems.is-on { pointer-events: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }   /* phones: the list below the framework scrolls */
 }
 
 /* ---- part 4: The Collective, one closing view ---- */

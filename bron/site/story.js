@@ -329,7 +329,7 @@
   let touchY = null;
   stage.addEventListener("touchstart", e => { touchY = e.touches[0].clientY; }, { passive: true });
   stage.addEventListener("touchmove", e => { if (!e.target.closest(".problems, .coll__page, [data-drawer]")) e.preventDefault(); }, { passive: false });
-  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } if (e.target.closest(".coll__page") && $(".coll__page").scrollHeight > $(".coll__page").clientHeight + 4) { touchY = null; return; } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });
+  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } for (const sel of [".coll__page", ".problems"]) { const el = e.target.closest(sel); if (el && el.scrollHeight > el.clientHeight + 4) { touchY = null; return; } } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });   // a list that scrolls (About, problems on phones) is scrolled, not swiped away
   const segBtns = SEGS.map((g, n) => { const b = document.createElement("button");
     b.type = "button"; b.className = "timeline__seg"; b.dataset.timelineSeg = n; b.tabIndex = -1;
     b.setAttribute("aria-label", `${STORY.goTo} ${pad(n)} ${STOPS[g.first].name}`);
