@@ -74,16 +74,14 @@
   const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
   const FW_STEP = 0.6;   // the framework builds up one part every 0.6 s (frame 3)
-  const LINE_GAP = 0.9, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t1b-t3 move in TW_DUR, t3's line comes halfway)
-  // with each of the first three lines a few small groups of musicians stay lit (sitting together, in different places); "One performance" lights them all again
-  const PLUK = { roles: ["Cello's", "Hoorns"], skills: ["Altviolen", "Klarinetten", "Pauken"], views: ["Contrabassen", "Trompetten", "Harp"] };
-  const pluk = list => t => t.env || t.conductor || list.includes(t.group) || list.includes(t.section);
+  const LINE_GAP = 0.9, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t2 and t3 move in TW_DUR, t3's line comes halfway)
+  // from "Different roles" to "One performance" the sections light up one by one (oneByOne, a section every SECTION_STEP from arriving), then all again
+  const SECTION_STEP = 3 * LINE_GAP / 4;
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 7.0, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
-    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 1, fadeLate: 1, focus: pluk(PLUK.roles) },   // straight from the opening to "Different roles": the whole orchestra stays until the camera has arrived
-    { id: "t1b", ch: 0, seq: "twist", bar: 0, hold: LINE_GAP - TW_DUR, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 2, focus: pluk(PLUK.skills) },
-    { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 1.5 * TW_DUR, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 3, glow: 1, focus: pluk(PLUK.views) },
+    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, fadeLate: 1, focus: (t, s) => oneByOne(t, s, 0, SECTION_STEP) },   // straight from the opening to "Different roles": the whole orchestra stays until the camera has arrived
+    { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 1.5 * TW_DUR, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 3, glow: 1, focus: (t, s) => oneByOne(t, s + 2 * LINE_GAP + TW_DUR, 0, SECTION_STEP) },   // the sections go on where t1 left them
     { id: "t3", ch: 0, seq: "twist", bar: 2, hold: TENSION_GAP - TW_DUR / 2, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 4, chaos: 1 },
     { id: "t5", ch: 0, seq: "twist", bar: 3, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
@@ -141,7 +139,6 @@
       if (n.name === "Stoel") t.chair = true;
       if (n.name === "Eerste violen") t.firstViolins = true;
       if (/^Muzikant · /.test(n.name)) t.player = n.name.slice(11);
-      if (n.parent && n.parent.parent === orkest) t.group = n.name;   // the group inside a section ("Cello's", "Hoorns")
       if (n.parent === orkest) t.section = n.name;
       if (n === kassa) t.booth = true;
       if (n === bord) t.board = true;
@@ -232,7 +229,7 @@
 
   /* ---------- moving between stops ---------- */
   const clock = new THREE.Clock();
-  let at = 0, from = 0, anim = null, arrived = 0, started = 0, paused = false, preview = -1, barStart = 0, curBar = -1;
+  let at = 0, from = 0, fromSince = 0, anim = null, arrived = 0, started = 0, paused = false, preview = -1, barStart = 0, curBar = -1;
   const camNow = () => ({ pos: camera.position.clone(), target: camTarget.clone(), fov: camera.fov });
   const camTarget = STOPS[0].cam.target.clone();
   const sameCam = (a, b) => a.pos.equals(b.pos) && a.target.equals(b.target) && a.fov === b.fov;
@@ -263,6 +260,7 @@
     const inSeq = S.seq && P.seq === S.seq && i === at + 1;
     const dist = camera.position.distanceTo(S.cam.pos);
     const dur = reduceMQ.matches || instant ? 0 : inSeq ? (S.dur || 1.2) : clamp(1.1 + dist * 0.022, 1.2, 2.8);
+    if (!anim) fromSince = now - arrived;   // how far the stop being left had got: its timed focus holds there during the move
     from = anim ? (anim.k > 0.5 ? anim.to : from) : at;
     anim = { start: camNow(), to: i, t0: now, dur, k: 0 }; at = i; started = now;
     if (!dur) { anim.k = 1; }
@@ -548,8 +546,7 @@
       merged.orch = true;
       const solo = new Set(); orkest.traverse(n => { if (/^Muzikant · /.test(n.name)) { const name = n.name.slice(11); if (inSect(n, "Koper") || LINE1.has(name) || LINE2.has(name)) solo.add(n); } });
       const inside = (o, set) => { for (let n = o; n; n = n.parent) if (set.has(n)) return true; return false; };
-      const plukNames = new Set(Object.values(PLUK).flat()), pluks = new Set(); orkest.children.forEach(sec => sec.children.forEach(g => { if (plukNames.has(g.name)) pluks.add(g); }));   // the small groups "It isn't" lights: each a unit of its own, the rest of the section stays one
-      solo.forEach(n => mergeUnit(n)); pluks.forEach(g => mergeUnit(g, o => inside(o, solo))); orkest.children.forEach(sec => mergeUnit(sec, o => inside(o, solo) || inside(o, pluks)));
+      solo.forEach(n => mergeUnit(n)); orkest.children.forEach(sec => mergeUnit(sec, o => inside(o, solo)));
       const condStand = lessen.getObjectByName("Dirigent (partituur)"); mergeUnit(condStand); mergeUnit(lessen, o => inside(o, new Set([condStand])));
       mergeUnit(CHG, o => inside(o, new Set([dir2]))); mergeUnit(kassa); mergeUnit(pod);
     }
@@ -569,7 +566,7 @@
       if (anim.k >= 1) { anim = null; arrived = now; from = at; }
     }
     camera.lookAt(camTarget); camera.updateProjectionMatrix();
-    const S = STOPS[at], F = STOPS[from], since = anim ? 0 : now - arrived, mix = anim ? kk : 1;
+    const S = STOPS[at], F = STOPS[from], since = anim ? 0 : now - arrived, fSince = anim ? fromSince : since, mix = anim ? kk : 1;
     if (S.seq === "twist") { lineT = anim ? 0 : now - arrived; showLines(S); }   // the lines count from arriving
     if (waitGo && (window.__audience || now - waitGo.since >= AUDIENCE_WAIT)) goTo(waitGo.i, waitGo.instant);   // the audience is in (or will not come): go now
     // auto-advance inside a sequence
@@ -594,10 +591,10 @@
     const inView = { audience: seeFrustum.intersectsBox(pubBox), grass: seeFrustum.intersectsBox(grassBox), board: seeFrustum.intersectsBox(boardBox) };
     for (const m of meshes) {
       const t = m.userData.tags || (m.userData.tags = tagsOf(m));
-      const lit = anim && S.fadeLate ? litOf(F, t, since) : lerp(litOf(F, t, since), litOf(S, t, since), mix);   // fadeLate: the rest stays until the camera has arrived, then fades
+      const lit = anim && S.fadeLate ? litOf(F, t, fSince) : lerp(litOf(F, t, fSince), litOf(S, t, since), mix);   // fadeLate: the rest stays until the camera has arrived, then fades
       const fresh = m.userData.fadeIn, goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim && !fresh ? 1 : ease);   // the late audience fades in, also during a camera move
       if (t.audience || t.grass || t.board) { const seen = t.audience ? inView.audience : t.grass ? inView.grass : inView.board;   // things that come and go between stops:
-        const gF = FALLEN + (1 - FALLEN) * litOf(F, t, since), gS = FALLEN + (1 - FALLEN) * litOf(S, t, since);
+        const gF = FALLEN + (1 - FALLEN) * litOf(F, t, fSince), gS = FALLEN + (1 - FALLEN) * litOf(S, t, since);
         if (!seen) op = goal;                                                                                   // out of view: switch at once
         else if (anim && gS > gF) op = m.material.opacity;                                                      // appearing in view: wait until out of view or arrived
         else if (anim && gS < gF) op = lerp(gF, gS, smoother(clamp(anim.k * 2, 0, 1))); }                       // leaving in view: gone in the first half of the flight, while the camera moves fastest
