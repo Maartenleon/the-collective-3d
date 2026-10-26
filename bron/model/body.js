@@ -586,10 +586,11 @@
       const px = x / T.wavelength, pz = z / T.wavelength;
       const qx = fbm(px * 0.55 + 3.1, pz * 0.55 - 1.7, 4), qz = fbm(px * 0.55 - 8.3, pz * 0.55 + 4.4, 4);
       const n = fbm(px + T.warp * qx, pz + T.warp * qz, T.octaves) * 1.6;
-      return n - 0.33 * n * n * n;   // rounds the tops off (an eroded, wind-worn profile)
+      return n - (T.round ?? 0.33) * n * n * n;   // rounds the tops off (an eroded, wind-worn profile)
     };
-    const heightAt = (x, z) => { const d = Math.hypot(x, z), k = sstep(T.r0, T.rise, d);
-      return T.base + T.slope * Math.max(0, Math.min(d, T.crest) - T.r0) * k - T.fall * Math.max(0, d - T.crest) + (T.ampNear + (T.ampFar - T.ampNear) * k) * hills(x, z); };
+    const over = (d, w) => w ? w * Math.log1p(Math.exp((d - T.crest) / w)) : Math.max(0, d - T.crest);   // how far past the crest, rounded over w metres (no kink: a kink read as a flat-topped mesa on the horizon)
+    const heightAt = (x, z) => { const d = Math.hypot(x, z), k = sstep(T.r0, T.rise, d), o = over(d, T.crestSoft || 0);
+      return T.base + T.slope * Math.max(0, d - T.r0 - o) * k - T.fall * o + (T.ampNear + (T.ampFar - T.ampNear) * k) * hills(x, z); };
     const pos = new Float32Array(rings * (segs + 1) * 3), idx = [];
     for (let r = 0; r < rings; r++) { const rad = T.r0 * Math.pow(T.r1 / T.r0, r / (rings - 1));
       for (let a = 0; a <= segs; a++) { const ang = a / segs * Math.PI * 2, x = Math.cos(ang) * rad, z = Math.sin(ang) * rad; pos.set([x, heightAt(x, z), z], (r * (segs + 1) + a) * 3); } }

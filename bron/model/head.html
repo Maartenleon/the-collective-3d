@@ -134,8 +134,8 @@ details[open] > summary .tw { transform: rotate(90deg); }
   const AD = { shadow: 0x1A0E0A, earth: 0x5C2414, conductor: 0xD9452B, grain: 0xA9824F, sky: 0x8A9CB0, stage: 0xF6F2EC, garnet: 0x5C0F07 };
   // the land beyond the bowl (body.js): one continuous procedural terrain to the horizon
   const LAND = { r0: 185, r1: 1900, rings: 420, segs: 1300, ringsPhone: 240, segsPhone: 760, seed: 7,
-    wavelength: 85, octaves: 6, gain: 0.4, lacunarity: 2.0, warp: 0.5,            // fBm simplex with domain warping: many small, low, rounded hills
-    base: 6, slope: 0.11, rise: 650, ampNear: 4, ampFar: 9, crest: 1500, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away
+    wavelength: 90, octaves: 4, gain: 0.33, lacunarity: 2.0, warp: 0.3, round: 0.15,   // fBm simplex with domain warping: many small, low, rounded hills (few fine octaves, little warp, tops only slightly flattened: no steep, angular steps)
+    base: 6, slope: 0.11, rise: 650, ampNear: 4, ampFar: 11, crest: 1700, crestSoft: 150, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away, rounded over crestSoft metres
     color: 0x090a10, shade: 0x34548a, shadeAmount: 0.52, rose: "0.30, 0.16, 0.16", roseAmount: 0.5, sunFrom: 0.1, sunTo: 0.9,   // soft contrast: slate blue, a gentle rose toward the low sun
     relief: 0.18, reliefScale: 0.05,                                              // fine folds on every slope
     haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.28 };   // linear colour: after the film look it meets the sky
