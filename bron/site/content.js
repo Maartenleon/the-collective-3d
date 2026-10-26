@@ -2,7 +2,8 @@
   /* ================================================================
      CONTENT: the problems and the framework parts. Edit the words here; the problem cards, both side panels
      and the links between them are built from these two lists. Source: docs/SYMPTOMS.md of the 2D site.
-     `short` is the card text, `line` the full quote as the panel title. `parts`: where the framework solves it (first = where it starts): p b m o r c.
+     `short` is the card text, `line` the full quote as the panel title; `theme` is kept but not shown. `parts`: where the framework solves it
+     (first = where it starts): p b m o r c; the figure beside the panel lights them.
      ================================================================ */
   // CONTACT: the address the About page shows, copies and opens in an email (Let's talk)
   const CONTACT = { email: "soundcheck@thecollective.nu", subject: "Sounds familiar" };
@@ -11,59 +12,43 @@
     { id: "everything-reports-green", theme: "Everyone is playing", parts: ["o", "p"],
       short: "Every report says green, but the numbers don’t move.",
       line: "Every project report says green, but the numbers that matter don’t move.",
-      recognise: "The steering committee sees a wall of green. Projects are on time and on budget, yet revenue, cost and customer scores sit where they were last year. Everyone is busy, and nobody can say what changed.",
       wrong: "Reports track activity and milestones, not results. Bad news travels up slowly, so a project turns red only when it is too late to act.",
-      solve: "Orchestration ties every piece of work to a goal in the plan and asks one question each cycle: did the number move? Reporting shifts from ‘are we on track’ to ‘is it working’, and work that moves no goal is stopped.",
-      concepts: ["Watermelon reporting", "Outcome KPIs", "OKRs", "Portfolio reporting"] },
+      solve: "Orchestration ties every piece of work to a goal in the plan and asks one question each cycle: did the number move? Reporting shifts from ‘are we on track’ to ‘is it working’, and work that moves no goal is stopped." },
     { id: "never-stop-anything", theme: "Another new piece", parts: ["o", "p", "m"],
       short: "We start a lot. We almost never stop anything.",
       line: "We’re good at starting things. We almost never stop anything.",
-      recognise: "Every quarter brings new initiatives, and the old ones never close. The same people sit on five projects at once. Everything moves a little; nothing finishes.",
       wrong: "There is no regular moment where the whole portfolio is reviewed and work is stopped. Not deciding becomes the decision, and capacity is spread thinner every month.",
-      solve: "Orchestration sets a fixed rhythm for choosing what starts, what continues and what stops, weighed against the plan and the people actually available in the means. Stopping becomes a normal decision, not a failure.",
-      concepts: ["Portfolio governance", "Work in progress limits", "Stage gates", "Lean portfolio management"] },
+      solve: "Orchestration sets a fixed rhythm for choosing what starts, what continues and what stops, weighed against the plan and the people actually available in the means. Stopping becomes a normal decision, not a failure." },
     { id: "projects-dont-pay-off", theme: "An expensive orchestra", parts: ["o", "p"],
       short: "We can’t tell whether our projects pay off.",
       line: "We can’t tell whether our projects actually pay off.",
-      recognise: "Every project came with a business case. A year later nobody can say which ones delivered, and the next budget round starts with the same arguments.",
       wrong: "Projects are approved on a business case, but nobody owns measuring the benefits once the money is spent. Success quietly becomes ‘delivered on time’.",
-      solve: "The plan names the outcome each investment must move. Orchestration gives that outcome an owner in the business, who keeps reporting on it after go-live. Money then follows what works.",
-      concepts: ["Return on investment", "Business case", "Value management", "Benefits realisation"] },
+      solve: "The plan names the outcome each investment must move. Orchestration gives that outcome an owner in the business, who keeps reporting on it after go-live. Money then follows what works." },
     { id: "programme-keeps-growing", theme: "The never-ending symphony", parts: ["o", "b", "m"],
       short: "Our big programme is late and still growing.",
       line: "Our big programme is late, over budget, and still getting bigger.",
-      recognise: "The programme was meant to take eighteen months. It is now in its third year, the budget has been raised twice, and every steering meeting adds scope.",
       wrong: "Scope, dependencies and capacity were never planned end to end, and business and IT don’t share ownership. Each team optimises its own part while the whole keeps growing.",
-      solve: "The blueprint maps which capabilities and teams the change really touches, so dependencies show before they bite. Orchestration plans scope against the means that are actually there and makes the trade-offs out loud.",
-      concepts: ["Programme recovery", "Programme management", "Value streams", "Team Topologies"] },
+      solve: "The blueprint maps which capabilities and teams the change really touches, so dependencies show before they bite. Orchestration plans scope against the means that are actually there and makes the trade-offs out loud." },
     { id: "costs-creeping-up", theme: "More and more to play", parts: ["m", "b"],
       short: "Our costs keep creeping up, and nobody knows why.",
       line: "Our costs keep creeping up, especially IT, and nobody can tell me exactly why.",
-      recognise: "Every year the IT bill is higher than the year before. Cloud, licences and contractors each grew a little, and nobody can show the full picture or say which part is worth it.",
       wrong: "Spend is spread across cloud, licences and teams that nobody oversees as a whole. New things are added; old ones are rarely switched off.",
-      solve: "The means become visible as one whole: people, technology and spend, each linked to the capability in the blueprint it supports. Cost turns into a choice per capability, and what no longer serves anything can be switched off.",
-      concepts: ["IT cost optimisation", "FinOps", "Technology Business Management", "Cloud costs"] },
+      solve: "The means become visible as one whole: people, technology and spend, each linked to the capability in the blueprint it supports. Cost turns into a choice per capability, and what no longer serves anything can be switched off." },
     { id: "run-eats-the-budget", theme: "Playing ahead of the score", parts: ["m", "r", "c", "o"],
       short: "Keeping things running eats the budget for anything new.",
       line: "Most of our IT budget goes to keeping things running. There’s very little left for anything new.",
-      recognise: "Most of the budget goes to keeping the lights on. New ideas wait for next year, and next year the maintenance bill is higher again.",
       wrong: "Old systems and quick fixes build up a maintenance bill that grows every year. Run and change draw on the same people and money, and run always wins because it cannot wait.",
-      solve: "The framework splits the means openly between run and change, and the blueprint shows which old systems can be simplified or retired. Orchestration protects a share for change and pays down technical debt on purpose, not when something breaks.",
-      concepts: ["Technical debt", "Run versus change", "IT budget", "Application rationalisation"] },
+      solve: "The framework splits the means openly between run and change, and the blueprint shows which old systems can be simplified or retired. Orchestration protects a share for change and pays down technical debt on purpose, not when something breaks." },
     { id: "two-of-everything", theme: "Two orchestras, one stage", parts: ["b", "p", "m"],
       short: "We merged, and still run two of everything.",
       line: "We merged two years ago, and we still run two of everything.",
-      recognise: "Two years after the merger there is one name on the door, but still two systems, two ways of invoicing and two teams doing the same job. Every change has to be made twice.",
       wrong: "The deal was integrated on paper: one name, one board. Nobody decided which processes, systems and teams become shared and which stay apart, so both keep running.",
-      solve: "The blueprint draws the target: which capabilities are shared, which stay separate, and which teams own them. The plan sets the order, and the means move with it, one capability at a time.",
-      concepts: ["Post-merger integration", "Operating model", "Shared services", "Business capabilities", "Team Topologies"] },
+      solve: "The blueprint draws the target: which capabilities are shared, which stay separate, and which teams own them. The plan sets the order, and the means move with it, one capability at a time." },
     { id: "benefits-never-showed-up", theme: "Who owns the music?", parts: ["o", "p", "b"],
       short: "The system went live, the benefits never showed up.",
       line: "The new system went live, but the benefits in the business case never showed up.",
-      recognise: "The new system went live on time, there was a party, and the programme team moved on. Two years later the savings in the business case are still nowhere to be seen.",
       wrong: "Success was defined as go-live. The programme team moved on, and nobody in the business owns the promised outcome.",
-      solve: "The plan defines success as the outcome, not the launch. The blueprint names the business owner of the changed process, and orchestration keeps measuring until the benefit is there, or decides to stop.",
-      concepts: ["Benefits realisation", "Post-implementation review", "Product ownership", "ERP implementation"] },
+      solve: "The plan defines success as the outcome, not the launch. The blueprint names the business owner of the changed process, and orchestration keeps measuring until the benefit is there, or decides to stop." },
   ];
 
   const PARTS = {
@@ -81,7 +66,7 @@
       concepts: ["Capacity planning", "Skills", "Technology landscape", "Spend management"] },
     o: { name: "Orchestration", sub: "the conductor", question: "Do we decide, stop and adjust in time?", title: "The whole, in motion",
       text: "The plan, the blueprint and the means running together, day to day. Orchestration is the rhythm of decisions that keeps them in step: what starts, what stops, and who gets the people when run and change collide. This is where we work, until the orchestra plays on its own.",
-      org: "Leadership that keeps it in step: by function for Run, by value stream for Change.",
+      org: "Leadership that decides what starts, what stops, and who gets the people when run and change collide.",
       concepts: ["Portfolio management", "Governance", "Decision rights"] },
     r: { name: "Run", sub: "tonight’s concert", question: "Does today’s work flow without us pushing it?", title: "Keep today’s value flowing",
       text: "Run is everything the organisation does today for its customers: sell, deliver, invoice, support. It needs stable value streams and clear ownership, steered by function, so that tonight’s concert is played well, every night.",
@@ -94,6 +79,6 @@
   };
 
   const LABELS = {   // headings inside the side panels
-    recognise: "Sound familiar?", wrong: "Where it goes wrong", solve: "How the framework solves it", concepts: "Related concepts",
+    wrong: "Where it goes wrong", solve: "How the framework solves it", concepts: "Related concepts",
     org: "In your organisation", problems: "Problems it helps solve",
   };

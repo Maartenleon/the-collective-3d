@@ -20,13 +20,6 @@
   <div class="shade" id="shade" aria-hidden="true"></div>
   <div class="fore" id="fore" aria-hidden="true"></div>
 
-  <div class="labels" id="labels" aria-hidden="true">
-    <span class="label" data-label="strings">Strings</span>
-    <span class="label" data-label="woodwinds">Woodwinds</span>
-    <span class="label" data-label="brass">Brass</span>
-    <span class="label" data-label="percussion">Percussion</span>
-  </div>
-
   <div class="beats">
     <div class="beat" data-beat="opening" data-anchor="conductor">
       <p class="beat__title">When an organisation plays as one,</p>
@@ -47,7 +40,6 @@
     </div>
     <div class="beat beat--top" data-beat="fw">
       <p class="beat__title">What holds it together</p>
-      <p class="beat__lead">A plan, a score, the people and their instruments, and someone who keeps them in&nbsp;step.</p>
     </div>
     <div class="beat beat--centred" data-beat="question">
       <p class="beat__title">So, how does your organisation sound?</p>
@@ -59,24 +51,24 @@
 
   <div class="panels">
     <aside class="panel glass" data-panel="plan" aria-label="Plan">
-      <p class="panel__kicker">Plan &middot; the piece<svg class="panel__fw" data-panel-fw="p" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__kicker">Plan &middot; the piece</p>
       <p class="panel__title">What we choose to play and leave out.</p>
       <p class="panel__body">Your strategy, turned into this year&rsquo;s budget and a change portfolio for the years ahead.</p>
     </aside>
     <aside class="panel glass" data-panel="blueprint" aria-label="Blueprint">
-      <p class="panel__kicker">Blueprint &middot; the score<svg class="panel__fw" data-panel-fw="b" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__kicker">Blueprint &middot; the score</p>
       <p class="panel__title">Turning the piece into parts every section can play.</p>
       <p class="panel__body">How value flows through your business, data and technology, and what it must grow into.</p>
     </aside>
     <aside class="panel glass" data-panel="means" aria-label="Means">
-      <p class="panel__kicker">Means &middot; the orchestra<svg class="panel__fw" data-panel-fw="m" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__kicker">Means &middot; the orchestra</p>
       <p class="panel__title">The musicians, their instruments, and the budget that keeps them playing.</p>
       <p class="panel__body">People, skills, tools and funding: who and what you have to run today and change for tomorrow.</p>
     </aside>
     <aside class="panel glass" data-panel="orchestration" aria-label="Orchestration">
-      <p class="panel__kicker">Orchestration &middot; the conductor<svg class="panel__fw" data-panel-fw="o" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__kicker">Orchestration &middot; the conductor</p>
       <p class="panel__title">Keeping every part in time, and the whole in tune.</p>
-      <p class="panel__body">Leadership that keeps it in step: by function for Run, by value stream for Change.</p>
+      <p class="panel__body">Leadership that decides what starts, what stops, and who gets the people when run and change collide.</p>
     </aside>
     <aside class="panel glass" data-panel="dims" aria-label="Run and Change">
       <p class="panel__kicker">Run and Change &middot; tonight and next season</p>
@@ -86,7 +78,7 @@
     </aside>
   </div>
 
-  <div class="caption" id="caption" aria-live="polite"><span class="caption__kind" id="captionKind"></span><span class="caption__text" id="captionText"></span></div>
+  <div class="caption" id="caption" aria-live="polite"><span class="caption__text" id="captionText"></span></div>
   <section class="problems" id="problems" aria-label="Problems companies recognise">
     <p class="problems__head problems__head--fw">Our framework</p>
     <div class="problems__col" data-problems-list>
@@ -120,7 +112,7 @@
         <div class="coll__col">
           <h3>We bring our score.</h3>
           <p>Proven theory and hard-won experience in one framework. Not another 200-slide deck.</p>
-          <p class="coll__links"><button class="link-pill" type="button" data-coll-go="problems">Problems we see</button><button class="link-pill" type="button" data-coll-go="problems">Our framework</button></p>
+          <p class="coll__links"><button class="link-pill" type="button" data-coll-go="problems">The problems we solve</button></p>
         </div>
         <div class="coll__col">
           <h3>We stay for the performance.</h3>
@@ -130,20 +122,17 @@
       <footer class="coll__cta">
         <p class="coll__ask">Sounds familiar?</p>
         <a class="coll__btn" data-mailto href="#">Let&rsquo;s talk</a>
-        <p class="coll__baton">We won&rsquo;t steal the baton. <button class="coll__mail" type="button" data-copy-email><span data-email></span><span class="coll__copy" data-copy-label aria-live="polite">Copy</span></button></p>
+        <p class="coll__contact"><button class="coll__mail" type="button" data-copy-email><span data-email></span><span class="coll__copy" data-copy-label aria-live="polite">Copy</span></button></p>
       </footer>
     </div>
   </section>
   <button class="brand" type="button" data-brand aria-label="The Collective, back to the start">The Collective</button>
   <button class="meet" id="meet" type="button">About us</button>
   <nav class="timeline" data-timeline aria-label="Story">
-    <span class="timeline__num" data-timeline-num>01</span>
     <span class="timeline__bar" data-timeline-bar></span>
     <span class="timeline__label" data-timeline-label>The concert</span>
-    <button class="timeline__play" type="button" data-timeline-play aria-label="Play story"></button>
     <button class="timeline__skip" type="button" data-timeline-skip>Next</button>
   </nav>
-  <div class="scroll-hint" id="hint" aria-hidden="true">Scroll</div>
   <div class="loading" id="loading" aria-hidden="true">Musicians arriving…</div>
   <div class="loader" id="loader" role="status" aria-live="polite">
     <div class="loader__open"><b>When an organisation plays as one,</b><i>it sounds effortless.</i><span class="loader__pct" id="loaderPct">0%</span></div>

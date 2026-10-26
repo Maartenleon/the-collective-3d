@@ -1,7 +1,7 @@
 
   /* ================================================================
      STORY: one scene per scroll, swipe or arrow key. Each stop sets the camera, the text, the panel and what stays lit.
-     Blueprint and Means play a short sequence by themselves (with pause and skip).
+     Some frames play a short sequence by themselves; Next (or a scroll) jumps past it.
      ================================================================ */
   const $ = s => document.querySelector(s);
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -68,7 +68,6 @@
     return { pos: c.pos.clone().add(off), target: c.target.clone().add(off), fov: c.fov }; };
   const sideOrUp = c => NARROW ? shiftCam(c, 0.04, -0.3) : shiftCam(c, 0, -0.27);
   const CAMC = sideOrUp(frame(BOWL, V(0.1, 0.75, 1), 40, NARROW ? 0.9 : 0.75, -1));            // high over the bowl: both stages
-  const ALL4 = ["strings", "woodwinds", "brass", "percussion"];
   const SECT = ["Strijkers", "Houtblazers", "Koper", "Slagwerk"];
   const CAM2 = NARROW ? frame(orchBox, V(0, 0.62, 1), 40, 0.84) : K([0, 3.2, 25], [0, 2.4, -4], 38);   // the closer view of frame 2, reused by Blueprint, Means and the dimensions; phones look down a little more, so the orchestra fills the width instead of a thin strip
   const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
@@ -93,14 +92,14 @@
     // Frame 4: Plan
     { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, V(0.62, 0.2, 1), 40, NARROW ? 2.3 : 1.9, 0.2), panel: "plan" },
     // Frame 5: Blueprint
-    { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: ["Blueprint", "The score on every stand"] },
-    { id: "b2", ch: 3, seq: "bp", bar: 1, fadeLate: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"] },
-    { id: "b3", ch: 3, seq: "bp", bar: 2, hold: 2.6, dur: 1.8, cam: frame(orchBox, V(0, 0.75, 1), 42, 0.74), panel: "blueprint", line: 1, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player), caption: ["Value stream", "One melody, many hands"] },
-    { id: "b4", ch: 3, seq: "bp", bar: 3, hold: 3.0, cam: frame(orchBox, V(0.06, 0.72, 1), 42, 0.72), panel: "blueprint", line: 2, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player) || LINE2.has(t.player), caption: ["Value streams", "Two melodies, eight specialists, four sections"] },
+    { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: "The score on every stand" },
+    { id: "b2", ch: 3, seq: "bp", bar: 1, fadeLate: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: "The conductor’s score" },
+    { id: "b3", ch: 3, seq: "bp", bar: 2, hold: 2.6, dur: 1.8, cam: frame(orchBox, V(0, 0.75, 1), 42, 0.74), panel: "blueprint", line: 1, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player), caption: "One melody, many hands" },
+    { id: "b4", ch: 3, seq: "bp", bar: 3, hold: 3.0, cam: frame(orchBox, V(0.06, 0.72, 1), 42, 0.72), panel: "blueprint", line: 2, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player) || LINE2.has(t.player), caption: "Two melodies, eight specialists, four sections" },
     // Frame 6: Means
-    { id: "m1", name: "Means", ch: 4, seq: "means", bar: 0, hold: 3.6, cam: CAM2, panel: "means", labels: ALL4, focus: (t, s) => oneByOne(t, s, 0.4, 0.8), caption: ["People", "Four sections, many specialists"] },
-    { id: "m2", ch: 4, seq: "means", bar: 1, hold: 2.6, dur: 0.5, cam: CAM2, panel: "means", glow: 1, caption: ["Means", "Their instruments"] },
-    { id: "m3", ch: 4, seq: "means", bar: 2, hold: 3.0, dur: 2.2, cam: frame(kassaBox, V(-0.55, 0.32, 1), 38, 1.7), panel: "means", booth: 1, caption: ["Means", "And the budget that keeps them playing"] },
+    { id: "m1", name: "Means", ch: 4, seq: "means", bar: 0, hold: 3.6, cam: CAM2, panel: "means", focus: (t, s) => oneByOne(t, s, 0.4, 0.8), caption: "Four sections, many specialists" },
+    { id: "m2", ch: 4, seq: "means", bar: 1, hold: 2.6, dur: 0.5, cam: CAM2, panel: "means", glow: 1, caption: "Their instruments" },
+    { id: "m3", ch: 4, seq: "means", bar: 2, hold: 3.0, dur: 2.2, cam: frame(kassaBox, V(-0.55, 0.32, 1), 38, 1.7), panel: "means", booth: 1, caption: "And the budget that keeps them playing" },
     // Frame 7: Orchestration
     { id: "orch", name: "Orchestration", ch: 5, seq: "dims", bar: 0, hold: 3.6, cam: frame(condBox, V(0.1, 0.22, 1), 34, 1.7, 0.1), panel: "orchestration", focus: t => t.env || t.conductor || (t.stand && t.condStand) },
     // Frame 8: the two dimensions
@@ -108,12 +107,11 @@
     { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: NARROW ? abovePanel(frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.15), 310) : frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
     // Frame 9 and 10: your organisation
     { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: NARROW ? K([0, 2.2, 46], [0, 2.2, -3], 28) : K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
-    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },
+    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.72, fw: "side", show: "pbmorc" },
     // Part 4: The Collective. The camera rises over the bowl: tonight's concert and next season's rehearsal in one view
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
   ];
-  const FW_FLIP = { start: 0.1, end: 0.9 };   // the big diagram shrinks into the panel miniature over this part of the camera move (0 to 1)
-  const STORY = { hold: 5, play: "Play story", pause: "Pause story", goTo: "Go to", next: "Next" };   // Play story: seconds on a stop without its own hold; button and segment labels
+  const STORY = { goTo: "Go to", next: "Next" };   // the segment and button labels
   const N = STOPS.length, idx = id => STOPS.findIndex(s => s.id === id);
   const SEQS = {};
   STOPS.forEach((s, i) => { if (!s.seq) return; const q = SEQS[s.seq] || (SEQS[s.seq] = { first: i, last: i, bars: [] }); q.last = i;
@@ -121,7 +119,6 @@
   const SEGS = [];   // the timeline: one segment per scroll step, a stop on its own or a whole sequence
   STOPS.forEach((s, i) => { if (!s.seq || SEQS[s.seq].first === i) SEGS.push({ first: i, last: s.seq ? SEQS[s.seq].last : i }); });
   const segOf = i => SEGS.findIndex(g => i >= g.first && i <= g.last), nameAt = i => { while (!STOPS[i].name) i--; return STOPS[i].name; };
-  const pad = n => String(n + 1).padStart(2, "0");
 
   /* ---------- focus: tag every mesh by what it belongs to, then fade what is not in the scene's focus ---------- */
   const meshes = []; let selected = null;   // the people loader adds its meshes here
@@ -164,22 +161,16 @@
   const AUDIENCE_FROM = STOPS.findIndex(s => s.id === "question");   // the audience is there from "So, how does your organisation sound?" on
   const litOf = (s, t, since) => (t.grass || t.board) && s.id === "open" || t.audience && STOPS.indexOf(s) < AUDIENCE_FROM ? -FALLEN / (1 - FALLEN) : t.booth ? (s.booth ? 1 : -FALLEN / (1 - FALLEN)) : s.booth ? (t.env || t.audience ? 1 : 0.6) : !s.focus ? 1 : s.focus(t, since) ? 1 : (s.fallen || 0) / (1 - FALLEN);
 
-  /* ---------- labels anchored to the sections ---------- */
-  const labelEls = {}; document.querySelectorAll("[data-label]").forEach(el => (labelEls[el.dataset.label] = { el, a: 0 }));
-  const LABEL_AT = { strings: sec("Strijkers"), woodwinds: sec("Houtblazers"), brass: sec("Koper"), percussion: sec("Slagwerk") };
-  const labelPos = {}; for (const k in LABEL_AT) { const b = box(LABEL_AT[k]); labelPos[k] = V((b.min.x + b.max.x) / 2, b.max.y + 0.5, (b.min.z + b.max.z) / 2); }
-  for (const [k, g] of [["strings", "Eerste violen"], ["brass", "Hoorns"], ["percussion", "Pauken"]]) { const b = box(sec(g)); labelPos[k].x = (b.min.x + b.max.x) / 2; labelPos[k].z = (b.min.z + b.max.z) / 2; }
-
   /* ---------- elements ---------- */
   const stage = $("#stage"), fx = $("#fx"), fctx = fx.getContext("2d");
   const beats = {}; document.querySelectorAll("[data-beat]").forEach(el => (beats[el.dataset.beat] = el));
   const panels = {}; document.querySelectorAll("[data-panel]").forEach(el => (panels[el.dataset.panel] = el));
-  const caption = $("#caption"), capKind = $("#captionKind"), capText = $("#captionText");
-  const shade = $("#shade"), fore = $("#fore"), problems = $("#problems"), hint = $("#hint");
+  const caption = $("#caption"), capText = $("#captionText");
+  const shade = $("#shade"), fore = $("#fore"), problems = $("#problems");
   let scrollRest = 0; const setProblemsScroll = () => { document.documentElement.style.setProperty("--problems-scroll", problems.scrollTop + "px");   // phones: the framework above the list scrolls along
     fwEl.classList.add("is-scrolling"); clearTimeout(scrollRest); scrollRest = setTimeout(() => fwEl.classList.remove("is-scrolling"), 150); };
   problems.addEventListener("scroll", setProblemsScroll, { passive: true });
-  const tlNav = $("[data-timeline]"), tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
+  const tlNav = $("[data-timeline]"), tlBar = $("[data-timeline-bar]"), tlLabel = $("[data-timeline-label]"), tlSkip = $("[data-timeline-skip]");
   const collEl = $("#coll"), meetBtn = $("#meet");
   const fwGlass = $("[data-fw-glass]");
   // "It isn't": the sections light up one by one while "Different roles" and "Different capabilities" appear (t1, the second after LINE_GAP);
@@ -192,18 +183,18 @@
     const band = (d, k, l, sub) => { const hw = Math.sqrt(R * R - (Math.abs(d) + 32) ** 2);
       return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60)}<text class="lab band" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 2}">${l.toUpperCase()}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 20}">${sub}</text></g>`; };
     const SPAN = 104 + 30;   // Run and Change reach from the top of Plan to the bottom of Means, so their labels line up
-    const col = (dx, k, l, sub) => { const hh = SPAN;
-      return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text><text class="sub" transform="translate(${CX + dx + 5} ${CY}) rotate(-90)" text-anchor="middle">${sub}</text></g>`; };
+    const col = (dx, k, l) => { const hh = SPAN;
+      return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text></g>`; };   // RUN and CHANGE only: no text down the columns
     const RO = 228, a = 0.2;   // the arrow ends just before its start: almost a full circle
     fwEl.innerHTML = `<defs><marker id="fwArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="tip" d="M0 0L10 5L0 10z"/></marker></defs>
       <circle class="ring" cx="${CX}" cy="${CY}" r="205"/>`
-      + band(-104, "p", "Plan", "the piece") + band(0, "b", "Blueprint", "the score") + band(104, "m", "Means", "the orchestra") + col(40, "r", "Run", "tonight\u2019s concert") + col(110, "c", "Change", "next season\u2019s symphony")
+      + band(-104, "p", "Plan", "the piece") + band(0, "b", "Blueprint", "the score") + band(104, "m", "Means", "the orchestra") + col(40, "r", "Run") + col(110, "c", "Change")
       + `<g class="k" data-k="o"><path d="M ${CX} ${CY - RO} A ${RO} ${RO} 0 1 1 ${(CX - RO * Math.sin(a)).toFixed(1)} ${(CY - RO * Math.cos(a)).toFixed(1)}" class="arc" pathLength="1" marker-end="url(#fwArrow)"/>
         <text class="lab lab--big" x="${CX}" y="${CY + RO + 30}" text-anchor="middle">ORCHESTRATION</text><text class="sub" x="${CX}" y="${CY + RO + 50}" text-anchor="middle">the conductor</text></g>`;
   }
   { // the Orchestration arrow: the line draws itself clockwise and its head rides on the drawn end, so the head appears and moves with the line.
     // Once elsewhere; on the framework frame it loops: drawn, held, then the tail runs after the head until both are gone, and again.
-    // The head is a separate path (the copies in the panels keep their marker); set up on first use, after those copies were made.
+    // The head is a separate path, set up on first use.
     const g = fwEl.querySelector('[data-k="o"]'), arc = g.querySelector(".arc"), ARC = { draw: 0.9, loop: 4.2, drawn: 0.4, hold: 0.65 };
     let tip = null, L = 0, mode = "off", t0 = 0, idle = false;
     const show = (tail, head) => { const a = Math.max(0, head - tail);
@@ -235,7 +226,7 @@
 
   /* ---------- moving between stops ---------- */
   const clock = new THREE.Clock();
-  let at = 0, from = 0, anim = null, arrived = 0, started = 0, paused = false, story = false, preview = -1, playShown = null, barStart = 0, curBar = -1;
+  let at = 0, from = 0, anim = null, arrived = 0, started = 0, paused = false, preview = -1, barStart = 0, curBar = -1;
   const camNow = () => ({ pos: camera.position.clone(), target: camTarget.clone(), fov: camera.fov });
   const camTarget = STOPS[0].cam.target.clone();
   const sameCam = (a, b) => a.pos.equals(b.pos) && a.target.equals(b.target) && a.fov === b.fov;
@@ -277,7 +268,7 @@
     for (const k in beats) beats[k].classList.toggle("is-on", (S.beats || []).includes(k));
     for (const k in panels) panels[k].classList.toggle("is-on", S.panel === k);
     caption.classList.toggle("is-on", !!S.caption);
-    if (S.caption) { capKind.textContent = S.caption[0]; capText.textContent = S.caption[1]; }
+    if (S.caption) capText.textContent = S.caption;
     problems.classList.toggle("is-on", !!S.problems); if (!S.problems && problems.scrollTop) { problems.scrollTop = 0; setProblemsScroll(); } if (!S.problems) closeDrawers();
     showLines(S);
     dimsLate.classList.toggle("is-late", !!S.late); $("#dimsOrgC").classList.toggle("is-late", !!S.late);
@@ -287,30 +278,22 @@
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
       g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o"), S.fw === "big"); });
     shade.style.opacity = S.shade || 0; fore.classList.toggle("is-on", !!S.fore);
-    hint.style.opacity = at === 0 ? 1 : 0;
-    const seg = segOf(at), lastSeg = seg === SEGS.length - 1;
-    tlNav.classList.toggle("is-opening", at === 0); tlNav.classList.toggle("is-last", lastSeg);   // the opening and the last part show no separator, play and Next
-    const n = segOf(at);
+    const n = segOf(at), lastSeg = n === SEGS.length - 1;
     segBtns.forEach((b, k) => { b.setAttribute("aria-current", k === n ? "step" : "false"); b.tabIndex = k === n ? 0 : -1; segFills[k].style.transform = `scaleX(${k < n ? 1 : 0})`; });
     if (tlBar.contains(document.activeElement) && document.activeElement !== segBtns[n]) segBtns[n].focus({ preventScroll: true });   // focus follows only if it is already in the bar
     segFills[n].parentNode.appendChild(tlDot);
-    if (preview < 0) showSeg(n, nameAt(at));
-    tlSkip.classList.toggle("is-on", seg > 0 && !lastSeg);   // Next: from the second part to the one before the last
+    if (preview < 0) showSeg(nameAt(at));
+    tlSkip.classList.toggle("is-on", !lastSeg);   // Next: everywhere but the last part
   }
-  function setPaused(v) {
+  function setPaused(v) {   // only the screenshot scripts pause a sequence (__story.pause)
     paused = v;
-    if (!v) arrived = clock.getElapsedTime() - (STOPS[at].hold || STORY.hold) * 0.5;   // resume: a short wait, then on
+    if (!v) arrived = clock.getElapsedTime() - (STOPS[at].hold || 0) * 0.5;   // resume: a short wait, then on
   }
-  const advancing = () => { const Q = STOPS[at].seq && SEQS[STOPS[at].seq]; return !paused && (story || !!(Q && at < Q.last)); };
-  tlPlay.addEventListener("click", () => {
-    if (advancing()) { story = false; setPaused(true); return; }
-    story = true; setPaused(false); if (at === N - 1) goTo(0);
-  });
   tlSkip.textContent = STORY.next;
   tlSkip.addEventListener("click", () => { const n = segOf(at); if (n < SEGS.length - 1) goTo(SEGS[n + 1].first); });   // Next: the first step of the next part (a running sequence is passed as a whole)
   function step(d) {   // one gesture = one scene; a running sequence counts as one scene
     if (document.body.classList.contains("is-loading")) return;
-    meetFrom = null; story = false;
+    meetFrom = null;
     const q = STOPS[at].seq && SEQS[STOPS[at].seq];
     if (q) { paused = false; setPaused(false); goTo(d > 0 ? q.last + 1 : q.first - 1); return; }
     goTo(at + d);
@@ -320,14 +303,13 @@
   const WHEEL_REST = 0.45; let wheelQuiet = 0, wheelAcc = 0;
   addEventListener("wheel", e => {
     if (e.target.closest && e.target.closest("[data-drawer]")) return;   // an open side panel scrolls itself
-    e.preventDefault(); story = false;
+    e.preventDefault();
     const now = clock.getElapsedTime(), quiet = now - wheelQuiet; wheelQuiet = now;
     if ((anim && anim.k < 0.85) || quiet < WHEEL_REST && wheelAcc === 0) return;
     wheelAcc += e.deltaY; if (Math.abs(wheelAcc) < 24) return;
     step(Math.sign(wheelAcc)); wheelAcc = 0;
   }, { passive: false });
   addEventListener("keydown", e => {
-    if (!(e.target.closest && e.target.closest("[data-timeline]"))) story = false;
     if (e.key === "Escape" && (openProblem >= 0 || openPart)) { closeDrawers(true); return; }
     if (e.target.closest && e.target.closest("[data-drawer]")) return;   // arrows and space scroll the open side panel
     if (e.target.closest && e.target.closest("button") && (e.key === " " || e.key === "Enter")) return;
@@ -342,48 +324,36 @@
   stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } for (const sel of [".coll__page", ".problems"]) { const el = e.target.closest(sel); if (el && el.scrollHeight > el.clientHeight + 4) { touchY = null; return; } } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });   // a list that scrolls (About, problems on phones) is scrolled, not swiped away
   const segBtns = SEGS.map((g, n) => { const b = document.createElement("button");
     b.type = "button"; b.className = "timeline__seg"; b.dataset.timelineSeg = n; b.tabIndex = -1;
-    b.setAttribute("aria-label", `${STORY.goTo} ${pad(n)} ${STOPS[g.first].name}`);
+    b.setAttribute("aria-label", `${STORY.goTo} ${STOPS[g.first].name}`);
     b.innerHTML = '<span class="timeline__line"><i class="timeline__fill"></i></span>'; tlBar.appendChild(b); return b; });
   const segFills = segBtns.map(b => b.querySelector(".timeline__fill"));
   const tlDot = document.createElement("span"); tlDot.className = "timeline__dot";
-  function showSeg(n, name) { tlNum.textContent = pad(n); tlLabel.textContent = name; }
-  segBtns.forEach((b, n) => {   // hover or focus previews a segment's number and name; leaving shows the active one again
-    const peek = () => { preview = n; showSeg(n, STOPS[SEGS[n].first].name); }, back = () => { preview = -1; showSeg(segOf(at), nameAt(at)); };
+  function showSeg(name) { tlLabel.textContent = name; }
+  segBtns.forEach((b, n) => {   // hover or focus previews a segment's name; leaving shows the active one again
+    const peek = () => { preview = n; showSeg(STOPS[SEGS[n].first].name); }, back = () => { preview = -1; showSeg(nameAt(at)); };
     b.addEventListener("pointerenter", peek); b.addEventListener("focus", peek); b.addEventListener("pointerleave", back); b.addEventListener("blur", back);
-    b.addEventListener("click", () => { if (document.body.classList.contains("is-loading")) return; story = false; paused = false; meetFrom = null; goTo(SEGS[n].first); });
+    b.addEventListener("click", () => { if (document.body.classList.contains("is-loading")) return; paused = false; meetFrom = null; goTo(SEGS[n].first); });
   });
   tlBar.addEventListener("keydown", e => {   // roving tabindex: one tab stop, the arrows move between segments
     const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key], n = +e.target.dataset.timelineSeg; if (!d || Number.isNaN(n)) return;
     e.preventDefault(); e.stopPropagation(); const k = clamp(n + d, 0, SEGS.length - 1);
     segBtns.forEach((b, j) => (b.tabIndex = j === k ? 0 : -1)); segBtns[k].focus();
   });
-  if (matchMedia("(pointer: coarse)").matches) hint.textContent = "Swipe";
-  const panelFw = {};   // panel name -> its miniature: a copy of the big diagram with the panel's part lit
-  document.querySelectorAll("[data-panel-fw]").forEach(svg => { const k = svg.dataset.panelFw, id = "fwArrow-" + k;
-    svg.innerHTML = fwEl.innerHTML.replace(/id="fwArrow"/, `id="${id}"`).replace(/url\(#fwArrow\)/g, `url(#${id})`);
-    svg.querySelector(`[data-k="${k}"]`).classList.add("is-active"); svg.classList.add("is-" + k);
-    panelFw[svg.closest("[data-panel]").dataset.panel] = svg; });
-  let flip = null;
-  // the miniature to fly to when one stop shows the big diagram and the other a panel that has one
-  const flipTarget = (a, b) => { const big = a.fw === "big" ? a : b.fw === "big" ? b : null, other = big === a ? b : a;
-    return big && other.fw !== "big" && other.panel ? panelFw[other.panel] || null : null; };
   $("[data-brand]").addEventListener("click", () => {   // the logo: back to the opening
-    if (document.body.classList.contains("is-loading")) return; story = false; paused = false; meetFrom = null; goTo(0); });
+    if (document.body.classList.contains("is-loading")) return; paused = false; meetFrom = null; goTo(0); });
   /* ---------- side panels: a problem slides in from the left, a framework part from the right; words in content.js ---------- */
   const drawers = { problem: $("[data-drawer='problem']"), part: $("[data-drawer='part']") };
   let openProblem = -1, openPart = null, drawerFrom = null;
   const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const pills = list => `<ul class="pills" aria-label="${esc(LABELS.concepts)}">${list.map(c => `<li class="pill">${esc(c)}</li>`).join("")}</ul>`;
+  const pills = list => `<ul class="pills" aria-label="${esc(LABELS.concepts)}">${list.map(c => `<li class="pill">${esc(c)}</li>`).join("")}</ul>`;   // the part panel's related concepts
   const section = (label, html) => `<h3 class="drawer__h">${esc(label)}</h3>${html}`;
-  function problemHTML(n) { const P = PROBLEMS[n];
-    return `<p class="drawer__kicker">${pad(n)} · ${esc(P.theme)}</p><h2 class="drawer__title">${esc(P.line)}</h2>`
-      + section(LABELS.recognise, `<p class="drawer__text">${esc(P.recognise)}</p>`) + section(LABELS.wrong, `<p class="drawer__text">${esc(P.wrong)}</p>`)
-      + section(LABELS.solve, `<p class="drawer__text">${esc(P.solve)}</p><p class="drawer__links">${P.parts.map(k => `<button class="drawer__link" type="button" data-open-part="${k}">${esc(PARTS[k].name)}</button>`).join("")}</p>`)
-      + section(LABELS.concepts, pills(P.concepts)); }
+  function problemHTML(n) { const P = PROBLEMS[n];   // the title is the recognition; the figure beside it lights the parts and opens them
+    return `<h2 class="drawer__title">${esc(P.line)}</h2>`
+      + section(LABELS.wrong, `<p class="drawer__text">${esc(P.wrong)}</p>`) + section(LABELS.solve, `<p class="drawer__text">${esc(P.solve)}</p>`); }
   function partHTML(k) { const T = PARTS[k], related = PROBLEMS.map((P, n) => [P, n]).filter(([P]) => P.parts.includes(k));
     return `<p class="drawer__kicker">${esc(T.name)} · ${esc(T.sub)}</p><h2 class="drawer__title">${esc(T.title)}</h2><p class="drawer__question">${esc(T.question)}</p><p class="drawer__text">${esc(T.text)}</p>`
       + section(LABELS.org, `<p class="drawer__text">${esc(T.org)}</p>`)
-      + (related.length ? section(LABELS.problems, `<div class="drawer__problems">${related.map(([P, n]) => `<button class="drawer__problem" type="button" data-open-problem="${n}"><span>${pad(n)} · ${esc(P.theme)}</span>${esc(P.short)}</button>`).join("")}</div>`) : "")
+      + (related.length ? section(LABELS.problems, `<div class="drawer__problems">${related.map(([P, n]) => `<button class="drawer__problem" type="button" data-open-problem="${n}">${esc(P.short)}</button>`).join("")}</div>`) : "")
       + section(LABELS.concepts, pills(T.concepts)); }
   function showDrawer(kind, html) {
     const d = drawers[kind], other = drawers[kind === "problem" ? "part" : "problem"];
@@ -412,13 +382,13 @@
   }
   const cards = PROBLEMS.map((P, n) => { const b = document.createElement("button");
     b.type = "button"; b.className = "prob glass"; b.dataset.problem = n; b.style.setProperty("--i", n); b.setAttribute("aria-controls", "drawerProblem"); b.setAttribute("aria-expanded", "false");
-    b.innerHTML = `<span class="prob__ph">${pad(n)} · ${esc(P.theme)}</span><span class="prob__line">${esc(P.short)}</span>`; $("[data-problems-list]").appendChild(b); return b; });
+    b.innerHTML = `<span class="prob__line">${esc(P.short)}</span>`; $("[data-problems-list]").appendChild(b); return b; });
   document.addEventListener("click", e => {
     if (!STOPS[at].problems || !e.target.closest) return;
     const card = e.target.closest("[data-problem]"), part = e.target.closest("[data-open-part]") || (fwEl.classList.contains("is-side") && e.target.closest("#fw .k"));
     const prob = e.target.closest("[data-open-problem]"), close = e.target.closest("[data-drawer-close]");
-    if (card) { story = false; const n = +card.dataset.problem; n === openProblem ? closeDrawer("problem") : openProblemFn(n); return; }
-    if (part) { story = false; const k = part.dataset.openPart || part.dataset.k; k === openPart ? closeDrawer("part") : openPartFn(k); return; }
+    if (card) { const n = +card.dataset.problem; n === openProblem ? closeDrawer("problem") : openProblemFn(n); return; }
+    if (part) { const k = part.dataset.openPart || part.dataset.k; k === openPart ? closeDrawer("part") : openPartFn(k); return; }
     if (prob) { openProblemFn(+prob.dataset.openProblem); return; }
     if (close) { closeDrawer(close.closest("[data-drawer]").dataset.drawer); return; }
     if (!e.target.closest("[data-drawer], [data-timeline], .meet, .brand")) closeDrawers(false);   // a click anywhere else closes them
@@ -431,7 +401,7 @@
     leaveColl();
   });
   $("[data-coll-close]").addEventListener("click", () => { if (STOPS[at].coll) leaveColl(); });   // the small cross does the same as a click beside the page
-  document.querySelectorAll("[data-coll-go]").forEach(b => b.addEventListener("click", () => { meetFrom = null; story = false; goTo(idx(b.dataset.collGo)); }));   // About page: to the framework or the problems
+  document.querySelectorAll("[data-coll-go]").forEach(b => b.addEventListener("click", () => { meetFrom = null; goTo(idx(b.dataset.collGo)); }));   // About page: to the problems and the framework
   { // contact: one address (CONTACT in content.js) for the text, the copy button and Let's talk
     const mail = $("[data-mailto]"), copyBtn = $("[data-copy-email]"), label = $("[data-copy-label]"), COPY = { idle: "Copy", done: "Copied" };
     $("[data-email]").textContent = CONTACT.email; mail.href = "mailto:" + CONTACT.email + (CONTACT.subject ? "?subject=" + encodeURIComponent(CONTACT.subject) : "");
@@ -599,22 +569,7 @@
     // auto-advance inside a sequence
     const Q = S.seq && SEQS[S.seq];
     if (Q && !paused && at < Q.last && (anim ? S.fw && sameCam(STOPS[at + 1].cam, STOPS[anim.to].cam) && now - started >= S.hold : now - arrived >= S.hold)) goTo(at + 1);   // the framework's steps don't wait for the camera; every other sequence goes on once it has arrived ("It isn't" dimmed the orchestra mid-flight)
-    else if (story && !anim && !paused && (!Q || at === Q.last) && now - arrived >= (S.hold || STORY.hold)) { if (at < N - 1) goTo(at + 1); else story = false; }
     if (paused && Q) barStart += dt;
-    { // FLIP: the big diagram shrinks into the panel miniature (and grows back) with the progress of the camera move
-      const mini = anim && !reduceMQ.matches ? flipTarget(STOPS[from], STOPS[anim.to]) : null;
-      if (mini) {
-        if (!flip || flip.mini !== mini) { if (flip) flip.mini.style.opacity = ""; fwEl.style.transform = ""; fwEl.classList.add("is-flip"); flip = { mini, box: fwEl.getBoundingClientRect() }; }
-        const grow = STOPS[anim.to].fw === "big", p = grow ? 1 - anim.k : anim.k;
-        const e = smoother(clamp((p - FW_FLIP.start) / (FW_FLIP.end - FW_FLIP.start), 0, 1)), B = flip.box, M = mini.getBoundingClientRect();
-        const dx = lerp(0, M.left + M.width / 2 - B.left - B.width / 2, e), dy = lerp(0, M.top + M.height / 2 - B.top - B.height / 2, e);
-        fwEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) translate(-50%, -50%) scale(${lerp(1, M.width / B.width, e).toFixed(4)})`;
-        fwEl.style.setProperty("--fw-text", (1 - e).toFixed(3));
-        const hand = clamp((e - 0.97) / 0.03, 0, 1);   // the last stretch, when both sit in the same place: the diagram hands over to the miniature
-        if (!grow) { fwEl.style.opacity = (1 - hand).toFixed(3); mini.style.opacity = hand.toFixed(3); }
-        else mini.style.opacity = "";
-      } else if (flip) { fwEl.classList.remove("is-flip"); fwEl.style.transform = fwEl.style.opacity = ""; fwEl.style.removeProperty("--fw-text"); flip.mini.style.opacity = ""; flip = null; }
-    }
     { // the glass disc behind the diagram follows its circle: place, size and fade
       const o = +getComputedStyle(fwEl).opacity;
       if (o > 0.005) { const c = fwEl.querySelector(":scope > circle").getBoundingClientRect(), p = fwGlass.offsetParent.getBoundingClientRect();
@@ -624,10 +579,7 @@
     { // the active segment fills with the progress through its steps
       let f = anim ? anim.k : 1;
       if (Q) { let done = 0, all = 0; Q.bars.forEach((d, b) => { all += d; if (b < S.bar) done += d; }); f = (done + clamp((now - barStart) / Q.bars[S.bar], 0, 1) * Q.bars[S.bar]) / all; }
-      segFills[segOf(at)].style.transform = `scaleX(${f.toFixed(3)})`; tlDot.style.left = (f * 100).toFixed(2) + "%";
-      const adv = advancing(); if (adv !== playShown) { playShown = adv; tlPlay.setAttribute("aria-label", adv ? STORY.pause : STORY.play);
-        tlPlay.innerHTML = adv ? '<svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1" y="0" width="3" height="10"/><rect x="6" y="0" width="3" height="10"/></svg>'
-                               : '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0 L10 5 L1 10 Z"/></svg>'; } }
+      segFills[segOf(at)].style.transform = `scaleX(${f.toFixed(3)})`; tlDot.style.left = (f * 100).toFixed(2) + "%"; }
     // focus
     const ease = 1 - Math.exp(-dt * 7);
     // the audience and the grass (hidden in the opening) change only where nobody sees it: while the camera still sees their place during a move
@@ -648,16 +600,6 @@
         if (m.userData.cast0 === undefined) m.userData.cast0 = m.castShadow; m.castShadow = m.userData.cast0 && op > 0.5;   // a faded figure leaves no shadow behind
         if ((m.visible !== was && cast) || m.castShadow !== cast) shadows.dirty = true; }   // late arrivals (fresh) always get their visibility set once: at opacity 0 with a goal of 0 nothing else would
     }
-    // labels
-    { const shown = [];   // the section names; a label that would touch a nearer one moves up a line, so each stays above its own section
-      for (const k in labelEls) { const L = labelEls[k], want = (S.labels || []).includes(k) && (!anim || anim.k > 0.5) ? 1 : 0;
-        L.a += (want - L.a) * (1 - Math.exp(-dt * 5)); if (L.a < 0.002 && !want) { if (L.el.style.opacity !== "0") L.el.style.opacity = "0"; continue; }
-        const [x, y] = toScreen(labelPos[k]); L.w = L.w || L.el.offsetWidth; shown.push({ L, x, y, d: camera.position.distanceTo(labelPos[k]) }); }
-      shown.sort((p, q) => p.d - q.d);
-      for (let i = 0; i < shown.length; i++) { const q = shown[i];
-        for (let moved = true; moved;) { moved = false;
-          for (let j = 0; j < i; j++) { const p = shown[j]; if (Math.abs(q.x - p.x) < (p.L.w + q.L.w) / 2 + 14 && Math.abs(q.y - p.y) < 24) { q.y = p.y - 24; moved = true; } } } }
-      for (const { L, x, y } of shown) { L.el.style.opacity = L.a.toFixed(3); L.el.style.transform = `translate3d(${(x - L.w / 2).toFixed(1)}px, ${(y - 30 + (1 - L.a) * 8).toFixed(1)}px, 0)`; } }
     fctx.setTransform(dpr, 0, 0, dpr, 0, 0); fctx.clearRect(0, 0, vw, vh);
     drawMelody(now, dt); drawChaos(now, dt); glowTick(dt); placeBeats(); arcTick(now);
     windU.value = now; tickPeople(now); tension(now, dt);
