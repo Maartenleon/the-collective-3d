@@ -1661,13 +1661,13 @@
   const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
   const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
-  const LINE_GAP = 1.9;   // "It isn't": seconds between its four lines (t1 and t2 hold for it; t3's line comes halfway its 0.5 s move)
+  const BEAT = 0.95, LINE_GAP = 2 * BEAT;   // "It isn't" runs on one beat: a section every BEAT, a line every LINE_GAP, the tension LINE_GAP after the last line (the holds of t1-t3 follow from it; t3's line comes halfway its 0.5 s move)
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 9.3, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
-    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, focus: (t, s) => oneByOne(t, s) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
+    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, focus: (t, s) => oneByOne(t, s, 0, BEAT) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
     { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 0.75, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, glow: 1 },
-    { id: "t3", ch: 0, seq: "twist", bar: 2, hold: 3.2, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4, chaos: 1 },
+    { id: "t3", ch: 0, seq: "twist", bar: 2, hold: LINE_GAP - 0.25, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4, chaos: 1 },
     { id: "t5", ch: 0, seq: "twist", bar: 3, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
     { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: FW_STEP, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },   // one part every FW_STEP seconds
