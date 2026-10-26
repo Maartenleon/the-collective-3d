@@ -69,11 +69,12 @@
   const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
   const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
+  const LINE_GAP = 1.9;   // "It isn't": seconds between its four lines (t1 and t2 hold for it; t3's line comes halfway its 0.5 s move)
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 9.3, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
-    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 4.0, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, focus: (t, s) => oneByOne(t, s) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
-    { id: "t2", ch: 0, seq: "twist", bar: 1, hold: 2.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, glow: 1 },
+    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, focus: (t, s) => oneByOne(t, s) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
+    { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 0.75, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, glow: 1 },
     { id: "t3", ch: 0, seq: "twist", bar: 2, hold: 3.2, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4, chaos: 1 },
     { id: "t5", ch: 0, seq: "twist", bar: 3, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
@@ -177,8 +178,7 @@
   const collEl = $("#coll"), meetBtn = $("#meet");
   const fwGlass = $("[data-fw-glass]");
   // "It isn't": the sections light up one by one while "Different roles" and "Different capabilities" appear (t1, the second after LINE_GAP);
-  // "Different perspectives" comes with the glow (t2), "One performance" together with the coloured lines (t3)
-  const LINE_GAP = 1.9;
+  // "Different perspectives" comes with the glow (t2), "One performance" together with the coloured lines (t3), each LINE_GAP after the last
   let lineT = 0; const showLines = S => { let n = S.lines ?? 4; if (S.linesTo) n = Math.min(S.linesTo, n + Math.floor(lineT / LINE_GAP)); if (S.chaos && anim && anim.k <= 0.5) n--; lineEls.forEach(li => li.classList.toggle("is-shown", +li.dataset.line <= n)); };
   const lineEls = [...document.querySelectorAll("[data-line]")], dimsLate = $("#dimsLate"), fwEl = $("#fw");
   { // the framework figure, B2: floating rounded bands inside a circle, two columns, the Orchestration ring with its arrow
