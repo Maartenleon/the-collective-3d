@@ -136,7 +136,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
   // the land beyond the bowl (body.js): one continuous procedural terrain to the horizon
   const LAND = { r0: 185, r1: 1900, rings: 420, segs: 1300, ringsPhone: 240, segsPhone: 760, seed: 7,
     wavelength: 85, stretch: 1.6, octaves: 6, gain: 0.4, lacunarity: 2.0, warp: 0.4,   // fBm simplex with domain warping: many small, low, rounded hills, stretched sideways into long, soft ridges (fewer separate tops)
-    base: 6, slope: 0.11, rise: 650, ampNear: 3, ampFar: 8, crest: 1700, crestSoft: 150, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away, rounded over crestSoft metres (a calm horizon line)
+    base: 6, slope: 0.123, rise: 650, ampNear: 3.5, ampFar: 9.5, crest: 1700, crestSoft: 150, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away, rounded over crestSoft metres (a calm horizon line)
     color: 0x090a10, shade: 0x34548a, shadeAmount: 0.52, rose: "0.30, 0.16, 0.16", roseAmount: 0.5, sunFrom: 0.1, sunTo: 0.9,   // soft contrast: slate blue, a gentle rose toward the low sun
     relief: 0.18, reliefScale: 0.05,                                              // fine folds on every slope
     haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.28 };   // linear colour: after the film look it meets the sky

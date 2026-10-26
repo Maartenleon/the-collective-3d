@@ -71,7 +71,7 @@
   const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
   const BEAT = 0.95, LINE_GAP = 2 * BEAT;   // "It isn't" runs on one beat: a section every BEAT, a line every LINE_GAP, the tension LINE_GAP after the last line (the holds of t1-t3 follow from it; t3's line comes halfway its 0.5 s move)
   const STOPS = [
-    { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 9.3, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
+    { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 7.0, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
     { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, focus: (t, s) => oneByOne(t, s, 0, BEAT) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
     { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 0.75, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, glow: 1 },
@@ -438,10 +438,11 @@
   }
 
   /* ---------- per frame ---------- */
+  const OPEN_TOP = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--open-top")) / 100 || 0.55;   // read once: the opening text sits no lower than this, where the loader text is (--open-top in styles.css)
   function placeBeats() {   // beats marked data-anchor sit centred above the conductor, as on the site
     const [, y] = toScreen(V(0, STAGE.floor + STAGE.wall.high + 0.9, -STAGE.zb));   // above the back wall
     for (const k in beats) { const el = beats[k]; if (!el.dataset.anchor || !el.classList.contains("is-on")) continue;
-      const h = el.offsetHeight; el.style.top = clamp(y - h - 26, vh < 600 ? 64 : 84, vh * 0.55).toFixed(0) + "px"; }
+      const h = el.offsetHeight; el.style.top = clamp(y - h - 26, vh < 600 ? 64 : 84, vh * OPEN_TOP).toFixed(0) + "px"; }
   }
   function drawMelody(now, dt) {
     const S = STOPS[at], live = !anim || anim.k > 0.6;

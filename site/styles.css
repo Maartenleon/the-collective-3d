@@ -2,6 +2,7 @@
    One committed dark look: the film is the palette. */
 :root {
   color-scheme: dark;
+  --open-top: 55%;   /* where the opening text sits (top), the loader text too; story.js reads it once */
   --palette-shadow: #1A0E0A; --palette-garnet: #5C0F07; --palette-vermilion: #F1400B; --palette-paper: #FAF8F6; --palette-cream: #FCE8D8;
   --rgb-shadow: 26 14 10; --rgb-paper: 250 248 246;
   --color-bg: var(--palette-shadow); --color-text: var(--palette-paper);
@@ -20,7 +21,7 @@
   --ease-out: cubic-bezier(.16, .84, .24, 1); --ease-in-out: cubic-bezier(.4, 0, .6, 1);
   --dur-fast: .3s; --dur-base: .6s; --dur-slow: .9s; --stagger: .08s;
 }
-@media (max-width: 720px) { :root { --text-body: .72rem; --problems-top: 96px; --problems-fw-size: 30vh; --panel-fw-size: 52px; --panel-offset: calc(92px + env(safe-area-inset-bottom, 0px)); --timeline-offset: calc(36px + env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 720px) { :root { --open-top: 47%; --text-body: .72rem; --problems-top: 96px; --problems-fw-size: 30vh; --panel-fw-size: 52px; --panel-offset: calc(92px + env(safe-area-inset-bottom, 0px)); --timeline-offset: calc(36px + env(safe-area-inset-bottom, 0px)); } }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--color-bg); color: var(--color-text); overflow: hidden; overscroll-behavior: none; }
 body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
@@ -95,7 +96,7 @@ p, ul, h1, h2 { margin: 0; }
 .panel__fw marker path { fill: var(--color-line); stroke: none; }
 .panel__fw .is-active rect, .panel__fw .is-active path { stroke: var(--color-text); }
 .panel__fw .is-active marker path, .panel__fw.is-o marker path { fill: var(--color-text); }
-.panel__title { margin-bottom: var(--space-xs); font: 400 var(--text-h3)/1.15 var(--font-serif); text-wrap: balance; }
+.panel__title { margin-bottom: var(--space-s); font: 400 var(--text-h3)/1.15 var(--font-serif); text-wrap: balance; }
 .panel__body { font: 400 var(--text-body)/var(--leading-body) var(--font-sans); color: var(--color-body); }
 .panel__org { margin-top: var(--space-s); padding-top: var(--space-s); font: 400 var(--text-body)/var(--leading-body) var(--font-sans); color: var(--color-body); }
 .panel__org span { display: block; margin-bottom: .3em; font: 500 .62rem/1 var(--font-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--color-highlight); }
@@ -180,7 +181,7 @@ p, ul, h1, h2 { margin: 0; }
 .is-ready .brand, .is-ready .meet, .is-ready .timeline, .is-ready .scroll-hint { animation: ui-in 1.4s ease .5s backwards; }   /* once loaded, the interface fades in after the loader */
 @keyframes ui-in { from { opacity: 0; } }
 /* poster: the opening view as a picture, shown at once while the 3D scene loads behind it */
-.loader__open { position: absolute; left: 50%; top: 55%; transform: translate(-50%, 0); width: 100%; max-width: min(var(--beat-width), calc(100% - 2 * var(--gutter))); text-align: center; text-shadow: var(--shadow-text); }   /* where the opening beat sits */
+.loader__open { position: absolute; left: 50%; top: var(--open-top); transform: translate(-50%, 0); width: 100%; max-width: min(var(--beat-width), calc(100% - 2 * var(--gutter))); text-align: center; text-shadow: var(--shadow-text); }   /* where the opening beat sits */
 .loader__open > * { opacity: 0; transform: translateY(14px); filter: blur(4px); transition: opacity .9s ease, transform 1.1s var(--ease-out), filter .9s ease; }   /* animates in once the fonts are there (script in head.html) */
 .loader.is-in .loader__open > * { opacity: 1; transform: none; filter: none; }
 .loader.is-in .loader__open i { transition-delay: .2s; }

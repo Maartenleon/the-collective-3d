@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&family=Barlow+Condensed:wght@700&display=swap">
-<link rel="stylesheet" href="site/styles.css?v=8f740662">
+<link rel="stylesheet" href="site/styles.css?v=ebbb9e65">
 </head>
 <body class="is-loading">
 <main class="stage" id="stage" aria-label="The Collective: when an organisation plays as one">
@@ -60,34 +60,30 @@
 
   <div class="panels">
     <aside class="panel glass" data-panel="plan" aria-label="Plan">
-      <p class="panel__kicker">Plan<svg class="panel__fw" data-panel-fw="p" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
-      <p class="panel__title">The piece</p>
-      <p class="panel__body">What we choose to play for our audience, and what we leave out.</p>
-      <p class="panel__org"><span>In your organisation</span>Your strategy, turned into this year&rsquo;s budget and a change portfolio for the years ahead.</p>
+      <p class="panel__kicker">Plan &middot; the piece<svg class="panel__fw" data-panel-fw="p" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__title">What we choose to play and leave out.</p>
+      <p class="panel__body">Your strategy, turned into this year&rsquo;s budget and a change portfolio for the years ahead.</p>
     </aside>
     <aside class="panel glass" data-panel="blueprint" aria-label="Blueprint">
-      <p class="panel__kicker">Blueprint<svg class="panel__fw" data-panel-fw="b" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
-      <p class="panel__title">The score</p>
-      <p class="panel__body">Turning the piece into parts every section can play.</p>
-      <p class="panel__org"><span>In your organisation</span>How value flows through your business, data and technology, and what it must grow into.</p>
+      <p class="panel__kicker">Blueprint &middot; the score<svg class="panel__fw" data-panel-fw="b" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__title">Turning the piece into parts every section can play.</p>
+      <p class="panel__body">How value flows through your business, data and technology, and what it must grow into.</p>
     </aside>
     <aside class="panel glass" data-panel="means" aria-label="Means">
-      <p class="panel__kicker">Means<svg class="panel__fw" data-panel-fw="m" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
-      <p class="panel__title">The orchestra</p>
-      <p class="panel__body">The musicians, their instruments, and the budget that keeps them playing.</p>
-      <p class="panel__org"><span>In your organisation</span>People, skills, tools and funding: who and what you have to run today and change for tomorrow.</p>
+      <p class="panel__kicker">Means &middot; the orchestra<svg class="panel__fw" data-panel-fw="m" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__title">The musicians, their instruments, and the budget that keeps them playing.</p>
+      <p class="panel__body">People, skills, tools and funding: who and what you have to run today and change for tomorrow.</p>
     </aside>
     <aside class="panel glass" data-panel="orchestration" aria-label="Orchestration">
-      <p class="panel__kicker">Orchestration<svg class="panel__fw" data-panel-fw="o" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
-      <p class="panel__title">The conductor</p>
-      <p class="panel__body">Keeping every part in time, and the whole in tune.</p>
-      <p class="panel__org"><span>In your organisation</span>Leadership that keeps it in step: by function for Run, by value stream for Change.</p>
+      <p class="panel__kicker">Orchestration &middot; the conductor<svg class="panel__fw" data-panel-fw="o" viewBox="0 0 640 560" aria-hidden="true"></svg></p>
+      <p class="panel__title">Keeping every part in time, and the whole in tune.</p>
+      <p class="panel__body">Leadership that keeps it in step: by function for Run, by value stream for Change.</p>
     </aside>
     <aside class="panel glass" data-panel="dims" aria-label="Run and Change">
-      <p class="panel__kicker">Run and Change</p>
+      <p class="panel__kicker">Run and Change &middot; tonight and next season</p>
       <p class="panel__title">Tonight’s concert has to be perfect. But if that is all we play, next season the hall stays silent.</p>
       <p class="panel__extra" id="dimsLate">So while tonight&rsquo;s concert plays, next season&rsquo;s symphony is already in rehearsal.</p>
-      <p class="panel__org"><span>In your organisation</span><b class="org-run">Run: keep today&rsquo;s value flowing, with stable value streams steered by function.</b><b class="org-chg" id="dimsOrgC">Change: build what comes next, with multidisciplinary teams around a value stream and the means to deliver it end to end.</b></p>
+      <p class="panel__org"><b class="org-run">Run: keep today&rsquo;s value flowing, with stable value streams steered by function.</b><b class="org-chg" id="dimsOrgC">Change: build what comes next, with multidisciplinary teams around a value stream and the means to deliver it end to end.</b></p>
     </aside>
   </div>
 
@@ -214,7 +210,7 @@
   // the land beyond the bowl (body.js): one continuous procedural terrain to the horizon
   const LAND = { r0: 185, r1: 1900, rings: 420, segs: 1300, ringsPhone: 240, segsPhone: 760, seed: 7,
     wavelength: 85, stretch: 1.6, octaves: 6, gain: 0.4, lacunarity: 2.0, warp: 0.4,   // fBm simplex with domain warping: many small, low, rounded hills, stretched sideways into long, soft ridges (fewer separate tops)
-    base: 6, slope: 0.11, rise: 650, ampNear: 3, ampFar: 8, crest: 1700, crestSoft: 150, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away, rounded over crestSoft metres (a calm horizon line)
+    base: 6, slope: 0.123, rise: 650, ampNear: 3.5, ampFar: 9.5, crest: 1700, crestSoft: 150, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away, rounded over crestSoft metres (a calm horizon line)
     color: 0x090a10, shade: 0x34548a, shadeAmount: 0.52, rose: "0.30, 0.16, 0.16", roseAmount: 0.5, sunFrom: 0.1, sunTo: 0.9,   // soft contrast: slate blue, a gentle rose toward the low sun
     relief: 0.18, reliefScale: 0.05,                                              // fine folds on every slope
     haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.28 };   // linear colour: after the film look it meets the sky
@@ -1664,7 +1660,7 @@
   const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
   const BEAT = 0.95, LINE_GAP = 2 * BEAT;   // "It isn't" runs on one beat: a section every BEAT, a line every LINE_GAP, the tension LINE_GAP after the last line (the holds of t1-t3 follow from it; t3's line comes halfway its 0.5 s move)
   const STOPS = [
-    { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 9.3, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
+    { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 7.0, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
     { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, focus: (t, s) => oneByOne(t, s, 0, BEAT) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
     { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 0.75, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, glow: 1 },
@@ -2031,10 +2027,11 @@
   }
 
   /* ---------- per frame ---------- */
+  const OPEN_TOP = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--open-top")) / 100 || 0.55;   // read once: the opening text sits no lower than this, where the loader text is (--open-top in styles.css)
   function placeBeats() {   // beats marked data-anchor sit centred above the conductor, as on the site
     const [, y] = toScreen(V(0, STAGE.floor + STAGE.wall.high + 0.9, -STAGE.zb));   // above the back wall
     for (const k in beats) { const el = beats[k]; if (!el.dataset.anchor || !el.classList.contains("is-on")) continue;
-      const h = el.offsetHeight; el.style.top = clamp(y - h - 26, vh < 600 ? 64 : 84, vh * 0.55).toFixed(0) + "px"; }
+      const h = el.offsetHeight; el.style.top = clamp(y - h - 26, vh < 600 ? 64 : 84, vh * OPEN_TOP).toFixed(0) + "px"; }
   }
   function drawMelody(now, dt) {
     const S = STOPS[at], live = !anim || anim.k > 0.6;
