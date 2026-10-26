@@ -15,7 +15,7 @@
   --font-serif: "EB Garamond", Garamond, Georgia, serif; --font-sans: "Restart Soft", "Figtree", ui-sans-serif, system-ui, sans-serif;
   --text-ui: .75rem; --text-body: var(--text-ui); --leading-body: 1.6; --text-lede: clamp(1.05rem, 1.45vw, 1.4rem); --text-beat: clamp(1.5rem, 2.3vw, 2.25rem); --text-h3: 1.45rem; --text-h3-sm: 1.25rem;
   --space-3xs: .25rem; --space-2xs: .4rem; --space-xs: .6rem; --space-s: .85rem; --space-m: 1.25rem; --space-l: 1.75rem;
-  --gutter: clamp(20px, 7vw, 120px); --nav-top: calc(20px + env(safe-area-inset-top, 0px)); --brand-nudge: 9.5px; --beat-width: 46rem; --panel-width: 20rem; --panel-offset: 72px; --timeline-offset: 30px; --space-segment: 4px; --problems-top: max(84px, 10vh); --problems-fw-size: min(52vh, 36vw);
+  --gutter: clamp(20px, 7vw, 120px); --nav-top: calc(20px + env(safe-area-inset-top, 0px)); --brand-nudge: 9.5px; --beat-width: 46rem; --panel-width: 20rem; --panel-offset: 72px; --timeline-offset: 30px; --space-segment: 4px; --problems-top: max(84px, calc((100vh - 2.3rem - var(--problems-fw-size) * .875) / 2)); --problems-fw-size: min(52vh, 36vw);
   --radius-glass: 18px; --radius-pill: 999px; --blur-glass: blur(18px) saturate(1.15);
   --shadow-glass: 0 20px 50px -30px rgb(0 0 0 / .6); --shadow-text: 0 1px 30px rgb(var(--rgb-shadow) / .45);
   --ease-out: cubic-bezier(.16, .84, .24, 1); --ease-in-out: cubic-bezier(.4, 0, .6, 1);
@@ -237,8 +237,6 @@ p, ul, h1, h2 { margin: 0; }
 .drawer__problem { border-color: var(--panel-border); }
 .drawer__problem:hover { border-color: var(--color-line); background-color: var(--panel-fill); }
 .drawer__problem:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 2px; }
-.pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }   /* a framework part's related concepts: quiet labels, not links */
-.pill { padding: 5px 10px; border: 1px solid var(--color-line-soft); border-radius: var(--radius-pill); font: 400 .7rem/1 var(--font-sans); color: var(--color-text-muted); }
 .fw.has-focus .k:not(.is-lit):not(:hover) { opacity: .2 !important; }   /* the parts the open panel is about stay lit */
 @media (max-width: 720px) {
   .drawer { --drawer-width: auto; left: var(--gutter); right: var(--gutter); top: 50%; translate: 0 -50%; max-height: calc(100% - 2 * (var(--timeline-offset) + 40px)); padding: var(--space-m); }   /* phones: centred on the screen both ways (equal gutters; translate leaves the slide-in transform alone) */
@@ -273,19 +271,20 @@ p, ul, h1, h2 { margin: 0; }
 .close svg { width: var(--close-icon); height: var(--close-icon); fill: none; stroke: currentColor; stroke-width: var(--close-stroke); stroke-linecap: round; }
 .close:hover { color: var(--color-highlight); }
 .close:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 3px; }
-.close--corner { position: absolute; top: 20px; right: 25px; }   /* level with the kicker, its right edge on the text edge */
+.close--corner { position: absolute; top: 20px; right: 25px; }   /* top right, its right edge on the text edge */
+.coll:not(.is-overlay) .close--corner { display: none; }   /* About: the cross only when the page lies over another stop (opened with the button); on its own stop it is the stop */
 .close--sticky { position: sticky; top: 0; float: right; margin: -8px -8px 0 var(--space-s); }   /* stays in view while the panel scrolls */
-.coll__kicker { margin-bottom: 10px; font: 500 var(--text-ui)/1 var(--font-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--color-highlight); }
 .coll__title { margin: 0 0 10px; font: 400 clamp(1.8rem, 3vw, 2.6rem)/1.1 var(--font-serif); color: var(--color-text); }
 .coll__intro { max-width: 46rem; font: 400 var(--text-body)/var(--leading-body) var(--font-sans); color: var(--color-body); }
 .coll__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; margin: 26px 0 24px; }
 .coll__col h3 { margin: 0 0 8px; font: 400 1.25rem/1.2 var(--font-serif); color: var(--color-text); }
 .coll__col p { font: 400 var(--text-body)/var(--leading-body) var(--font-sans); color: var(--color-body); }
-.coll__links { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin-top: var(--space-s); }
-.link-pill { all: unset; cursor: pointer; padding: .4rem .7rem; border: 1px solid var(--color-line); border-radius: var(--radius-pill); font: 500 var(--text-ui)/1 var(--font-sans); color: var(--color-text);
-  transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
-.link-pill:hover { color: var(--color-highlight); border-color: var(--color-highlight); }
-.link-pill:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 2px; }
+.coll__links { margin-top: var(--space-s); }
+.coll__link { all: unset; cursor: pointer; font: 500 var(--text-ui)/1.4 var(--font-sans); color: var(--color-text); text-decoration: underline; text-decoration-color: var(--color-line); text-underline-offset: 4px;   /* a quiet link to the problems and the framework */
+  transition: color var(--dur-fast) ease, text-decoration-color var(--dur-fast) ease; }
+.coll__link::after { content: " \2192"; }
+.coll__link:hover { color: var(--color-highlight); text-decoration-color: var(--color-highlight); }
+.coll__link:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 3px; border-radius: 2px; }
 .coll__cta { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 22px; }
 .coll__ask { font: 400 clamp(1.4rem, 2.2vw, 1.9rem)/1 var(--font-serif); color: var(--color-text); }
 .coll__btn, .meet { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .75rem;

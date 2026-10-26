@@ -74,11 +74,11 @@
   const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
   const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
-  const LINE_GAP = 0.9, BEAT = LINE_GAP / 2, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, a section every BEAT (two per line), the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t2 and t3 move in TW_DUR, t3's line comes halfway)
+  const LINE_GAP = 0.9, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t2 and t3 move in TW_DUR, t3's line comes halfway)
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 7.0, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
-    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2, focus: (t, s) => oneByOne(t, s, 0, BEAT) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
+    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2 },   // straight from the opening to "Different roles": the whole orchestra stays seated and lit (Kai)
     { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 1.5 * TW_DUR, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 3, glow: 1 },
     { id: "t3", ch: 0, seq: "twist", bar: 2, hold: TENSION_GAP - TW_DUR / 2, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 4, chaos: 1 },
     { id: "t5", ch: 0, seq: "twist", bar: 3, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
@@ -108,7 +108,7 @@
     { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: NARROW ? abovePanel(frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.15), 310) : frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
     // Frame 9 and 10: your organisation
     { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: NARROW ? K([0, 2.2, 46], [0, 2.2, -3], 28) : K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
-    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.72, fw: "side", show: "pbmorc" },
+    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: NARROW ? K([0, 13, 33], [0, -16, -3]) : K([0, 24, 46], [0, 12.5, -3]), problems: true, shade: 0.72, fw: "side", show: "pbmorc" },   // the list on dark ground: the stage below it (desktop) or up behind the framework (phones)
     // Part 4: The Collective. The camera rises over the bowl: tonight's concert and next season's rehearsal in one view
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
   ];
@@ -174,8 +174,8 @@
   const tlNav = $("[data-timeline]"), tlBar = $("[data-timeline-bar]"), tlLabel = $("[data-timeline-label]"), tlSkip = $("[data-timeline-skip]");
   const collEl = $("#coll"), meetBtn = $("#meet");
   const fwGlass = $("[data-fw-glass]");
-  // "It isn't": the sections light up one by one while "Different roles" and "Different capabilities" appear (t1, the second after LINE_GAP);
-  // "Different perspectives" comes with the glow (t2), "One performance" together with the coloured lines (t3), each LINE_GAP after the last
+  // "It isn't": "Different roles" and "Different capabilities" appear in t1 (the second after LINE_GAP), "Different perspectives" with the glow (t2),
+  // "One performance" together with the coloured lines (t3), each LINE_GAP after the last
   let lineT = 0; const showLines = S => { let n = S.lines ?? 4; if (S.linesTo) n = anim ? 0 : Math.min(S.linesTo, n + Math.floor(lineT / LINE_GAP)); if (S.chaos && anim && anim.k <= 0.5) n--; lineEls.forEach(li => li.classList.toggle("is-shown", +li.dataset.line <= n)); };   // t1: only "It isn't." during the flight, the first line once the camera has arrived
   const lineEls = [...document.querySelectorAll("[data-line]")], dimsLate = $("#dimsLate"), fwEl = $("#fw");
   { // the framework figure, B2: floating rounded bands inside a circle, two columns, the Orchestration ring with its arrow
@@ -274,7 +274,8 @@
     showLines(S);
     dimsLate.classList.toggle("is-late", !!S.late); $("#dimsOrgC").classList.toggle("is-late", !!S.late);
     fwEl.classList.toggle("is-on", !!S.fw); fwEl.classList.toggle("is-side", S.fw === "side"); fwEl.classList.toggle("is-coll", S.fw === "coll");
-    collEl.classList.toggle("is-on", !!S.coll);
+    if (!S.coll) meetFrom = null;   // leaving the About page in any way forgets where the button was pressed
+    collEl.classList.toggle("is-on", !!S.coll); collEl.classList.toggle("is-overlay", !!S.coll && meetFrom !== null);   // opened with the button: a page over the story, with a cross
     meetBtn.classList.toggle("is-hidden", !!S.coll);
     fwEl.querySelectorAll(".k").forEach(g => { const k = g.dataset.k;
       g.style.opacity = (S.show || "").includes(k) ? 1 : 0; if (k === "o") drawArc(!!S.fw && (S.show || "").includes("o"), S.fw === "big"); });
@@ -346,7 +347,6 @@
   const drawers = { problem: $("[data-drawer='problem']"), part: $("[data-drawer='part']") };
   let openProblem = -1, openPart = null, drawerFrom = null;
   const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const pills = list => `<ul class="pills" aria-label="${esc(LABELS.concepts)}">${list.map(c => `<li class="pill">${esc(c)}</li>`).join("")}</ul>`;   // the part panel's related concepts
   const section = (label, html) => `<h3 class="drawer__h">${esc(label)}</h3>${html}`;
   function problemHTML(n) { const P = PROBLEMS[n];   // the title is the recognition; the figure beside it lights the parts and opens them
     return `<h2 class="drawer__title">${esc(P.line)}</h2>`
@@ -354,8 +354,7 @@
   function partHTML(k) { const T = PARTS[k], related = PROBLEMS.map((P, n) => [P, n]).filter(([P]) => P.parts.includes(k));
     return `<p class="drawer__kicker">${esc(T.name)} · ${esc(T.sub)}</p><h2 class="drawer__title">${esc(T.title)}</h2><p class="drawer__question">${esc(T.question)}</p><p class="drawer__text">${esc(T.text)}</p>`
       + section(LABELS.org, `<p class="drawer__text">${esc(T.org)}</p>`)
-      + (related.length ? section(LABELS.problems, `<div class="drawer__problems">${related.map(([P, n]) => `<button class="drawer__problem" type="button" data-open-problem="${n}">${esc(P.short)}</button>`).join("")}</div>`) : "")
-      + section(LABELS.concepts, pills(T.concepts)); }
+      + (related.length ? section(LABELS.problems, `<div class="drawer__problems">${related.map(([P, n]) => `<button class="drawer__problem" type="button" data-open-problem="${n}">${esc(P.short)}</button>`).join("")}</div>`) : ""); }
   function showDrawer(kind, html) {
     const d = drawers[kind], other = drawers[kind === "problem" ? "part" : "problem"];
     if (!drawerFrom || !drawerFrom.isConnected) drawerFrom = document.activeElement;
@@ -402,7 +401,7 @@
     leaveColl();
   });
   $("[data-coll-close]").addEventListener("click", () => { if (STOPS[at].coll) leaveColl(); });   // the small cross does the same as a click beside the page
-  document.querySelectorAll("[data-coll-go]").forEach(b => b.addEventListener("click", () => { meetFrom = null; goTo(idx(b.dataset.collGo)); }));   // About page: to the problems and the framework
+  document.querySelectorAll("[data-coll-go]").forEach(b => b.addEventListener("click", () => { meetFrom = null; goTo(idx(b.dataset.collGo)); }));   // About page: the link to the problems and the framework
   { // contact: one address (CONTACT in content.js) for the text, the copy button and Let's talk
     const mail = $("[data-mailto]"), copyBtn = $("[data-copy-email]"), label = $("[data-copy-label]"), COPY = { idle: "Copy", done: "Copied" };
     $("[data-email]").textContent = CONTACT.email; mail.href = "mailto:" + CONTACT.email + (CONTACT.subject ? "?subject=" + encodeURIComponent(CONTACT.subject) : "");
@@ -565,7 +564,7 @@
     }
     camera.lookAt(camTarget); camera.updateProjectionMatrix();
     const S = STOPS[at], F = STOPS[from], since = anim ? 0 : now - arrived, mix = anim ? kk : 1;
-    if (S.seq === "twist") { lineT = anim ? 0 : now - arrived; showLines(S); }   // timed focus (sections one by one) counts from arriving: during a flight the rest dims with the camera
+    if (S.seq === "twist") { lineT = anim ? 0 : now - arrived; showLines(S); }   // the lines count from arriving
     if (waitGo && (window.__audience || now - waitGo.since >= AUDIENCE_WAIT)) goTo(waitGo.i, waitGo.instant);   // the audience is in (or will not come): go now
     // auto-advance inside a sequence
     const Q = S.seq && SEQS[S.seq];
