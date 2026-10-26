@@ -541,13 +541,13 @@
     // fine soil texture so close-ups are not plastic
     const cv = document.createElement("canvas"); cv.width = cv.height = 256; const x2 = cv.getContext("2d"), id = x2.createImageData(256, 256);
     for (let i = 0; i < id.data.length; i += 4) { const v = 226 + Math.random() * 29; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
-    x2.putImageData(id, 0, 0); const soil = new THREE.CanvasTexture(cv); soil.wrapS = soil.wrapT = THREE.RepeatWrapping; soil.repeat.set(320, 320);
+    x2.putImageData(id, 0, 0); const soil = new THREE.CanvasTexture(cv); soil.wrapS = soil.wrapT = THREE.RepeatWrapping; soil.repeat.set(640, 640);
     const mat = material("earth", { map: soil });
     mat.onBeforeCompile = sh => {   // smooth velvet earth: soft tone patches, no furrows, rust and dark patches, all in world space
       sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\n varying vec3 vW;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\n vW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
       sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\n varying vec3 vW;\n" + NOISE_GLSL).replace("#include <map_fragment>", `#include <map_fragment>
         float wob = sin(vW.x * 0.045) * 1.6 + sin(vW.z * 0.06 + vW.x * 0.01) * 1.2 + vnoise(vW.xz * 0.08) * 1.5;
-        float big = fbm(vW.xz * 0.025 + 3.0), mid = fbm(vW.xz * 0.12), clod = fbm(vW.xz * 6.0), grit = vnoise(vW.xz * 18.0);
+        float big = fbm(vW.xz * 0.025 + 3.0), mid = fbm(vW.xz * 0.12), clod = fbm(vW.xz * 10.0), grit = vnoise(vW.xz * 30.0);
         vec3 rust = vec3(0.16, 0.05, 0.02), deep = vec3(0.03, 0.009, 0.006), dust = vec3(0.16, 0.085, 0.06);
         float lum0 = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11)); diffuseColor.rgb = mix(diffuseColor.rgb, lum0 * vec3(1.45, 0.82, 0.66), 0.6);   // less candy red, more maroon-brown
         diffuseColor.rgb = mix(diffuseColor.rgb, rust, smoothstep(0.5, 0.75, big) * 0.35);          // rusty, sun-baked patches
@@ -561,7 +561,7 @@
         float shade = max(smoothstep(-0.35, 0.35, (5.5 + 0.22 * vW.x) - vW.y), smoothstep(8.0, 13.0, vW.z)) * (1.0 - smoothstep(28.0, 32.0, vW.z));   // below a line that climbs to the right, and all of the ground in front of the stage
         diffuseColor.rgb *= 1.0 - 0.84 * shade;   // a long, sharp-edged shadow over the front of the bowl, like the site photo                 // evening haze: the rim melts toward the hills
       `).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
-        { float e = 0.02; float c0 = fbm(vW.xz * 6.0), cx = fbm((vW.xz + vec2(e, 0.0)) * 6.0), cz = fbm((vW.xz + vec2(0.0, e)) * 6.0);
+        { float e = 0.012; float c0 = fbm(vW.xz * 10.0), cx = fbm((vW.xz + vec2(e, 0.0)) * 10.0), cz = fbm((vW.xz + vec2(0.0, e)) * 10.0);
           float far = smoothstep(16.0, 46.0, length(vW.xz - vec2(0.0, -3.0))) * smoothstep(1.5, 9.0, vW.y);
           vec3 dW = vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * 0.035 * (1.0 - 0.6 * far);           // fine, flat clods catch the low sun
           normal = normalize(normal + mat3(viewMatrix) * dW); }`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
@@ -595,7 +595,7 @@
       for (let a = 0; a <= segs; a++) { const ang = a / segs * Math.PI * 2, x = Math.cos(ang) * rad, z = Math.sin(ang) * rad; pos.set([x, heightAt(x, z), z], (r * (segs + 1) + a) * 3); } }
     for (let r = 0; r < rings - 1; r++) for (let a = 0; a < segs; a++) { const p0 = r * (segs + 1) + a, p1 = p0 + segs + 1; idx.push(p0, p0 + 1, p1, p0 + 1, p1 + 1, p1); }
     const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();   // normals from the heightfield
-    const fm = material("far", { fog: false, color: T.color, emissive: T.shade, emissiveIntensity: T.shadeAmount, roughness: 1 });
+    const fm = material("far", { fog: false, color: T.color, emissive: T.shade, emissiveIntensity: T.shadeAmount, roughness: 1, envMapIntensity: 0 });   // no sky reflection: seen at a grazing angle it turned the hilltops whiter than the sunlit slopes
     const f = v => (+v).toFixed(4);   // numbers into GLSL always as floats (an integer such as 0 would not compile)
     fm.onBeforeCompile = sh => {   // rose where the low sun reaches, slate blue in the shade, fine relief in the light, haze toward the horizon
       sh.uniforms.uHaze = { value: new THREE.Color(T.haze) }; sh.uniforms.uSun = { value: new THREE.Vector3(...SUN.pos).sub(new THREE.Vector3(...SUN.target)).normalize() };

@@ -66,7 +66,7 @@
   const ALL4 = ["strings", "woodwinds", "brass", "percussion"];
   const SECT = ["Strijkers", "Houtblazers", "Koper", "Slagwerk"];
   const CAM2 = NARROW ? frame(orchBox, V(0, 0.62, 1), 40, 0.84) : K([0, 3.2, 25], [0, 2.4, -4], 38);   // the closer view of frame 2, reused by Blueprint, Means and the dimensions; phones look down a little more, so the orchestra fills the width instead of a thin strip
-  const oneByOne = (t, s, t0 = 0.3, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || (i >= 0 && i <= 3 && (t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")))); };
+  const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
   const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
   const STOPS = [
@@ -75,8 +75,7 @@
     { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 3.4, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, focus: (t, s) => oneByOne(t, s) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
     { id: "t2", ch: 0, seq: "twist", bar: 1, hold: 2.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 2, glow: 1 },
     { id: "t3", ch: 0, seq: "twist", bar: 2, hold: 3.2, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, chaos: 1 },
-    { id: "t4", ch: 0, seq: "twist", bar: 3, hold: 1.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4 },
-    { id: "t5", ch: 0, seq: "twist", bar: 4, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
+    { id: "t5", ch: 0, seq: "twist", bar: 3, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
     { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: FW_STEP, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },   // one part every FW_STEP seconds
     { id: "f1", ch: 1, seq: "fw", bar: 1, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
@@ -89,7 +88,7 @@
     { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, V(0.62, 0.2, 1), 40, NARROW ? 2.3 : 1.9, 0.2), panel: "plan" },
     // Frame 5: Blueprint
     { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: ["Blueprint", "The score on every stand"] },
-    { id: "b2", ch: 3, seq: "bp", bar: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"] },
+    { id: "b2", ch: 3, seq: "bp", bar: 1, fadeLate: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: ["Blueprint", "The conductor’s score"] },
     { id: "b3", ch: 3, seq: "bp", bar: 2, hold: 2.6, dur: 1.8, cam: frame(orchBox, V(0, 0.75, 1), 42, 0.74), panel: "blueprint", line: 1, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player), caption: ["Value stream", "One melody, many hands"] },
     { id: "b4", ch: 3, seq: "bp", bar: 3, hold: 3.0, cam: frame(orchBox, V(0.06, 0.72, 1), 42, 0.72), panel: "blueprint", line: 2, fallen: 0.16, focus: t => t.env || t.stand || LINE1.has(t.player) || LINE2.has(t.player), caption: ["Value streams", "Two melodies, eight specialists, four sections"] },
     // Frame 6: Means
@@ -116,7 +115,7 @@
   const SEGS = [];   // the timeline: one segment per scroll step, a stop on its own or a whole sequence
   STOPS.forEach((s, i) => { if (!s.seq || SEQS[s.seq].first === i) SEGS.push({ first: i, last: s.seq ? SEQS[s.seq].last : i }); });
   const segOf = i => SEGS.findIndex(g => i >= g.first && i <= g.last), nameAt = i => { while (!STOPS[i].name) i--; return STOPS[i].name; };
-  const pad = n => String(n + 1).padStart(2, "0");
+  const pad = n => String(n + 1);   // the timeline counts 1, 2, 3
 
   /* ---------- focus: tag every mesh by what it belongs to, then fade what is not in the scene's focus ---------- */
   const meshes = []; let selected = null;   // the people loader adds its meshes here
@@ -174,6 +173,8 @@
   const tlNav = $("[data-timeline]"), tlBar = $("[data-timeline-bar]"), tlNum = $("[data-timeline-num]"), tlLabel = $("[data-timeline-label]"), tlPlay = $("[data-timeline-play]"), tlSkip = $("[data-timeline-skip]");
   const collEl = $("#coll"), meetBtn = $("#meet");
   const fwGlass = $("[data-fw-glass]");
+  const LINE_GAP = 1.1;   // "It isn't": the words come one by one on their own rhythm, at least as many as the stop says
+  let lineT = 0; const showLines = S => { const n = S.seq === "twist" ? Math.max(S.lines || 0, Math.min(4, 1 + Math.floor(lineT / LINE_GAP))) : (S.lines ?? 4); lineEls.forEach(li => li.classList.toggle("is-shown", +li.dataset.line <= n)); };
   const lineEls = [...document.querySelectorAll("[data-line]")], dimsLate = $("#dimsLate"), fwEl = $("#fw");
   { // the framework figure, B2: floating rounded bands inside a circle, two columns, the Orchestration ring with its arrow
     const CX = 320, CY = 262, R = 192;   // all colours and the text sizes come from styles.css (.fw .part, .fw .ring, .fw .arc, .fw .sub): the parts look like the panels
@@ -183,7 +184,7 @@
     const SPAN = 104 + 30;   // Run and Change reach from the top of Plan to the bottom of Means, so their labels line up
     const col = (dx, k, l, sub) => { const hh = SPAN;
       return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text><text class="sub" transform="translate(${CX + dx + 5} ${CY}) rotate(-90)" text-anchor="middle">${sub}</text></g>`; };
-    const RO = 228, a = 0.62;
+    const RO = 228, a = 0.2;   // the arrow ends just before its start: almost a full circle
     fwEl.innerHTML = `<defs><marker id="fwArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="tip" d="M0 0L10 5L0 10z"/></marker></defs>
       <circle class="ring" cx="${CX}" cy="${CY}" r="205"/>`
       + band(-104, "p", "Plan", "the piece") + band(0, "b", "Blueprint", "the score") + band(104, "m", "Means", "the orchestra") + col(40, "r", "Run", "tonight\u2019s concert") + col(110, "c", "Change", "next season\u2019s symphony")
@@ -268,7 +269,7 @@
     caption.classList.toggle("is-on", !!S.caption);
     if (S.caption) { capKind.textContent = S.caption[0]; capText.textContent = S.caption[1]; }
     problems.classList.toggle("is-on", !!S.problems); if (!S.problems) closeDrawers();
-    lineEls.forEach(li => li.classList.toggle("is-shown", +li.dataset.line <= (S.lines ?? 4)));
+    showLines(S);
     dimsLate.classList.toggle("is-late", !!S.late); $("#dimsOrgC").classList.toggle("is-late", !!S.late);
     fwEl.classList.toggle("is-on", !!S.fw); fwEl.classList.toggle("is-side", S.fw === "side"); fwEl.classList.toggle("is-coll", S.fw === "coll");
     collEl.classList.toggle("is-on", !!S.coll);
@@ -469,7 +470,7 @@
     for (const mt of glowMats) { glowTmp.copy(mt.color).multiplyScalar(GLOW_SELF).lerp(GLOW, GLOW_AMOUNT); mt.emissive.copy(mt.userData.e0).lerp(glowTmp, glowK); }   // they light up in their own colour (dark wood stays wood, brass stays brass), with a touch of warmth
   }
   /* ---------- frame 2: different views, as loose lines in many colours crossing over the orchestra ---------- */
-  const CHAOS_RGB = ["241, 64, 11", "222, 170, 72", "252, 232, 216", "196, 160, 214", "232, 132, 96", "176, 196, 214", "240, 200, 150"];
+  const CHAOS_RGB = ["250, 248, 246", "252, 232, 216", "241, 64, 11", "250, 248, 246", "232, 186, 160", "252, 232, 216", "214, 196, 214"];   // paper, cream, one vermilion, warm and lavender greys: the palette of the panels
   const allPlayers = []; orkest.traverse(n => { if (/^Muzikant · /.test(n.name)) allPlayers.push(n); });
   const CHAOS = Array.from({ length: 11 }, (_, i) => { const A = allPlayers[(i * 7 + 3) % allPlayers.length], B = allPlayers[(i * 13 + 11) % allPlayers.length];
     const pa = A.getWorldPosition(V(0, 0, 0)), pb = B.getWorldPosition(V(0, 0, 0)); pa.y += 1.3; pb.y += 1.3;
@@ -486,7 +487,7 @@
       const grow = reduceMQ.matches ? 1 : clamp((chaosT - L.delay) / 1.2, 0, 1), n = 40, pts = [];
       for (let k = 0; k <= n * smoother(want ? grow : 1); k++) { const u = k / n, m = 1 - u; pts.push([m*m*m*P[0] + 3*m*m*u*c1[0] + 3*m*u*u*c2[0] + u*u*u*Q[0], m*m*m*P[1] + 3*m*m*u*c1[1] + 3*m*u*u*c2[1] + u*u*u*Q[1]]); }
       if (pts.length < 2) return;
-      for (const [w, a] of [[6, 0.1], [1.4, 0.75]]) { fctx.strokeStyle = `rgba(${L.rgb}, ${a * chaosK})`; fctx.lineWidth = w; fctx.beginPath(); pts.forEach((p, i) => i ? fctx.lineTo(p[0], p[1]) : fctx.moveTo(p[0], p[1])); fctx.stroke(); }
+      for (const [w, a] of [[4, 0.06], [1, 0.62]]) { fctx.strokeStyle = `rgba(${L.rgb}, ${a * chaosK})`; fctx.lineWidth = w; fctx.beginPath(); pts.forEach((p, i) => i ? fctx.lineTo(p[0], p[1]) : fctx.moveTo(p[0], p[1])); fctx.stroke(); }
     });
   }
   /* ---------- tension: the brass turns away and plays for itself; the conductor gives up ---------- */
@@ -573,11 +574,16 @@
     if (anim) {
       anim.k = anim.dur ? clamp((now - anim.t0) / anim.dur, 0, 1) : 1; kk = smoother(anim.k);
       const E = STOPS[anim.to].cam, s = anim.start;
-      camera.position.lerpVectors(s.pos, E.pos, kk); camTarget.lerpVectors(s.target, E.target, kk); camera.fov = lerp(s.fov, E.fov, kk);
+      camera.position.lerpVectors(s.pos, E.pos, kk); camTarget.lerpVectors(s.target, E.target, kk);
+      { // the lens follows the framed size, not the angle: what is in view grows or shrinks steadily, without zooming out and back in between a long and a wide lens
+        const ds = s.pos.distanceTo(s.target), de = E.pos.distanceTo(E.target), d = camera.position.distanceTo(camTarget), tn = f => Math.tan(THREE.MathUtils.degToRad(f / 2));
+        if (Math.max(s.fov, E.fov) / Math.min(s.fov, E.fov) < 1.6) camera.fov = lerp(s.fov, E.fov, kk);   // a small lens change: as before
+        else { const h = Math.exp(lerp(Math.log(ds * tn(s.fov)), Math.log(de * tn(E.fov)), kk)); camera.fov = clamp(THREE.MathUtils.radToDeg(2 * Math.atan(h / Math.max(d, 1e-3))), Math.min(s.fov, E.fov), Math.max(s.fov, E.fov)); } }
       if (anim.k >= 1) { anim = null; arrived = now; from = at; }
     }
     camera.lookAt(camTarget); camera.updateProjectionMatrix();
-    const S = STOPS[at], F = STOPS[from], since = anim ? 0 : now - arrived, mix = anim ? kk : 1;   // timed focus (sections one by one) counts from arriving: during a flight the rest dims with the camera
+    const S = STOPS[at], F = STOPS[from], since = anim ? 0 : now - arrived, mix = anim ? kk : 1;
+    if (S.seq === "twist") { if (!anim && !paused) { lineT += dt; showLines(S); } } else lineT = 0;   // timed focus (sections one by one) counts from arriving: during a flight the rest dims with the camera
     if (waitGo && (window.__audience || now - waitGo.since >= AUDIENCE_WAIT)) goTo(waitGo.i, waitGo.instant);   // the audience is in (or will not come): go now
     // auto-advance inside a sequence
     const Q = S.seq && SEQS[S.seq];
@@ -619,7 +625,7 @@
     const inView = { audience: seeFrustum.intersectsBox(pubBox), grass: seeFrustum.intersectsBox(grassBox), board: seeFrustum.intersectsBox(boardBox) };
     for (const m of meshes) {
       const t = m.userData.tags || (m.userData.tags = tagsOf(m));
-      const lit = lerp(litOf(F, t, since), litOf(S, t, since), mix);
+      const lit = anim && S.fadeLate ? litOf(F, t, since) : lerp(litOf(F, t, since), litOf(S, t, since), mix);   // fadeLate: the rest stays until the camera has arrived, then fades
       const fresh = m.userData.fadeIn, goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim && !fresh ? 1 : ease);   // the late audience fades in, also during a camera move
       if (t.audience || t.grass || t.board) { const seen = t.audience ? inView.audience : t.grass ? inView.grass : inView.board;   // things that come and go between stops:
         const gF = FALLEN + (1 - FALLEN) * litOf(F, t, since), gS = FALLEN + (1 - FALLEN) * litOf(S, t, since);
