@@ -239,7 +239,7 @@ p, ul, h1, h2 { margin: 0; }
 .drawer__problem:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 2px; }
 .fw.has-focus .k:not(.is-lit):not(:hover) { opacity: .2 !important; }   /* the parts the open panel is about stay lit */
 @media (max-width: 720px) {
-  .drawer { --drawer-width: auto; left: var(--gutter); right: var(--gutter); top: 50%; translate: 0 -50%; max-height: calc(100% - 2 * (var(--timeline-offset) + 40px)); padding: var(--space-m); }   /* phones: centred on the screen both ways (equal gutters; translate leaves the slide-in transform alone) */
+  .drawer { --drawer-width: auto; left: var(--gutter); right: var(--gutter); top: calc(50% - 6px); translate: 0 -50%; max-height: calc(100% - 64px - var(--timeline-offset) - 44px); padding: var(--space-m); }   /* phones: centred (equal gutters; translate leaves the slide-in transform alone), as tall as the room between the header and the timeline */
 }
 .problems__head--fw { position: absolute; left: 72%; top: var(--problems-top); transform: translateX(-50%); white-space: nowrap; }
 @media (max-height: 800px) and (min-width: 721px) {   /* low laptop screens: tighter cards, so the list ends above the timeline */

@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&family=Barlow+Condensed:wght@700&display=swap">
-<link rel="stylesheet" href="site/styles.css?v=399b050d">
+<link rel="stylesheet" href="site/styles.css?v=fc96a001">
 </head>
 <body class="is-loading">
 <main class="stage" id="stage" aria-label="The Collective: when an organisation plays as one">
@@ -1630,13 +1630,17 @@
   const CAM2 = NARROW ? frame(orchBox, V(0, 0.62, 1), 40, 0.84) : K([0, 3.2, 25], [0, 2.4, -4], 38);   // the closer view of frame 2, reused by Blueprint, Means and the dimensions; phones look down a little more, so the orchestra fills the width instead of a thin strip
   const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
-  const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
-  const LINE_GAP = 0.9, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t2 and t3 move in TW_DUR, t3's line comes halfway)
+  const FW_STEP = 0.6;   // the framework builds up one part every 0.6 s (frame 3)
+  const LINE_GAP = 0.9, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t1b-t3 move in TW_DUR, t3's line comes halfway)
+  // with each of the first three lines a few small groups of musicians stay lit (sitting together, in different places); "One performance" lights them all again
+  const PLUK = { roles: ["Cello's", "Hoorns"], skills: ["Altviolen", "Klarinetten", "Pauken"], views: ["Contrabassen", "Trompetten", "Harp"] };
+  const pluk = list => t => t.env || t.conductor || list.includes(t.group) || list.includes(t.section);
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 7.0, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
-    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 2 * LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 2 },   // straight from the opening to "Different roles": the whole orchestra stays seated and lit (Kai)
-    { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 1.5 * TW_DUR, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 3, glow: 1 },
+    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: LINE_GAP, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, linesTo: 1, fadeLate: 1, focus: pluk(PLUK.roles) },   // straight from the opening to "Different roles": the whole orchestra stays until the camera has arrived
+    { id: "t1b", ch: 0, seq: "twist", bar: 0, hold: LINE_GAP - TW_DUR, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 2, focus: pluk(PLUK.skills) },
+    { id: "t2", ch: 0, seq: "twist", bar: 1, hold: LINE_GAP - 1.5 * TW_DUR, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 3, glow: 1, focus: pluk(PLUK.views) },
     { id: "t3", ch: 0, seq: "twist", bar: 2, hold: TENSION_GAP - TW_DUR / 2, dur: TW_DUR, cam: CAM2, beats: ["twist"], lines: 4, chaos: 1 },
     { id: "t5", ch: 0, seq: "twist", bar: 3, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
@@ -1694,6 +1698,7 @@
       if (n.name === "Stoel") t.chair = true;
       if (n.name === "Eerste violen") t.firstViolins = true;
       if (/^Muzikant · /.test(n.name)) t.player = n.name.slice(11);
+      if (n.parent && n.parent.parent === orkest) t.group = n.name;   // the group inside a section ("Cello's", "Hoorns")
       if (n.parent === orkest) t.section = n.name;
       if (n === kassa) t.booth = true;
       if (n === bord) t.board = true;
@@ -2100,7 +2105,8 @@
       merged.orch = true;
       const solo = new Set(); orkest.traverse(n => { if (/^Muzikant · /.test(n.name)) { const name = n.name.slice(11); if (inSect(n, "Koper") || LINE1.has(name) || LINE2.has(name)) solo.add(n); } });
       const inside = (o, set) => { for (let n = o; n; n = n.parent) if (set.has(n)) return true; return false; };
-      solo.forEach(n => mergeUnit(n)); orkest.children.forEach(sec => mergeUnit(sec, o => inside(o, solo)));
+      const plukNames = new Set(Object.values(PLUK).flat()), pluks = new Set(); orkest.children.forEach(sec => sec.children.forEach(g => { if (plukNames.has(g.name)) pluks.add(g); }));   // the small groups "It isn't" lights: each a unit of its own, the rest of the section stays one
+      solo.forEach(n => mergeUnit(n)); pluks.forEach(g => mergeUnit(g, o => inside(o, solo))); orkest.children.forEach(sec => mergeUnit(sec, o => inside(o, solo) || inside(o, pluks)));
       const condStand = lessen.getObjectByName("Dirigent (partituur)"); mergeUnit(condStand); mergeUnit(lessen, o => inside(o, new Set([condStand])));
       mergeUnit(CHG, o => inside(o, new Set([dir2]))); mergeUnit(kassa); mergeUnit(pod);
     }
