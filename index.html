@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500&family=Barlow+Condensed:wght@700&display=swap">
-<link rel="stylesheet" href="site/styles.css?v=8ebbf114">
+<link rel="stylesheet" href="site/styles.css?v=4cf5340a">
 </head>
 <body class="is-loading">
 <main class="stage" id="stage" aria-label="The Collective: when an organisation plays as one">
@@ -99,11 +99,11 @@
     </div>
   </section>
   <!-- side panels: a problem (from the left) and a framework part (from the right); filled from content.js -->
-  <aside class="drawer drawer--right glass" id="drawerProblem" data-drawer="problem" aria-label="Problem" tabindex="-1" inert>
+  <aside class="drawer drawer--left glass" id="drawerProblem" data-drawer="problem" aria-label="Problem" tabindex="-1" inert>
     <button class="close close--sticky" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
     <div data-drawer-body></div>
   </aside>
-  <aside class="drawer drawer--left glass" id="drawerPart" data-drawer="part" aria-label="Framework part" tabindex="-1" inert>
+  <aside class="drawer drawer--right glass" id="drawerPart" data-drawer="part" aria-label="Framework part" tabindex="-1" inert>
     <button class="close close--sticky" type="button" data-drawer-close aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5"/></svg></button>
     <div data-drawer-body></div>
   </aside>
@@ -125,7 +125,7 @@
         <div class="coll__col">
           <h3>We bring our score.</h3>
           <p>Proven theory and hard-won experience in one framework. Not another 200-slide deck.</p>
-          <p class="coll__links"><button class="link-pill" type="button" data-coll-go="f0">Our framework</button><button class="link-pill" type="button" data-coll-go="problems">Problems we see</button></p>
+          <p class="coll__links"><button class="link-pill" type="button" data-coll-go="problems">Problems we see</button><button class="link-pill" type="button" data-coll-go="f0">Our framework</button></p>
         </div>
         <div class="coll__col">
           <h3>We stay for the performance.</h3>
@@ -1683,7 +1683,7 @@
     { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
     // Frame 9 and 10: your organisation
     { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
-    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: NARROW ? K([0, 13, 33], [0, 0.6, -3]) : shiftCam(K([0, 13, 33], [0, 0.6, -3]), 0.25, 0), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },   // desktop: the stage moves left, under the framework, so the list on the right lies on the dark ground
+    { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },
     // Part 4: The Collective. The camera rises over the bowl: tonight's concert and next season's rehearsal in one view
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
   ];
@@ -1908,7 +1908,7 @@
   let touchY = null;
   stage.addEventListener("touchstart", e => { touchY = e.touches[0].clientY; }, { passive: true });
   stage.addEventListener("touchmove", e => { if (!e.target.closest(".problems, .coll__page, [data-drawer]")) e.preventDefault(); }, { passive: false });
-  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } for (const sel of [".coll__page", ".problems"]) { const el = e.target.closest(sel); if (el && el.scrollHeight > el.clientHeight + 4) { touchY = null; return; } } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });   // a list that scrolls (About, problems on phones) is scrolled, not swiped away
+  stage.addEventListener("touchend", e => { if (touchY === null) return; if (e.target.closest("[data-drawer]")) { touchY = null; return; } if (e.target.closest(".coll__page") && $(".coll__page").scrollHeight > $(".coll__page").clientHeight + 4) { touchY = null; return; } const dy = touchY - e.changedTouches[0].clientY; touchY = null; if (Math.abs(dy) > 40) step(Math.sign(dy)); });
   const segBtns = SEGS.map((g, n) => { const b = document.createElement("button");
     b.type = "button"; b.className = "timeline__seg"; b.dataset.timelineSeg = n; b.tabIndex = -1;
     b.setAttribute("aria-label", `${STORY.goTo} ${pad(n)} ${STOPS[g.first].name}`);
