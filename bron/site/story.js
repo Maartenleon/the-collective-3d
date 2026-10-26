@@ -15,6 +15,11 @@
     return { pos: c.clone().add(from.clone().normalize().multiplyScalar(d)), target: c, fov };
   }
   const K = (pos, target, fov = 40) => ({ pos: V(...pos), target: V(...target), fov });
+  const abovePanel = (c, panelH) => {   // phones: the framed subject moves into the middle of the free space above a panel (header 80 px, panel bottom 92 px up), pulled back to fit when that space is small
+    const H = innerHeight, free = Math.max(120, H - 92 - panelH - 80), k = Math.max(1, 0.49 * H / free) / 1.15, tanHalf = Math.tan(THREE.MathUtils.degToRad(c.fov / 2)) / Math.min(1, innerWidth / H / 1.2);   // with the portrait zoom (see resize)
+    c.pos.sub(c.target).multiplyScalar(k).add(c.target);
+    const a = Math.atan((H / 2 - (80 + free / 2)) / (H / 2) * tanHalf), dir = c.target.clone().sub(c.pos), right = dir.clone().cross(V(0, 1, 0)).normalize();
+    c.target.copy(c.pos).add(dir.applyAxisAngle(right, -a)); return c; };   // an exact tilt: the subject, on the axis before, ends up a above it
   const sec = n => orkest.getObjectByName(n);
   const player = n => orkest.getObjectByName("Muzikant · " + n);
   const orchBox = box(orkest), standBox = box(lessen), boardBox = box(bord), condBox = box(dir);
@@ -69,7 +74,7 @@
   const oneByOne = (t, s, t0 = 0.6, step = 0.8) => { const i = Math.floor((s - t0) / step); return t.env || t.conductor || i < 0 || i > 3 || t.section === SECT[i] || (i === 0 && (t.section === "Harp" || t.section === "Piano")); };   // the whole orchestra first, then section by section (harp and piano with the strings), then all again: never the conductor alone
   const condStandBox = box(lessen.getObjectByName("Dirigent (partituur)"));
   const FW_STEP = 0.4;   // the framework builds up one part every 0.4 s (frame 3)
-  const LINE_GAP = 0.7, BEAT = LINE_GAP / 2, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, a section every BEAT (two per line), the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t2 and t3 move in TW_DUR, t3's line comes halfway)
+  const LINE_GAP = 0.9, BEAT = LINE_GAP / 2, TW_DUR = 0.3, TENSION_GAP = 1.9;   // "It isn't": a line every LINE_GAP, a section every BEAT (two per line), the tension TENSION_GAP after the last line, so the coloured lines can be seen; the holds of t1-t3 follow from these (t2 and t3 move in TW_DUR, t3's line comes halfway)
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: NARROW ? K([0, 5.5, 90], [0, 7.0, -20], 6.8) : K([0, 3.2, 90], [0, 5.95, -20], 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills; phones zoom in further, the orchestra a little wider than the screen and low in it
     // Frame 2: It isn't. Roles, skills, views, one performance
@@ -100,7 +105,7 @@
     { id: "orch", name: "Orchestration", ch: 5, seq: "dims", bar: 0, hold: 3.6, cam: frame(condBox, V(0.1, 0.22, 1), 34, 1.7, 0.1), panel: "orchestration", focus: t => t.env || t.conductor || (t.stand && t.condStand) },
     // Frame 8: the two dimensions
     { id: "d1", name: "Run and Change", ch: 6, seq: "dims", bar: 1, hold: 3.4, dur: 2.2, cam: CAM2, panel: "dims" },
-    { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
+    { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: NARROW ? abovePanel(frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.15), 310) : frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
     // Frame 9 and 10: your organisation
     { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: NARROW ? K([0, 2.2, 46], [0, 2.2, -3], 28) : K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
     { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },
