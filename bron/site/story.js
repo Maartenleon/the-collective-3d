@@ -15,8 +15,9 @@
     return { pos: c.clone().add(from.clone().normalize().multiplyScalar(d)), target: c, fov };
   }
   const K = (pos, target, fov = 40) => ({ pos: V(...pos), target: V(...target), fov });
-  const abovePanel = (c, panelH) => {   // phones: the framed subject moves into the middle of the free space above a panel (header 80 px, panel bottom 92 px up), pulled back to fit when that space is small
-    const H = innerHeight, free = Math.max(120, H - 92 - panelH - 80), k = Math.max(1, 0.49 * H / free) / 1.15, tanHalf = Math.tan(THREE.MathUtils.degToRad(c.fov / 2)) / Math.min(1, innerWidth / H / 1.2);   // with the portrait zoom (see resize)
+  const abovePanel = (c, panelH, fit = 0.426) => {   // phones: the framed subject moves into the middle of the free space above a panel (header 80 px, panel bottom 92 px up), pulled back when that space is
+    // smaller than fit (its share of the screen the framing was made for)
+    const H = innerHeight, free = Math.max(120, H - 92 - panelH - 80), k = Math.max(0.87, fit * H / free), tanHalf = Math.tan(THREE.MathUtils.degToRad(c.fov / 2)) / Math.min(1, innerWidth / H / 1.2);   // with the portrait zoom (see resize)
     c.pos.sub(c.target).multiplyScalar(k).add(c.target);
     const a = Math.atan((H / 2 - (80 + free / 2)) / (H / 2) * tanHalf), dir = c.target.clone().sub(c.pos), right = dir.clone().cross(V(0, 1, 0)).normalize();
     c.target.copy(c.pos).add(dir.applyAxisAngle(right, -a)); return c; };   // an exact tilt: the subject, on the axis before, ends up a above it
@@ -28,8 +29,8 @@
 
   /* ---------- the two melody lines (value streams), each through four players in different sections ---------- */
   const MELODY = [
-    { rgb: "241, 64, 11", players: ["Viool 1", "Fluit 1", "Hoorn 1", "Cello 1"] },          // vermilion
-    { rgb: "222, 170, 72", players: ["Klarinet 1", "Altviool 1", "Trompet 1", "Contrabas 1"] },  // gold
+    { rgb: "241, 64, 11", players: ["Viool 1", "Fluit 1", "Hoorn 1", "Cello 1"] },          // vermilion (--palette-vermilion)
+    { rgb: "252, 232, 216", players: ["Klarinet 1", "Altviool 1", "Trompet 1", "Contrabas 1"] },  // cream (--palette-cream): the panel palette, as the coloured lines in "It isn't"
   ];
   MELODY.forEach(L => { L.anchors = L.players.map(n => { const m = player(n); const p = m.getWorldPosition(V(0, 0, 0)); p.y += 1.18; return p; }); L.draw = 0; });
   const LINE1 = new Set(MELODY[0].players), LINE2 = new Set(MELODY[1].players);
@@ -90,7 +91,7 @@
     { id: "f5", ch: 1, seq: "fw", bar: 2, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmor", shade: 0.3 },
     { id: "f6", ch: 1, seq: "fw", bar: 3, hold: 2.8, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "pbmorc", shade: 0.3 },
     // Frame 4: Plan
-    { id: "plan", name: "Plan", ch: 2, cam: frame(boardBox, V(0.62, 0.2, 1), 40, NARROW ? 2.3 : 1.9, 0.2), panel: "plan" },
+    { id: "plan", name: "Plan", ch: 2, cam: NARROW ? abovePanel(frame(boardBox, V(0.62, 0.2, 1), 40, 1.25, 0.2), 155, 0.6) : frame(boardBox, V(0.62, 0.2, 1), 40, 1.9, 0.2), panel: "plan" },   // phones: close on the board, above the panel
     // Frame 5: Blueprint
     { id: "b1", name: "Blueprint", ch: 3, seq: "bp", bar: 0, hold: 2.2, cam: CAM2, panel: "blueprint", focus: t => t.stand || t.env, caption: "The score on every stand" },
     { id: "b2", ch: 3, seq: "bp", bar: 1, fadeLate: 1, hold: 2.8, dur: 1.8, cam: frame(condStandBox, V(0, 0.9, 0.55), 34, 1.15), panel: "blueprint", focus: t => t.env || t.condStand, caption: "The conductor’s score" },
@@ -181,7 +182,7 @@
     const CX = 320, CY = 262, R = 192;   // all colours and the text sizes come from styles.css (.fw .part, .fw .ring, .fw .arc, .fw .sub): the parts look like the panels
     const pill = (x, y, w, h) => `<rect class="part" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${(Math.min(w, h) / 2).toFixed(1)}"/>`;
     const band = (d, k, l, sub) => { const hw = Math.sqrt(R * R - (Math.abs(d) + 32) ** 2);
-      return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60)}<text class="lab band" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 2}">${l.toUpperCase()}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 20}">${sub}</text></g>`; };
+      return `<g class="k" data-k="${k}">${pill(CX - hw, CY + d - 30, 2 * hw, 60)}<text class="lab band" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d - 6}">${l.toUpperCase()}</text><text class="sub" x="${(CX - hw + 26).toFixed(1)}" y="${CY + d + 12}">${sub}</text></g>`; };   // label and sub centred in the band as a block
     const SPAN = 104 + 30;   // Run and Change reach from the top of Plan to the bottom of Means, so their labels line up
     const col = (dx, k, l) => { const hh = SPAN;
       return `<g class="k" data-k="${k}">${pill(CX + dx - 28, CY - hh, 56, 2 * hh)}<text class="lab" x="${CX + dx}" y="${(CY - hh - 10).toFixed(1)}" text-anchor="middle">${l.toUpperCase()}</text></g>`; };   // RUN and CHANGE only: no text down the columns
@@ -423,7 +424,7 @@
     const S = STOPS[at], live = !anim || anim.k > 0.6;
     MELODY.forEach((L, li) => {
       const want = (S.line || 0) > li && live ? 1 : 0;
-      L.draw = want ? Math.min(1, L.draw + dt / (reduceMQ.matches ? 0.01 : 1.8)) : Math.max(0, L.draw - dt * 2.5);
+      L.draw = want ? Math.min(1, L.draw + dt / (reduceMQ.matches ? 0.01 : 1.8)) : S.panel === "blueprint" ? Math.max(0, L.draw - dt * 2.5) : 0;   // leaving Blueprint: gone at once (they ran on into Means)
       L.alpha = want ? 1 : L.draw;
       if (L.draw <= 0.001) return;
       const P = L.anchors.map(a => toScreen(a)), pts = [];
@@ -433,7 +434,7 @@
       }
       const n = Math.max(2, Math.round(pts.length * smoother(L.draw)));
       fctx.lineCap = "round"; fctx.lineJoin = "round";
-      for (const [w, a] of [[9, 0.12], [4, 0.28], [1.8, 0.95]]) {
+      for (const [w, a] of [[4, 0.08], [1.4, 0.9]]) {   // the same fine strokes as the lines in "It isn't"
         fctx.strokeStyle = `rgba(${L.rgb}, ${a * L.alpha})`; fctx.lineWidth = w; fctx.beginPath();
         for (let i = 0; i < n; i++) i ? fctx.lineTo(pts[i][0], pts[i][1]) : fctx.moveTo(pts[i][0], pts[i][1]); fctx.stroke();
       }
