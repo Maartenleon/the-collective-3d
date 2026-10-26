@@ -134,7 +134,7 @@ Measure before and after any change to the scene, the people or the frame loop: 
 
 Public repo github.com/Maartenleon/the-collective-3d, served by GitHub Pages from branch `main`, folder `/ (root)`, no GitHub Actions and no build on GitHub (the token has no Workflows rights; ask before adding Actions).
 
-- Website: https://maartenleon.github.io/the-collective-3d/ (root `index.html` is the website itself; `site/3d.html` redirects there)
+- Website: http://thecollective.nu/ (custom domain since 26 Oct 2026: `CNAME` in the root, set via GitHub; keep that file. maartenleon.github.io/the-collective-3d/ redirects there. Root `index.html` is the website itself; `site/3d.html` redirects there)
 - Model builder: https://maartenleon.github.io/the-collective-3d/site/orkest-model.html
 - Built files are committed: run `python3 bron/build.py` (and `model`) before committing; `index.html`, `site/styles.css` and `site/3d.html` are written by the build.
 - All paths relative (no leading `/`, no localhost): the site lives under the subpath `/the-collective-3d/`. Pages is case-sensitive, macOS is not: keep file names and references lowercase and identical.
