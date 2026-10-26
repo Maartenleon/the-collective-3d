@@ -134,12 +134,12 @@ details[open] > summary .tw { transform: rotate(90deg); }
   // Art direction v3 image palette
   const AD = { shadow: 0x1A0E0A, earth: 0x5C2414, conductor: 0xD9452B, grain: 0xA9824F, sky: 0x8A9CB0, stage: 0xF6F2EC, garnet: 0x5C0F07 };
   // the land beyond the bowl (body.js): one continuous procedural terrain to the horizon
-  const LAND = { r0: 185, r1: 1900, rings: 320, segs: 1000, ringsPhone: 200, segsPhone: 640, seed: 7,
-    wavelength: 120, octaves: 5, gain: 0.33, lacunarity: 2.0, warp: 0.4,           // fBm simplex with domain warping: many soft, rounded, eroded hills
-    base: 6, slope: 0.11, rise: 650, ampNear: 4, ampFar: 17, crest: 1500, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away
-    color: 0x090a10, shade: 0x34548a, shadeAmount: 0.32, rose: "0.30, 0.16, 0.16", roseAmount: 1.0, sunFrom: 0.42, sunTo: 0.85,   // slate blue in the shade; rose only on slopes turned to the low sun, the brightest part
-    relief: 0.1, reliefScale: 0.06,                                               // soft folds on the slopes
-    haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.18 };   // linear colour: after the film look it meets the sky
+  const LAND = { r0: 185, r1: 1900, rings: 420, segs: 1300, ringsPhone: 240, segsPhone: 760, seed: 7,
+    wavelength: 85, octaves: 6, gain: 0.4, lacunarity: 2.0, warp: 0.5,            // fBm simplex with domain warping: many small, low, rounded hills
+    base: 6, slope: 0.11, rise: 650, ampNear: 4, ampFar: 9, crest: 1500, fall: 0.5,   // the ground rises slowly away from the bowl, so row after row shows above the rim; beyond the crest it falls away
+    color: 0x090a10, shade: 0x34548a, shadeAmount: 0.52, rose: "0.30, 0.16, 0.16", roseAmount: 0.5, sunFrom: 0.1, sunTo: 0.9,   // soft contrast: slate blue, a gentle rose toward the low sun
+    relief: 0.18, reliefScale: 0.05,                                              // fine folds on every slope
+    haze: 0x3a4468, hazeFrom: 700, hazeTo: 2400, hazeMax: 0.28 };   // linear colour: after the film look it meets the sky
   const SUN = { color: 0xff9650, intensity: 3.4, pos: [70, 21, 26], target: [0, 0, -6] };   // golden hour: very low, warm, raking from the right
   const GHOST = 0.07;
 
@@ -699,7 +699,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
         diffuseColor.rgb = mix(diffuseColor.rgb, dust, smoothstep(0.62, 0.9, clod) * 0.15);         // dry tops of clods
         float far = smoothstep(16.0, 46.0, length(vW.xz - vec2(0.0, -3.0))) * smoothstep(1.5, 9.0, vW.y);     // up the bowl and toward the rim
         float front = (1.0 - smoothstep(16.0, 22.0, abs(vW.x))) * smoothstep(7.5, 10.0, vW.z) * (1.0 - smoothstep(30.0, 34.0, vW.z));   // the ground in front of the stage
-        diffuseColor.rgb *= mix(1.0, (0.96 + 0.08 * clod) * (0.98 + 0.04 * grit), 1.0 - 0.6 * far);    // no furrows, but clods and grit give the soil depth (softer in the haze)
+        diffuseColor.rgb *= mix(1.0, (0.97 + 0.06 * clod) * (0.985 + 0.03 * grit), 1.0 - 0.6 * far);    // no furrows, but clods and grit give the soil depth (softer in the haze)
         diffuseColor.rgb *= 0.28 * (1.0 - 0.14 * front);                                              // darker bowl; a little darker in front of the stage
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.13, 0.075, 0.08), far * 0.4);
         float shade = max(smoothstep(-0.35, 0.35, (5.5 + 0.22 * vW.x) - vW.y), smoothstep(8.0, 13.0, vW.z)) * (1.0 - smoothstep(28.0, 32.0, vW.z));   // below a line that climbs to the right, and all of the ground in front of the stage
@@ -707,7 +707,7 @@ details[open] > summary .tw { transform: rotate(90deg); }
       `).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
         { float e = 0.012; float c0 = fbm(vW.xz * 10.0), cx = fbm((vW.xz + vec2(e, 0.0)) * 10.0), cz = fbm((vW.xz + vec2(0.0, e)) * 10.0);
           float far = smoothstep(16.0, 46.0, length(vW.xz - vec2(0.0, -3.0))) * smoothstep(1.5, 9.0, vW.y);
-          vec3 dW = vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * 0.035 * (1.0 - 0.6 * far);           // fine, flat clods catch the low sun
+          vec3 dW = vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * 0.02 * (1.0 - 0.6 * far);           // fine, flat clods catch the low sun
           normal = normalize(normal + mat3(viewMatrix) * dW); }`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
         { float front = (1.0 - smoothstep(16.0, 22.0, abs(vW.x))) * smoothstep(7.5, 10.0, vW.z) * (1.0 - smoothstep(30.0, 34.0, vW.z));
           roughnessFactor = mix(roughnessFactor, 0.55, front * 0.35 * smoothstep(0.4, 0.7, fbm(vW.xz * 6.0))); }   // soft sheen on the clod tops in front of the stage`);

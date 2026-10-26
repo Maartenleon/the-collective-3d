@@ -555,7 +555,7 @@
         diffuseColor.rgb = mix(diffuseColor.rgb, dust, smoothstep(0.62, 0.9, clod) * 0.15);         // dry tops of clods
         float far = smoothstep(16.0, 46.0, length(vW.xz - vec2(0.0, -3.0))) * smoothstep(1.5, 9.0, vW.y);     // up the bowl and toward the rim
         float front = (1.0 - smoothstep(16.0, 22.0, abs(vW.x))) * smoothstep(7.5, 10.0, vW.z) * (1.0 - smoothstep(30.0, 34.0, vW.z));   // the ground in front of the stage
-        diffuseColor.rgb *= mix(1.0, (0.96 + 0.08 * clod) * (0.98 + 0.04 * grit), 1.0 - 0.6 * far);    // no furrows, but clods and grit give the soil depth (softer in the haze)
+        diffuseColor.rgb *= mix(1.0, (0.97 + 0.06 * clod) * (0.985 + 0.03 * grit), 1.0 - 0.6 * far);    // no furrows, but clods and grit give the soil depth (softer in the haze)
         diffuseColor.rgb *= 0.28 * (1.0 - 0.14 * front);                                              // darker bowl; a little darker in front of the stage
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.13, 0.075, 0.08), far * 0.4);
         float shade = max(smoothstep(-0.35, 0.35, (5.5 + 0.22 * vW.x) - vW.y), smoothstep(8.0, 13.0, vW.z)) * (1.0 - smoothstep(28.0, 32.0, vW.z));   // below a line that climbs to the right, and all of the ground in front of the stage
@@ -563,7 +563,7 @@
       `).replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
         { float e = 0.012; float c0 = fbm(vW.xz * 10.0), cx = fbm((vW.xz + vec2(e, 0.0)) * 10.0), cz = fbm((vW.xz + vec2(0.0, e)) * 10.0);
           float far = smoothstep(16.0, 46.0, length(vW.xz - vec2(0.0, -3.0))) * smoothstep(1.5, 9.0, vW.y);
-          vec3 dW = vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * 0.035 * (1.0 - 0.6 * far);           // fine, flat clods catch the low sun
+          vec3 dW = vec3(-(cx - c0) / e, 0.0, -(cz - c0) / e) * 0.02 * (1.0 - 0.6 * far);           // fine, flat clods catch the low sun
           normal = normalize(normal + mat3(viewMatrix) * dW); }`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
         { float front = (1.0 - smoothstep(16.0, 22.0, abs(vW.x))) * smoothstep(7.5, 10.0, vW.z) * (1.0 - smoothstep(30.0, 34.0, vW.z));
           roughnessFactor = mix(roughnessFactor, 0.55, front * 0.35 * smoothstep(0.4, 0.7, fbm(vW.xz * 6.0))); }   // soft sheen on the clod tops in front of the stage`);

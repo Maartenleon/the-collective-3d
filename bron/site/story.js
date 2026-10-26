@@ -115,7 +115,7 @@
   const SEGS = [];   // the timeline: one segment per scroll step, a stop on its own or a whole sequence
   STOPS.forEach((s, i) => { if (!s.seq || SEQS[s.seq].first === i) SEGS.push({ first: i, last: s.seq ? SEQS[s.seq].last : i }); });
   const segOf = i => SEGS.findIndex(g => i >= g.first && i <= g.last), nameAt = i => { while (!STOPS[i].name) i--; return STOPS[i].name; };
-  const pad = n => String(n + 1);   // the timeline counts 1, 2, 3
+  const pad = n => String(n + 1).padStart(2, "0");
 
   /* ---------- focus: tag every mesh by what it belongs to, then fade what is not in the scene's focus ---------- */
   const meshes = []; let selected = null;   // the people loader adds its meshes here
