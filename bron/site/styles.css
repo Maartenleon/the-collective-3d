@@ -47,7 +47,7 @@ p, ul, h1, h2 { margin: 0; }
 .beat.is-on { opacity: 1; visibility: visible; transform: translate(-50%, 0); filter: none;
   transition: opacity .9s ease .25s, transform 1.1s var(--ease-out) .25s, filter .9s ease .25s, visibility 0s; }
 .beat--centred { top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-@media (min-width: 721px) { .beat[data-beat="question"] { justify-content: flex-start; padding-top: 18vh; } }   /* desktop: the question sits in the sky, above the stage and the audience */
+.beat[data-beat="question"] { justify-content: flex-start; padding-top: 18vh; }   /* the question sits in the sky, above the stage and the audience (phones too) */
 .beat__title { font: 400 var(--text-beat)/1.1 var(--font-serif); letter-spacing: -.005em; text-wrap: balance; }
 .beat__lead, .beat__lines li { font: italic 400 var(--text-lede)/1.25 var(--font-serif); color: var(--color-text-muted); text-wrap: balance; }
 .beat__lead { margin-top: var(--space-3xs); }
@@ -193,7 +193,6 @@ p, ul, h1, h2 { margin: 0; }
 @media (max-width: 720px) {
   .beat:not(.beat--centred) { top: 13vh; }
   .problems__col { padding: var(--space-s) var(--space-m); background: var(--panel-fill); -webkit-backdrop-filter: var(--blur-glass); backdrop-filter: var(--blur-glass); border: 1px solid var(--panel-border); border-radius: var(--radius-glass); }   /* phones: the list lies over the stage, so it sits on a panel */
-  .loader__open { top: 45%; }
   .timeline { display: grid; grid-template-columns: 2ch 1fr auto auto; grid-template-areas: "num label play skip" "bar bar bar bar"; column-gap: var(--space-s); row-gap: var(--space-3xs); }
   .timeline__num { grid-area: num; } .timeline__label { grid-area: label; } .timeline__skip { grid-area: skip; }
   .timeline__play { grid-area: play; margin-block: calc((var(--text-ui) - var(--timeline-hit)) / 2); }   /* full hit area without making the row taller */

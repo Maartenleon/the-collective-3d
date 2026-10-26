@@ -101,7 +101,7 @@
     { id: "d1", name: "Run and Change", ch: 6, seq: "dims", bar: 1, hold: 3.4, dur: 2.2, cam: CAM2, panel: "dims" },
     { id: "d2", ch: 6, seq: "dims", bar: 2, hold: 3.0, dur: 2.6, cam: frame(nextBox, nextFront.clone().add(V(0.6, 0.55, 0.5)), 40, 1.35), panel: "dims", late: 1 },
     // Frame 9 and 10: your organisation
-    { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
+    { id: "question", name: "Your organisation", ch: 7, seq: "you", bar: 0, hold: 3.2, cam: NARROW ? K([0, 3.6, 48], [0, 1.9, -3], 26) : K([0, 1.7, 45.5], [0, 3.0, -3], 46), beats: ["question"], shade: 0.25, fore: 1 },
     { id: "problems", ch: 7, seq: "you", bar: 1, dur: 2.4, cam: K([0, 13, 33], [0, 0.6, -3]), problems: true, shade: 0.6, fw: "side", show: "pbmorc" },
     // Part 4: The Collective. The camera rises over the bowl: tonight's concert and next season's rehearsal in one view
     { id: "c0", name: "The Collective", ch: 8, cam: CAMC, coll: 1, shade: 0.45 },
