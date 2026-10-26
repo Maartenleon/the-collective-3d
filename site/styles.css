@@ -151,9 +151,8 @@ p, ul, h1, h2 { margin: 0; }
   display: flex; align-items: center; gap: var(--space-s); pointer-events: none;
   font: 400 var(--text-ui)/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
 .timeline__num { width: 2ch; }   /* fixed, so the bar ends where the panels end */
-.timeline__sep { width: 1px; height: var(--text-ui); background: var(--color-line); }
-.timeline__sep, .timeline__play { transition: opacity .6s ease, visibility 0s; }
-.timeline.is-opening .timeline__sep, .timeline.is-opening .timeline__play, .timeline.is-last .timeline__sep, .timeline.is-last .timeline__play { opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
+.timeline__play { transition: opacity .6s ease, visibility 0s; }
+.timeline.is-opening .timeline__play, .timeline.is-last .timeline__play { opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
 .timeline__play { all: unset; pointer-events: auto; cursor: pointer; display: grid; place-items: center; height: var(--timeline-hit); color: inherit; }
 .timeline__play svg { width: var(--timeline-icon); height: var(--timeline-icon); fill: currentColor; }
 .timeline__bar { pointer-events: auto; display: flex; gap: var(--space-segment); width: var(--timeline-bar-width); }
@@ -194,8 +193,8 @@ p, ul, h1, h2 { margin: 0; }
   .beat:not(.beat--centred) { top: 13vh; }
   .problems__col { padding: var(--space-s) var(--space-m); background: var(--panel-fill); -webkit-backdrop-filter: var(--blur-glass); backdrop-filter: var(--blur-glass); border: 1px solid var(--panel-border); border-radius: var(--radius-glass); }   /* phones: the list lies over the stage, so it sits on a panel */
   .loader__open { top: 45%; }
-  .timeline { display: grid; grid-template-columns: 2ch 1fr auto auto auto; grid-template-areas: "num label sep play skip" "bar bar bar bar bar"; column-gap: var(--space-s); row-gap: var(--space-3xs); }
-  .timeline__num { grid-area: num; } .timeline__label { grid-area: label; } .timeline__sep { grid-area: sep; } .timeline__skip { grid-area: skip; }
+  .timeline { display: grid; grid-template-columns: 2ch 1fr auto auto; grid-template-areas: "num label play skip" "bar bar bar bar"; column-gap: var(--space-s); row-gap: var(--space-3xs); }
+  .timeline__num { grid-area: num; } .timeline__label { grid-area: label; } .timeline__skip { grid-area: skip; }
   .timeline__play { grid-area: play; margin-block: calc((var(--text-ui) - var(--timeline-hit)) / 2); }   /* full hit area without making the row taller */
   .timeline__bar { grid-area: bar; width: auto; }
   .scroll-hint { display: none; }
@@ -231,7 +230,7 @@ p, ul, h1, h2 { margin: 0; }
 .fw .part { fill: var(--panel-fill); stroke: var(--panel-border); stroke-width: 1.5; }   /* every part looks like a story panel: no coloured parts */
 .fw .arc { fill: none; stroke: var(--color-text); stroke-width: 2.4; }   /* drawn by story.js (arcTick): the line and its head move together */
 .fw .tip { fill: var(--color-text); }
-.fw .sub { font-size: 15px; font-style: italic; opacity: .78; }
+.fw .sub { font-size: 17px; font-style: italic; opacity: .78; }
 .fw .lab.lab--big { font-size: 16px; }
 .fw .k { transition: opacity .2s ease; }
 .fw text { font-family: var(--font-serif); fill: var(--color-text); }

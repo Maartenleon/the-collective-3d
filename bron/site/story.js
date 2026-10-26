@@ -72,12 +72,11 @@
   const STOPS = [
     { id: "open", name: "The concert", ch: 0, cam: K([0, 3.2, 90], [0, 5.95, -20], NARROW ? 19 : 11.2), beats: ["opening"] },   // a long lens from far back: flat stage, high rim, big hills (a little wider on phones so the orchestra fits)
     // Frame 2: It isn't. Roles, skills, views, one performance
-    { id: "t0", name: "It isn’t", ch: 0, seq: "twist", bar: 0, hold: 1.4, cam: CAM2, beats: ["twist"], lines: 0 },
-    { id: "t1", ch: 0, seq: "twist", bar: 1, hold: 3.4, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, focus: (t, s) => oneByOne(t, s) },
-    { id: "t2", ch: 0, seq: "twist", bar: 2, hold: 2.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 2, glow: 1 },
-    { id: "t3", ch: 0, seq: "twist", bar: 3, hold: 3.2, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, chaos: 1 },
-    { id: "t4", ch: 0, seq: "twist", bar: 4, hold: 1.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4 },
-    { id: "t5", ch: 0, seq: "twist", bar: 5, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
+    { id: "t1", name: "The complexity", ch: 0, seq: "twist", bar: 0, hold: 3.4, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 1, focus: (t, s) => oneByOne(t, s) },   // straight from the opening to "Different roles": the rest of the orchestra dims with the flight, the sections light up after arriving
+    { id: "t2", ch: 0, seq: "twist", bar: 1, hold: 2.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 2, glow: 1 },
+    { id: "t3", ch: 0, seq: "twist", bar: 2, hold: 3.2, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 3, chaos: 1 },
+    { id: "t4", ch: 0, seq: "twist", bar: 3, hold: 1.8, dur: 0.5, cam: CAM2, beats: ["twist"], lines: 4 },
+    { id: "t5", ch: 0, seq: "twist", bar: 4, hold: 5.4, dur: 1.6, cam: frame(box(sec("Koper")).union(condBox), V(0.05, 0.42, 1), 30, innerWidth <= 720 ? 0.6 : 0.62, 0.3), beats: ["off"], off: 1 },
     // Frame 3: the framework, built up over the concert
     { id: "f0", name: "The framework", ch: 1, seq: "fw", bar: 0, hold: FW_STEP, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "", shade: 0.3 },   // one part every FW_STEP seconds
     { id: "f1", ch: 1, seq: "fw", bar: 1, hold: FW_STEP, dur: 0.15, cam: K([0, 27, 25], [0, 0, -1.5], 40), beats: ["fw"], fw: "big", show: "p", shade: 0.3 },
@@ -578,7 +577,7 @@
       if (anim.k >= 1) { anim = null; arrived = now; from = at; }
     }
     camera.lookAt(camTarget); camera.updateProjectionMatrix();
-    const S = STOPS[at], F = STOPS[from], since = now - started, mix = anim ? kk : 1;
+    const S = STOPS[at], F = STOPS[from], since = anim ? 0 : now - arrived, mix = anim ? kk : 1;   // timed focus (sections one by one) counts from arriving: during a flight the rest dims with the camera
     if (waitGo && (window.__audience || now - waitGo.since >= AUDIENCE_WAIT)) goTo(waitGo.i, waitGo.instant);   // the audience is in (or will not come): go now
     // auto-advance inside a sequence
     const Q = S.seq && SEQS[S.seq];
@@ -622,7 +621,11 @@
       const t = m.userData.tags || (m.userData.tags = tagsOf(m));
       const lit = lerp(litOf(F, t, since), litOf(S, t, since), mix);
       const fresh = m.userData.fadeIn, goal = FALLEN + (1 - FALLEN) * lit; let op = m.material.opacity + (goal - m.material.opacity) * (anim && !fresh ? 1 : ease);   // the late audience fades in, also during a camera move
-      if (t.audience || t.grass || t.board) { const seen = t.audience ? inView.audience : t.grass ? inView.grass : inView.board; if (!seen) op = goal; else if (anim) op = m.material.opacity; }
+      if (t.audience || t.grass || t.board) { const seen = t.audience ? inView.audience : t.grass ? inView.grass : inView.board;   // things that come and go between stops:
+        const gF = FALLEN + (1 - FALLEN) * litOf(F, t, since), gS = FALLEN + (1 - FALLEN) * litOf(S, t, since);
+        if (!seen) op = goal;                                                                                   // out of view: switch at once
+        else if (anim && gS > gF) op = m.material.opacity;                                                      // appearing in view: wait until out of view or arrived
+        else if (anim && gS < gF) op = lerp(gF, gS, smoother(clamp(anim.k * 2, 0, 1))); }                       // leaving in view: gone in the first half of the flight, while the camera moves fastest
       if (Math.abs(goal - op) < 0.002) { op = goal; m.userData.fadeIn = false; }   // land exactly on the goal; the old "skip steps under 0.0005" could stall a fade at 0.054, just above the cut-off, leaving people "visible" at 5 % and casting full shadows
       if (op !== m.material.opacity || fresh) { const was = m.visible, cast = m.castShadow; m.material.opacity = op; m.material.depthWrite = op > 0.5; m.visible = t.booth || t.grass ? op > 0.02 : op > FALLEN + 0.004 || !!t.env;
         if (m.userData.cast0 === undefined) m.userData.cast0 = m.castShadow; m.castShadow = m.userData.cast0 && op > 0.5;   // a faded figure leaves no shadow behind
