@@ -200,7 +200,7 @@ p, ul, h1, h2 { margin: 0; }
   .timeline__bar { grid-area: bar; width: auto; }
   .scroll-hint { display: none; }
   .panel { left: var(--gutter); right: var(--gutter); width: auto; padding: var(--space-s) var(--space-m); }
-  .panel__title { font-size: var(--text-h3-sm); }
+  .panel__title { max-width: 12em; font-size: var(--text-h3-sm); }   /* wraps sooner on phones: shorter lines read better */
   .panel__org { margin-top: var(--space-2xs, .5rem); padding-top: var(--space-2xs, .5rem); }
   .beat[data-beat="melody"] { top: 25vh; }
   .panel--wide { padding: var(--space-s); }
