@@ -248,7 +248,9 @@ p, ul, h1, h2 { margin: 0; }
 .panel__extra { opacity: 0; transition: opacity .8s ease; }
 .panel.is-on .panel__extra.is-late { opacity: 1; }
 @media (max-width: 720px) {
-  .fw { top: 52%; width: min(86vw, 50vh); }
+  :root { --fw-phone: min(92vw, 56vh); }   /* the framework frame on phones: the figure (its height is .875 of its width) with the title 102px above it, centred as one block between header and timeline */
+  .fw { top: calc(50% + 54px); width: var(--fw-phone); }
+  .beat[data-beat="fw"] { top: calc(50% - 48px - var(--fw-phone) * .4375); }
   .fw.is-side { left: 50%; transform: translate(-50%, calc(-50% - var(--problems-scroll, 0px))); }   /* phones: the framework scrolls with the list below it */
   .fw.is-side.is-scrolling { transition: opacity .7s ease, visibility 0s; }   /* follows the finger directly while scrolling */
   .problems__head { font-size: var(--text-h3-sm); }
